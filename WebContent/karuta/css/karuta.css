@@ -56,7 +56,7 @@ body,
 #welcome-bar {
   padding-top: 50px;
   width: 100%;
-  height: 250px;
+  height: 200px;
 }
 #welcome-bar .welcome-box {
   margin-left: auto;
@@ -83,11 +83,19 @@ body,
   width: 100%;
   text-align: center;
   color: var(--list-welcome-title-color);
-  font-size: 40px;
+  font-size: 2em;
 }
 #welcome-bar .welcome-baseline {
   color: var(--list-welcome-subtitle-color);
-  font-size: 24px;
+  font-size: 1.5em;
+}
+@media only screen and (max-width: 320px) {
+  #welcome-bar .welcome-title {
+    font-size: 1em;
+  }
+  #welcome-bar .welcome-baseline {
+    font-size: 0.75em;
+  }
 }
 
 /* ====================== */
@@ -268,9 +276,9 @@ body,
   padding: 0;
 }
 .tree .treeNode {
-  margin: 0;
   line-height: 2em;
   position: relative;
+  margin-top: 5px;
 }
 .tree .nested {
   display: none;
@@ -384,15 +392,124 @@ body,
 /* ====================== */
 /*     PAGE USERS         */
 /* ====================== */
+#userslist-leftside {
+  width: calc(25% - 5px);
+  margin-bottom: 10px;
+}
+#userslist-leftside h3 {
+  margin-top: 20px;
+}
+#userslist-leftside .active {
+  background-color: var(--list-button-background-color);
+}
+
+#userslist-rightside {
+  width: calc(75% - 5px);
+  margin-top: 2px;
+  padding-bottom: 5px;
+  float: right;
+}
+
 #main-user .btn {
   background-color: var(--list-button-background-color);
 }
-#main-user #active {
+#main-user #active,
+#main-user #inactive {
   padding: 10px;
-  background-color: var(--list-element-background-color);
 }
 #main-user .item:hover {
   background-color: var(--list-element-background-color-complement);
+}
+#main-user .no-toggledNode {
+  margin-left: 15px;
+}
+#main-user h3, #main-user h4 {
+  color: var(--list-title-color);
+}
+#main-user .navbar-pages {
+  background-color: var(--list-button-background-color);
+  padding: 5px;
+}
+#main-user .navbar-pages .badge {
+  margin-left: 5px;
+  background-color: var(--list-element-background-color);
+  cursor: pointer;
+}
+#main-user .dropdown-menu {
+  color: var(--list-menu-text-color);
+  background-color: var(--list-menu-background-color);
+}
+#main-user .dropdown-menu a.dropdown-item {
+  color: var(--list-menu-text-color);
+  background-color: var(--list-menu-background-color);
+}
+#main-user .dropdown-menu a.dropdown-item:hover {
+  color: var(--list-menu-background-color);
+  background-color: var(--list-menu-text-color);
+}
+#main-user .folder-menu .btn {
+  height: 25px;
+  padding-left: 9px;
+  padding-right: 9px;
+}
+
+#table_users,
+#table_unusers {
+  width: 100%;
+  color: var(--list-element-text-color);
+  background-color: var(--list-element-background-color);
+}
+#table_users td,
+#table_unusers td {
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+#table_users thead,
+#table_unusers thead {
+  background-color: var(--list-button-background-color);
+}
+#table_users thead th,
+#table_unusers thead th {
+  padding-top: 7px;
+  padding-bottom: 7px;
+  padding-left: 5px;
+}
+
+#folder-users-pages {
+  padding-top: 5px;
+}
+
+#folder-users {
+  color: var(--list-element-text-color);
+  background-color: var(--list-element-background-color);
+}
+#folder-users .usersfolder-header {
+  padding: 7px;
+  background-color: var(--list-menu-background-color);
+  color: var(--list-button-text-color);
+}
+#folder-users .usersfolder-header .btn {
+  background-color: var(--list-element-background-color);
+  height: 25px;
+}
+#folder-users .item-user {
+  margin-left: 1px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+#folder-users .item-folder {
+  margin-left: 1px;
+  margin-bottom: 2px;
+}
+
+#user-header {
+  color: var(--list-element-text-color);
+}
+
+#create-folder-button {
+  color: var(--list-element-text-color);
 }
 
 #main-portfoliosgroup .btn,
@@ -402,7 +519,6 @@ body,
   background-color: var(--list-button-background-color);
 }
 
-#active,
 #usersgroups .usersgroup-users,
 .usersgroup,
 .portfoliosgroup {

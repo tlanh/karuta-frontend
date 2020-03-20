@@ -18,7 +18,7 @@ var usersfolders_list = [];
 var bin_usersfolder_list = [];
 var currentDisplayedUsersFolderId = null;
 var root_usersfolder = '0';
-//var pagegNavbar_list = ["top","bottom"];
+var pagegNavbar_list = ["top","bottom"];
 var number_of_usersfolders = 0;
 /// Check namespace existence
 if( UIFactory === undefined )
@@ -58,12 +58,12 @@ UIFactory["UsersFolder"] = function(node)
 		this.ownerid = $(node).attr('ownerid');
 	else
 		this.ownerid = null;
-	if ($(node).attr('count')!=undefined) {
-		this.nb_folders = $(node).attr('count');		
+	if ($(node).attr('nb_folders')!=undefined) {
+		this.nb_folders = $(node).attr('nb_folders');		
 	} else this.nb_folders = 0;
-	if ($(node).attr('nb_children')!=undefined) {
-		this.nb_children = $(node).attr('nb_children');
-	} else this.nb_children = 0;
+	if ($(node).attr('nb_users')!=undefined) {
+		this.nb_users = $(node).attr('nb_users');
+	} else this.nb_users = 0;
 	this.loadedStruct = false;
 	this.folders_list = [];
 	this.loadedFolder = false;
@@ -109,7 +109,31 @@ UIFactory["UsersFolder"].displayTree = function(dest,type,langcode,parentid)
 		html += list[i].getTreeNodeView(dest,type,langcode);
 	}
 	document.getElementById(dest).innerHTML = html;
-	document.getElementById('number_of_usersfolders'+usersfolders_byid[parentid].id).innerHTML = usersfolders_byid[parentid].nb_folders;
+	document.getElementById('nb_folders_'+usersfolders_byid[parentid].id).innerHTML = usersfolders_byid[parentid].nb_folders;
+}
+
+//==================================
+function dragFolder(ev)
+//==================================
+{
+	ev.dataTransfer.setData("text", ev.target.id);
+}
+
+//==================================
+function allowDropFolder(ev)
+//==================================
+{
+	ev.preventDefault();
+}
+
+//==================================
+function dropFolder(ev)
+//==================================
+{
+	ev.preventDefault();
+	var folderid = ev.dataTransfer.getData("text");
+	var newparentid = ev.target.id.substring(ev.target.id.lastIndexOf('_')+1);
+	UIFactory.UsersFolder.moveto(folderid,newparentid)
 }
 
 //==================================
@@ -120,15 +144,17 @@ UIFactory["UsersFolder"].prototype.getTreeNodeView = function(dest,type,langcode
 	var folder_label = this.label_node[langcode].text();
 	var html = "";
 	if (type=='list') {
-		html += "<div id='usersfolder_"+this.id+"' class='treeNode usersfolder'>";
-		html += "	<div class='row-label folder-row'>";
-		html += "		<span id='toggle_usersfolder_"+this.id+"' class='closeSign";
+		html += "<div id='"+this.id+"' class='treeNode usersfolder' draggable='true' ondragstart='dragFolder(event)' ondrop=dropFolder(event)' ondragover='allowDropFolder(event)'>";
+		html += "	<div id='usersfolder_"+this.id+"' class='row-label folder-row'>";
 		if (this.nb_folders>0){
+			html += "		<span id='toggle_usersfolder_"+this.id+"' class='closeSign";
 			html += " toggledNode";
+			html += "' onclick=\"loadAndDisplayUsersFolderStruct('collapse_usersfolder_"+this.id+"','"+this.id+"');\"></span>";
+		} else {
+			html += "<span class='no-toggledNode'>&nbsp;</span>"
 		}
-		html += "' onclick=\"javascript:loadAndDisplayUsersFolderStruct('collapse_usersfolder_"+this.id+"','"+this.id+"');\"></span>";
-		html += "		<span id='treenode-usersfolderlabel_"+this.id+"' onclick=\"javascript:loadAndDisplayUsersFolderContent('folder-users','"+this.id+"');\" class='folder-label'>"+folder_label+"&nbsp;</span><span class='badge number_of_folders' id='number_of_usersfolders"+this.id+"'>"+this.nb_folders+"</span>";
-		html += "&nbsp;<span class='badge number_of_items' id='number_of_usersfolder_items_"+this.id+"'>"+this.nb_children+"</span>";
+		html += "		<span id='treenode-usersfolderlabel_"+this.id+"' onclick=\"loadAndDisplayUsersFolderContent('folder-users','"+this.id+"');\" class='folder-label'>"+folder_label+"&nbsp;</span><span class='badge number_of_folders' id='nb_folders_"+this.id+"'>"+this.nb_folders+"</span>";
+		html += "&nbsp;<span class='badge number_of_items' id='number_of_usersfolder_items_"+this.id+"'>"+this.nb_users+"</span>";
 		html += "	</div>";
 		html += "	<div id='collapse_usersfolder_"+this.id+"' class='nested'></div>";
 		html += "</div><!-- class='usersfolder'-->";
@@ -148,9 +174,9 @@ UIFactory["UsersFolder"].prototype.getTreeNodeView = function(dest,type,langcode
 		if (this.nb_folders>0){
 			html += " toggledNode";
 		}
-		html += "' onclick=\"javascript:loadAndDisplayUsersFolderStruct('collapse_select-usersfolder_"+this.id+"','"+this.id+"');\"></span>";
-		html += "		<span id='treenode-usersfolderlabel_"+this.id+"' onclick=\"javascript:loadAndDisplayUsersFolderContent('select-folder-users','"+this.id+"');\" class='folder-label'>"+folder_label+"&nbsp;</span><span class='badge number_of_folders' id='select-number_of_usersfolders"+this.id+"'>"+this.nb_folders+"</span>";
-		html += "&nbsp;<span class='badge number_of_items' id='select-number_of_usersfolder_items_"+this.id+"'>"+this.nb_children+"</span>";
+		html += "' onclick=\"loadAndDisplayUsersFolderStruct('collapse_select-usersfolder_"+this.id+"','"+this.id+"');\"></span>";
+		html += "		<span id='treenode-usersfolderlabel_"+this.id+"' onclick=\"loadAndDisplayUsersFolderContent('select-folder-users','"+this.id+"');\" class='folder-label'>"+folder_label+"&nbsp;</span><span class='badge number_of_folders' id='select-number_of_usersfolders"+this.id+"'>"+this.nb_folders+"</span>";
+		html += "&nbsp;<span class='badge number_of_items' id='select-number_of_usersfolder_items_"+this.id+"'>"+this.nb_users+"</span>";
 		html += "	</div>";
 		html += "	<div id='collapse_select-usersfolder_"+this.id+"' class='nested'></div>";
 		html += "</div><!-- id='select-usersfolder_...'-->";
@@ -177,20 +203,20 @@ UIFactory["UsersFolder"].displayFolderContent = function(dest,id,langcode,index_
 	var folder_label = usersfolder.label_node[langcode].text();
 	if (folder_label==undefined || folder_label=='' || folder_label=='&nbsp;')
 		folder_label = '- no label in '+languages[langcode]+' -';
-	html += "<div id='content-usersfolder_"+usersfolder.id+"' class='usersfolder'>";
+	html += "<div id='content-usersfolder_"+usersfolder.id+"' class='usersfolder-header'>";
 	html += "	<div class='row row-label'>";
-	html += "		<div class='col-1'/>";
 	html += "		<div class='col-4 folder-label' id='usersfolderlabel_"+usersfolder.id+"' >"+folder_label+"</div>";
 	html += "		<div class='col-2 d-none d-md-block folder-label'>"+owner+"</div>";
 	html += "		<div class='col-3 d-none d-sm-block comments' id='usersfolder-comments_"+usersfolder.date_modified.substring(0,10)+"'> </div><!-- comments -->";
 	html += "		<div class='col-1'>";
 	//------------ buttons ---------------
-	html += UIFactory.UsersFolder.getAdminMenu(usersfolder,false);
+	if (usersfolder.code!="#system-user#")
+		html += UIFactory.UsersFolder.getAdminMenu(usersfolder,false);
 	//---------------------------------------
 	html += "		</div><!-- class='col-1' -->";
 	html += "		<div class='col-1'>";
 	//------------------------ menu-burger
-	if (USER.admin || (USER.creator && !USER.limited) ) {
+	if (usersfolder.code!="#system-user#" && (USER.admin || (USER.creator && !USER.limited) )) {
 		html += "			<div class='dropdown folder-menu'>";
 		html += "				<button  class='btn dropdown-toggle' data-toggle='dropdown'></button>";
 		html += "				<ul class='dropdown-menu dropdown-menu-right' role='menu'>";
@@ -204,8 +230,8 @@ UIFactory["UsersFolder"].displayFolderContent = function(dest,id,langcode,index_
 	html += "	</div><!-- class='row' -->";
 	html += "</div><!-- class='usersfolder'-->";
 	//----------------------
-	html += "<div id='"+index_class+pagegNavbar_list[0]+"' class='navbar-pages'>";
-	html += "</div><!-- class='navbar-pages'-->";
+//	html += "<div id='"+index_class+pagegNavbar_list[0]+"' class='navbar-pages'>";
+//	html += "</div><!-- class='navbar-pages'-->";
 	// ----------------------
 	html += "<div id='folder-users-pages' class='usersfolder-pages'>";
 	html += "</div><!-- class='usersfolder-pages'-->";
@@ -226,18 +252,22 @@ UIFactory["UsersFolder"].prototype.displayFolderContentPage = function(dest,type
 		langcode = LANGCODE;
 	if (type==undefined || type==null)
 		type = 'list';
-
-	var list = this.chidren_list[this.pageindex];
-	//---------------------
 	var html = "";
-	for (var i=0; i<list.length;i++){
-		var item = list[i]['obj'];
-		if("USERSFOLDER"==list[i]['type']) {
+
+	var list = this.folders_list;
+	if (list!=undefined) {
+		for (var i=0; i<list.length;i++){
+			var item = list[i];
 			var destid = dest+"_item-usersfolder_"+item.id;
 			html += "<div class='row item item-folder' id='"+destid+"'>";
 			html += item.getView(destid+item.id,type,langcode);
 			html += "</div>";
-		} else {
+		}
+	}
+	var list = this.chidren_list[this.pageindex];
+	if (list!=undefined) {
+	for (var i=0; i<list.length;i++){
+			var item = list[i]['obj'];
 			var destid = dest+"_item-user_"+item.id;
 			html += "<div class='row item item-user' id='"+destid+"'>";
 			html += item.getView(destid,'list2',langcode);
@@ -245,9 +275,12 @@ UIFactory["UsersFolder"].prototype.displayFolderContentPage = function(dest,type
 		}
 	}
 	$("#"+dest).html($(html));
-	var nb_index = Math.ceil((this.nb_children)/nbItem_par_page);
+	var nb_index = Math.ceil((this.nb_users)/g_configVar['maxuserlist']);
 	if (nb_index>1) {
-		displayPagesNavbar(nb_index,this.id,langcode,parseInt(this.pageindex),index_class,'loadAndDisplayUsersFolderContentPage',dest,"list");		
+		displayPagesNavbar(nb_index,this.id,langcode,parseInt(this.pageindex),index_class,'loadAndDisplayUsersFolderContentPage',dest,"list");
+		$(".navbar-pages").show();
+	} else {
+		$(".navbar-pages").hide();
 	}
 	$(window).scrollTop(0);
 }
@@ -353,6 +386,29 @@ UIFactory["UsersFolder"].prototype.getSelector = function(attr,value,name,checkb
 };
 
 //==================================
+UIFactory["UsersFolder"].moveto = function(folderid,newparentid) 
+//==================================
+{
+	var url = serverBCK_API+"/folder/usersfolder/" + folderid + "?newparentid="+newparentid;
+	$.ajax({
+		type : "PUT",
+		contentType: "application/xml",
+		dataType : "text",
+		url : url,
+		data : "",
+		success : function(data) {
+			UIFactory["UsersFolder"].displayAll('usersfolders','list');
+			UIFactory["UsersFolder"].displayBin('bin','bin');
+			$('[data-toggle=tooltip]').tooltip({html: true, trigger: 'hover'}); 
+
+		},
+		error : function(jqxhr,textStatus) {
+			alertHTML("Error in remove : "+jqxhr.responseText);
+		}
+	});
+};
+
+//==================================
 UIFactory["UsersFolder"].remove = function(id) 
 //==================================
 {
@@ -379,7 +435,7 @@ UIFactory["UsersFolder"].remove = function(id)
 UIFactory["UsersFolder"].restore = function(id) 
 //==================================
 {
-	var url = serverBCK_API+"/usersfolders/usersfolder/" + id + "?active=1";
+	var url = serverBCK_API+"/folder/usersfolder/" + id + "?active=1";
 	$.ajax({
 		type : "PUT",
 		contentType: "application/xml",
@@ -425,7 +481,7 @@ UIFactory["UsersFolder"].callRename = function(id,langcode,list)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	var js1 = "javascript:$('#edit-window').modal('hide')";
+	var js1 = "$('#edit-window').modal('hide')";
 	var footer = "<button class='btn' onclick=\""+js1+";\">"+karutaStr[LANG]['Close']+"</button>";
 	var self = usersfolders_byid[id];
 	$("#edit-window-footer").html(footer);
@@ -481,20 +537,17 @@ UIFactory["UsersFolder"].rename = function(itself,langcode,list)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	var oldcode = $(itself.code);
 	var code = $.trim($("#code_"+itself.id).val());
-	//---------- test if new code already exists
 	$(itself.code_node).text(code);
 	itself.code = code;
 	var label = $.trim($("#label_"+itself.id+"_"+langcode).val());
 	$(itself.label_node[langcode]).text(label);
 	var xml = "";
-	xml +="		<usersfolder>";
-	xml +="			<code>"+code+"</code>";
+	xml +="<usersfolder><code>"+code+"</code>";
 	for (var i=0; i<languages.length;i++){
-		xml +="			<label lang='"+languages[i]+"'>"+$(itself.label_node[i]).text()+"</label>";	
+		xml +="<label lang='"+languages[i]+"'>"+$(itself.label_node[i]).text()+"</label>";	
 	}
-	xml +="		</usersfolder>";
+	xml +="</usersfolder>";
 	strippeddata = xml.replace(/xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g,"");  // remove xmlns attribute
 	var callback = function () {
 		$("#treenode-usersfolderlabel_"+itself.id).html($(label));
@@ -504,8 +557,9 @@ UIFactory["UsersFolder"].rename = function(itself,langcode,list)
 			$("#usersfolderlabel_"+itself.id).html($(label));
 		}
 	};
-	UICom.query("PUT",serverBCK_API+'/usersfolders/usersfolder/'+itself.id+'',callback,"text",strippeddata);
+	UICom.query("PUT",serverBCK_API+'/folder/usersfolder/'+itself.id+'',callback,"text",strippeddata);
 };
+
 
 //==================================
 UIFactory["UsersFolder"].prototype.update = function(node)
@@ -539,38 +593,21 @@ UIFactory["UsersFolder"].prototype.update = function(node)
 	this.node = current_node;
 }
 
+
 //==================================
-UIFactory["UsersFolder"].createFolder = function()
+UIFactory["UsersFolder"].callCreateFolder = function(parentid)
 //==================================
 {
 	$("#edit-window-title").html(karutaStr[LANG]['create_folder']);
 	$("#edit-window-footer").html("");
-	var js1 = "javascript:$('#edit-window').modal('hide')";
+	var js1 = "$('#edit-window').modal('hide')";
 	var create_button = "<button id='create_button' class='btn'>"+karutaStr[LANG]['Create']+"</button>";
 	var obj = $(create_button);
 	$(obj).click(function (){
 		var code = $("#code").val();
 		var label = $("#label").val();
 		if (code!='' && label!='') {
-			var url = serverBCK_API+"/usersfolders";
-			var data = "<usersfolder<code>"+code+"</code><label lang='"+LANG+"'>"+label+"</label></usersfolder>";
-			$.ajax({
-				type : "POST",
-				contentType: "application/xml",
-				dataType : "xml/text",
-				url : url,
-				data : data,
-				success : function(data) {
-					$("#refresh").click();
-					//--------------------------
-					$('#edit-window').modal('hide');
-				},
-				error : function(jqxhr,textStatus) {
-					alertHTML("Error : "+jqxhr.responseText);
-					//--------------------------
-					$('#edit-window').modal('hide');
-				}
-			});
+			UIFactory.UsersFolder.createFolder(parentid,code,label);
 		} else {
 			if (code=='')
 				alertHTML(karutaStr[LANG]['code-not-null']);
@@ -602,10 +639,42 @@ UIFactory["UsersFolder"].createFolder = function()
 };
 
 //==================================
+UIFactory["UsersFolder"].createFolder = function(parentid,code,label)
+//==================================
+{
+	if (code!='' && label!='') {
+		var url = serverBCK_API+"/folder/usersfolders/"+parentid;
+		var data = "<usersfolder><code>"+code+"</code><label lang='fr'>"+label+"</label><label lang='en'>"+label+"</label></usersfolder>";
+		$.ajax({
+			type : "POST",
+			contentType: "application/xml",
+			dataType : "xml/text",
+			url : url,
+			data : data,
+			success : function(data) {
+				$("#refresh").click();
+				//--------------------------
+				$('#edit-window').modal('hide');
+			},
+			error : function(jqxhr,textStatus) {
+				alertHTML("Error : "+jqxhr.responseText);
+				//--------------------------
+				$('#edit-window').modal('hide');
+			}
+		});
+	} else {
+		if (code=='')
+			alertHTML(karutaStr[LANG]['code-not-null']);
+		if (label=='')
+			alertHTML(karutaStr[LANG]['label-not-null']);
+	}
+};
+
+//==================================
 UIFactory["UsersFolder"].del = function(id) 
 //==================================
 {
-	var url = serverBCK_API+"/usersfolders/usersfolder/" + id;
+	var url = serverBCK_API+"/folder/usersfolder/" + id;
 	$.ajax({
 		type : "DELETE",
 		contentType: "application/xml",
@@ -733,89 +802,50 @@ function loadAndDisplayUsersFolderStruct(dest,id,langcode) {
 function loadUsersFolderStruct(dest,id,langcode)
 //==============================
 {
-/*
-	$.ajax({
-		type : "GET",
-		dataType : "xml",
-		url : serverBCK_API+"/usersfolders/usersfolder/"+id+"/children?type=FOLDER&count=true",
-		success : function(data) {
-			UIFactory["UsersFolder"].parse_add(data);
-			UIFactory["UsersFolder"].displayTree(dest,'list',langcode,id);
-		},
-		error : function(jqxhr,textStatus) {
-			alertHTML("Server Error GET active: "+textStatus);
+	if (karuta_backend_version.startsWith("x2.")) {
+		$("#usersfolders").hide();
+		$("#bin-usersfolders").hide();
+		$("#create-folder-button").hide();
+		$("#users-in-rootfolder").show();
+		$("#users-in-bin").show();
+	} else {
+		/*
+		$.ajax({
+			id : id,
+			type : "GET",
+			dataType : "xml",
+			url : serverBCK_API+"/folder/usersfolder/"+id+"?type=structure",
+			success : function(data) {
+					UIFactory["UsersFolder"].parseStructure(data,id);
+					UIFactory["UsersFolder"].displayTree(dest,'list',langcode,id);
+			},
+			error : function(jqxhr,textStatus) {
+			}
+		});
+		 */
+		//-------- Simulation ---------
+		if (id=="active") { //root folder
+			var data = "<usersfolders id='active' nb_folders='3' nb_users='0'>"
+				+"<usersfolder id='1' nb_folders='0' nb_users='3' owner='Y'  ownerid='1' modified='2019-12-02 12:19:02.0'><code>#system-user#</code><label lang='en'>System Users</label><label lang='fr'>Usagers Système</label></usersfolder>"
+				+"<usersfolder id='2' nb_folders='1' nb_users='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2</code><label lang='en'>Folder 2</label><label lang='fr'>Usagers</label></usersfolder>"
+				+"</userfolders>";
+			
 		}
-	});
-	*/
-		
-		//===== test data
-		var test_dataFolders= "<usersfolders count='3'>"
-				+"<usersfolder id='1' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder1</code><label lang='en'>Folder 1</label><label lang='fr'>Dossier 1</label></usersfolder>"
-				+"<usersfolder id='2' count='3' nb_children='52' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2</code><label lang='en'>Folder 2</label><label lang='fr'>Dossier 2</label></usersfolder>"
-				+"<usersfolder id='3' count='2' nb_children='2' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder3</code><label lang='en'>Folder 3</label><label lang='fr'>Dossier 3</label></usersfolder>"
-				+"</usersfolders>";
-		var test_dataFoldersStruct_byid = {};
-		test_dataFoldersStruct_byid['root']= "<usersfolders count='3'>"
-			+"<usersfolder id='1' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder1</code><label lang='en'>Folder 1</label><label lang='fr'>Dossier 1</label></usersfolder>"
-			+"<usersfolder id='2' count='3' nb_children='52' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2</code><label lang='en'>Folder 2</label><label lang='fr'>Dossier 2</label></usersfolder>"
-			+"<usersfolder id='3' count='2' nb_children='2' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder3</code><label lang='en'>Folder 3</label><label lang='fr'>Dossier 3</label></usersfolder>"
-			+"</usersfolders>";
-		test_dataFoldersStruct_byid['bin']= "<usersfolders count='3'>"
-			+"<usersfolder id='4' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder4</code><label lang='en'>Folder 4</label><label lang='fr'>Dossier 4</label></usersfolder>"
-			+"<usersfolder id='5' count='3' nb_children='52' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder5</code><label lang='en'>Folder 5</label><label lang='fr'>Dossier 5</label></usersfolder>"
-			+"<usersfolder id='6' count='2' nb_children='2' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder6</code><label lang='en'>Folder 6</label><label lang='fr'>Dossier 6</label></usersfolder>"
-			+"</usersfolders>";
-		test_dataFoldersStruct_byid['1']= "<usersfolder id='1.1' count='0' nb_children='0' modified='2019-12-02 12:19:02.0' ownerid='20'>"
-				+"<code>folder1.1</code>"
-				+"<label lang='en'>Folder 1.1</label>"
-				+"<label lang='fr'>Dossier 1.1</label>"
-				+"</usersfolder>";
-		test_dataFoldersStruct_byid['2']= "<usersfolders>"
-				+"<usersfolder id='2.1' count='2' nb_children='6' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.1</code><label lang='en'>Folder 2.1</label><label lang='fr'>Dossier 2.1</label></usersfolder>"
-				+"<usersfolder id='2.2' count='0' nb_children='1' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.2</code><label lang='en'>Folder 2.2</label><label lang='fr'>Dossier 2.2</label></usersfolder>"
-				+"<usersfolder id='2.3' count='1' nb_children='1' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.3</code><label lang='en'>Folder 2.3</label><label lang='fr'>Dossier 2.3</label></usersfolder>"
-				+"</usersfolders>";
-		test_dataFoldersStruct_byid['2.1']= "<usersfolders>"
-			+"<usersfolder id='2.1.1' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.1.1</code><label lang='en'>Folder 2.1.1</label><label lang='fr'>Dossier 2.1.1</label></usersfolder>"
-			+"<usersfolder id='2.1.2' count='1' nb_children='1' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.1.2</code><label lang='en'>Folder 2.1.2</label><label lang='fr'>Dossier 2.1.2</label></usersfolder>"
-			+"</usersfolders>";
-		test_dataFoldersStruct_byid['2.1.1']= "<usersfolders></usersfolders>";
-		test_dataFoldersStruct_byid['2.3']= "<usersfolders>"
-			+"<usersfolder id='2.3.1' count='1' nb_children='6' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.3.1</code><label lang='en'>Folder 2.3.1</label><label lang='fr'>Dossier 2.3.1</label></usersfolder>"
-			+"</usersfolders>";
-		test_dataFoldersStruct_byid['2.3.1']= "<usersfolders>"
-			+"<usersfolder id='2.3.1.1' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.3.1.1</code><label lang='en'>Folder 2.3.1</label><label lang='fr'>Dossier 2.3.1</label></usersfolder>"
-			+"</usersfolders>";
-		test_dataFoldersStruct_byid['2.1.2']= "<usersfolders>"
-			+"<usersfolder id='2.1.2.1' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.1.2.1</code><label lang='en'>Folder 2.1.2.1</label><label lang='fr'>Dossier 2.1.2.1</label></usersfolder>"
-			+"</usersfolders>";
-		test_dataFoldersStruct_byid['2.1.2.1']= "<usersfolders></usersfolders>";
-		test_dataFoldersStruct_byid['2.1.2.1']= "<usersfolders>"
-			+"</usersfolders>";
-		test_dataFoldersStruct_byid['3']= "<usersfolders>"
-				+"<usersfolder id='3.1' count='2' nb_children='2' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder3.1</code><label lang='en'>Folder 3.1</label><label lang='fr'>Dossier 3.1</label></usersfolder>"
-				+"<usersfolder id='3.2' count='0' nb_children='2' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder3.2</code><label lang='en'>Folder 3.2</label><label lang='fr'>Dossier 3.2</label></usersfolder>"
-				+"</usersfolders>";
-		test_dataFoldersStruct_byid['3.1']= "<usersfolders>"
-			+"<usersfolder id='3.1.1' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder3.1.1</code><label lang='en'>Folder 3.1.1</label><label lang='fr'>Dossier 3.1.1</label></usersfolder>"
-			+"<usersfolder id='3.1.2' count='0' nb_children='1' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder3.1.2</code><label lang='en'>Folder 3.1.2</label><label lang='fr'>Dossier 3.1.2</label></usersfolder>"
-			+"</usersfolders>";
-		test_dataFoldersStruct_byid['3.2']= "<usersfolders></usersfolders>";
-		test_dataFoldersStruct_byid['3.1.1']= "<usersfolders></usersfolders>";
-		test_dataFoldersStruct_byid['3.1.2']= "<usersfolders></usersfolders>";
-		//==================================
-	var data = null;
-	number_of_usersfolders = 3;
-	if (id==undefined||id==null) {
-		data=test_dataFolders;
-		UIFactory["UsersFolder"].parse(data);
-		UIFactory["UsersFolder"].displayAll('usersfolders','list');
+		if (id=="2") { 
+			var data = "<usersfolders id='2' nb_folders='3' nb_users='0'>"
+				+"<usersfolder id='2.1' nb_folders='0' nb_users='7' owner='Y'  ownerid='1' modified='2019-12-02 12:19:02.0'><code>folder1</code><label lang='en'>System Users</label><label lang='fr'>dossier2.1</label></usersfolder>"
+				+"</userfolders>";
+			
+		}
+		if (id=="inactive") { //bin folder
+			var data = "<usersfolders d='inactive' nb_folders='0' nb_users='0'>"
+					+"</userfolders>";
+			
+		}
+		UIFactory["UsersFolder"].parseStructure(data,id);
+		UIFactory["UsersFolder"].displayTree(dest,'list',langcode,id);
 	}
-	else {
-		data = test_dataFoldersStruct_byid[id];
-		UIFactory["UsersFolder"].parseStructure(data,id); 
-		UIFactory["UsersFolder"].displayTree(dest,'list',langcode,id);		
-	}
+
 }
 
 //==================================
@@ -825,20 +855,28 @@ function loadAndDisplayUsersFolderContent(dest,id,langcode,type) {
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	if (usersfolders_byid[id].nb_folders > 0){
-		loadAndDisplayUsersFolderStruct('collapse_usersfolder_'+id,id,langcode)
-	}
-	toggleOpenElt('closeSign','openSign','usersfolder_'+id);
-	var index_class = "userspageindex";
-	UIFactory["UsersFolder"].displayFolderContent(dest,id,langcode,index_class);
-	selectElt('usersfolder','usersfolder_'+id);
-	var dest_page = dest + '-pages';
-	var list = usersfolders_byid[id].chidren_list[usersfolders_byid[id].pageindex];
-	if (list==undefined||list==null){
-		loadUsersFolderContent(dest_page,id,langcode,type,index_class);		
-	}
-	else {
-		usersfolders_byid[id].displayFolderContentPage(dest_page,type,langcode,index_class);		
+	if (id=="0" && usersfolders_byid[id]==undefined) {
+		$("#folder-users").html("<div id='active'></div>");
+		fill_list_usersOLD();
+	} else if (id=="1" && usersfolders_byid[id]==undefined) {
+		$("#folder-users").html("<div id='inactive'></div>");
+		fill_list_usersOLD();
+	} else {
+		if (usersfolders_byid[id].nb_folders > 0){
+			loadAndDisplayUsersFolderStruct('collapse_usersfolder_'+id,id,langcode)
+		}
+		toggleOpenElt('closeSign','openSign','usersfolder_'+id);
+		var index_class = 1;
+		UIFactory.UsersFolder.displayFolderContent(dest,id,langcode,index_class);
+		selectElt('usersfolder','usersfolder_'+id);
+		var dest_page = dest + '-pages';
+		var list = usersfolders_byid[id].chidren_list[usersfolders_byid[id].pageindex];
+		if (list==undefined||list==null){
+			loadUsersFolderContent(dest_page,id,langcode,type,index_class);		
+		}
+		else {
+			usersfolders_byid[id].displayFolderContentPage(dest_page,type,langcode,index_class);		
+		}
 	}
 	$(window).scrollTop(0);
 	$("#wait-window").hide();
@@ -851,7 +889,7 @@ function loadAndDisplayUsersFolderContentPage(dest,type,id,langcode,pageindex,in
 	usersfolders_byid[id].pageindex = ""+pageindex;
 	var list = usersfolders_byid[id].chidren_list[usersfolders_byid[id].pageindex];
 	if (list==undefined||list==null)
-		loadUsersFolderContent(dest,id,langcode,type,index_class);
+		loadUsersFolderContent(dest,id,langcode,type,pageindex);
 	else {
 		usersfolders_byid[id].displayFolderContentPage(dest,type,langcode,index_class);		
 	}
@@ -859,126 +897,59 @@ function loadAndDisplayUsersFolderContentPage(dest,type,id,langcode,pageindex,in
 }
 
 //==============================
-function loadUsersFolderContent(dest,id,langcode,type,index_class)
+function loadUsersFolderContent(dest,id,type,langcode,index_class)
 //==============================
 {
 	var pageindex = usersfolders_byid[id].pageindex;
-/*
+	/*
 	$.ajax({
 		type : "GET",
 		dataType : "xml",
-		url : serverBCK_API+"/usersfolders/usersfolder/"+id+"/children?r="+pageindex+"&limit=100&count=true",
+		url : serverBCK_API+"/folder/usersfolder/"+id+"?type=children&r="+pageindex+"&limit="+g_configVar['maxuserlist'],
 		success : function(data) {
-			UIFactory["UsersFolder"].parseChildren(data,id); 
-			usersfolders_byid[id].displayFolderContentPage(dest,type,langcode,index_class);		
+			UIFactory.UsersFolder.parseChildren(data,id); 
+			usersfolders_byid[id].displayFolderContentPage(dest,type,langcode,index_class);
 		},
 		error : function(jqxhr,textStatus) {
 			alertHTML("Server Error GET active: "+textStatus);
 		}
 	});
-	*/
-	//===== test data
-	var test_dataFolders= "<usersfolder id='0' count='3' nb_children='3' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'>"
-		+"<code>userid</code>"
-		+"<label lang='en'>Folder userid</label>"
-		+"<label lang='fr'>Dossier userid</label>"
-			+"<usersfolders count='3'>"
-			+"<usersfolder id='1' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder1</code><label lang='en'>Folder 1</label><label lang='fr'>Dossier 1</label></usersfolder>"
-			+"<usersfolder id='2' count='2' nb_children='6' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2</code><label lang='en'>Folder 2</label><label lang='fr'>Dossier 2</label></usersfolder>"
-			+"<usersfolder id='3' count='2' nb_children='2' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder3</code><label lang='en'>Folder 3</label><label lang='fr'>Dossier 3</label></usersfolder>"
-			+"</usersfolders>"
-			+"</usersfolder>";
-	var test_dataFolders_byid = {};
-	test_dataFolders_byid['1']= {};
-	test_dataFolders_byid['2']= {};
-	test_dataFolders_byid['3']= {};
-	test_dataFolders_byid['2.1']= {};
-	test_dataFolders_byid['2.2']= {};
-	test_dataFolders_byid['2.1.1']= {};
-	test_dataFolders_byid['2.1.2']= {};
-	test_dataFolders_byid['2.3']= {};
-	test_dataFolders_byid['2.3.1']= {};
-	test_dataFolders_byid['2.3.1.1']= {};
-	test_dataFolders_byid['3.1']= {};
-	test_dataFolders_byid['3.2']= {};
-	test_dataFolders_byid['3.1.1']= {};
-	test_dataFolders_byid['3.1.2']= {};
 	
-	test_dataFolders_byid['1']['1']= "<children pageindex='1' count='4'>"
-		+"<user id='1'><username>root</username><firstname>root</firstname><lastname></lastname><admin>1</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='2'><username>sys_public</username><firstname>System public account (users with account)</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='3'><username>public</username><firstname>Public account (World)</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='4'><username>olivier</username><firstname>Olivier</firstname><lastname>Gerbé</lastname><admin>0</admin><designer>0</designer><email>olivier.gerbe@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='5'><username>saint-exupery@litterature.fr</username><firstname>Antoine</firstname><lastname>de Saint-Exupéry</lastname><admin>0</admin><designer>0</designer><email>saint-exupery@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='6'><username>beaudelaire@litterature.fr</username><firstname>Charles</firstname><lastname>Beaudelaire</lastname><admin>0</admin><designer>0</designer><email>beaudelaire@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='7'><username>hugo@litterature.fr</username><firstname>Victor</firstname><lastname>Hugo</lastname><admin>0</admin><designer>0</designer><email>hugo@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='8'><username>flaubert@litterature.fr</username><firstname>Gustave</firstname><lastname>Flaubert</lastname><admin>0</admin><designer>0</designer><email>flaubert@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='9'><username>maupassant@litterature.fr</username><firstname>Guy</firstname><lastname>de Maupassant</lastname><admin>0</admin><designer>0</designer><email>maupassant@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='10'><username>camus@litterature.fr</username><firstname>Albert</firstname><lastname>Camus</lastname><admin>0</admin><designer>0</designer><email>camus@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='11'><username>dumas@litterature.fr</username><firstname>Alexandre</firstname><lastname>Dumas</lastname><admin>0</admin><designer>0</designer><email>dumas@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='12'><username>crush@bulles.ca</username><firstname>Crush</firstname><lastname>LaTortue</lastname><admin>0</admin><designer>0</designer><email>crush@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='13'><username>nemo@bulles.ca</username><firstname>Némo</firstname><lastname>LePoisson</lastname><admin>0</admin><designer>0</designer><email>nemo@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='14'><username>adm-ateliers</username><firstname>Administrateur</firstname><lastname>Promising</lastname><admin>0</admin><designer>1</designer><email></email><active>1</active><substitute>0</substitute><other></other></user><user id='16'><username>ens-ateliers</username><firstname>Enseignant</firstname><lastname>Promising</lastname><admin>0</admin><designer>1</designer><email>ens@courriel.ca</email><active>1</active><substitute>0</substitute><other>xlimited</other></user><user id='17'><username>doris@bulles.ca</username><firstname>Doris</firstname><lastname>LePoisson</lastname><admin>0</admin><designer>0</designer><email>doris@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='18'><username>eric.giraudin@gmail.com</username><firstname>Eric</firstname><lastname>Giraudin</lastname><admin>0</admin><designer>1</designer><email>eric.giraudin@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='19'><username>eric.duquenoy@univ-littoral.fr</username><firstname>Éric</firstname><lastname>Duquenoy</lastname><admin>0</admin><designer>1</designer><email>eric.duquenoy@univ-littoral.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='20'><username>la</username><firstname>Lan Anh</firstname><lastname>Dinh</lastname><admin>0</admin><designer>1</designer><email>tlanh.dinh@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='22'><username>nobry</username><firstname>Nobry</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email></email><active>1</active><substitute>0</substitute><other></other></user><user id='38'><username>01-etudiant</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>0</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='39'><username>01-tuteur</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>0</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='40'><username>01-designer</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>1</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='41'><username>cecilekaya</username><firstname>Cécile</firstname><lastname>KAYA</lastname><admin>0</admin><designer>0</designer><email>eric.giraudin@gmail.com</email><active>1</active><substitute>0</substitute><other>undefined</other></user><user id='42'><username>prototype</username><firstname></firstname><lastname>prototype</lastname><admin>0</admin><designer>1</designer><email></email><active>1</active><substitute>0</substitute><other></other></user>"
-		+	"<portfolio id='6c2dcd99-5831-45eb-82b4-3f68812bbe54' root_node_id='8cd1122b-4c3a-11ea-b2a2-fa163ebfbd00' owner='Y'  ownerid='20' modified='2020-02-10 14:21:34.0'><asmRoot id='8cd1122b-4c3a-11ea-b2a2-fa163ebfbd00'><metadata-wad csstext='' menuroles='' seenoderoles='all' /><metadata-epm displayview='' /><metadata display-type='standard' export-htm='Y' export-pdf='Y' export-rtf='Y' menu-type='vertical' multilingual-node='Y' semantictag='root karuta-model' sharedNode='N' sharedResource='N' /><code>LA-test.Model-instance</code><label/><description/><semanticTag>root karuta-model</semanticTag><asmResource id='8cd5e087-4c3a-11ea-b2a2-fa163ebfbd00' contextid='8cd1122b-4c3a-11ea-b2a2-fa163ebfbd00' xsi_type='nodeRes'><code>LA-test.Model-instance</code><label lang='fr'>Instance de Modèle</label><label lang='en'>Modèle</label></asmResource><asmResource id='8cd4a925-4c3a-11ea-b2a2-fa163ebfbd00' contextid='8cd1122b-4c3a-11ea-b2a2-fa163ebfbd00' xsi_type='context'><text lang='fr'/><text lang='en'/></asmResource></asmRoot></portfolio><portfolio id='1666805d-e770-4721-bb56-aa43c139dac4' root_node_id='a28b65ec-46b3-11ea-b2a2-fa163ebfbd00' owner='Y'  ownerid='20' modified='2020-02-19 00:50:22.0'><asmRoot id='a28b65ec-46b3-11ea-b2a2-fa163ebfbd00'><metadata-wad csstext='' menuroles='' seenoderoles='all' /><metadata-epm displayview='' /><metadata display-type='standard' export-htm='Y' export-pdf='Y' export-rtf='Y' menu-type='vertical' multilingual-node='Y' semantictag='root karuta-model' sharedNode='N' sharedResource='N' /><code>LA-test.Model</code><label/><description/><semanticTag>root karuta-model</semanticTag><asmResource id='a28f40aa-46b3-11ea-b2a2-fa163ebfbd00' contextid='a28b65ec-46b3-11ea-b2a2-fa163ebfbd00' xsi_type='nodeRes'><code>LA-test.Model</code><label lang='fr'>Modèle</label><label lang='en'>Modèle</label></asmResource><asmResource id='a28e7f2d-46b3-11ea-b2a2-fa163ebfbd00' contextid='a28b65ec-46b3-11ea-b2a2-fa163ebfbd00' xsi_type='context'><text lang='fr'/><text lang='en'/></asmResource></asmRoot></portfolio><portfolio id='0ff0f973-8686-4d8a-a0e9-7fbfb75f6f5c' root_node_id='1a2a928c-519d-11ea-b5a9-fa163ebfbd00' owner='Y'  ownerid='20' modified='2020-02-14 16:30:44.0'><asmRoot id='1a2a928c-519d-11ea-b5a9-fa163ebfbd00'><metadata-wad csstext='' menuroles='' seenoderoles='all' /><metadata-epm displayview='' /><metadata display-type='standard' menu-type='vertical' multilingual-node='Y' semantictag='root karuta-model' sharedNode='N' sharedResource='N' /><code>LA-test.model2</code><label/><description/><semanticTag>root karuta-model</semanticTag><asmResource id='1a2ca031-519d-11ea-b5a9-fa163ebfbd00' contextid='1a2a928c-519d-11ea-b5a9-fa163ebfbd00' xsi_type='nodeRes'><code>LA-test.model2</code><label lang='fr'>Modèle 2</label><label lang='en'>Modèle 2</label></asmResource><asmResource id='1a2c139b-519d-11ea-b5a9-fa163ebfbd00' contextid='1a2a928c-519d-11ea-b5a9-fa163ebfbd00' xsi_type='context'><text lang='fr'/><text lang='en'/></asmResource></asmRoot></portfolio><portfolio id='b0454ab3-1e8c-4b9e-8ab4-a6a6b966f26c' root_node_id='92052dd8-46b3-11ea-b2a2-fa163ebfbd00' owner='Y'  ownerid='20' modified='2020-01-23 15:28:56.0'><asmRoot id='92052dd8-46b3-11ea-b2a2-fa163ebfbd00'><metadata-wad commentnoderoles='designer' seenoderoles='all' /><metadata-epm/><metadata multilingual-node='Y' semantictag='root karuta-project' sharedNode='N' sharedResource='N' /><code>LA-test</code><label/><description/><semanticTag>root karuta-project</semanticTag><asmResource id='92067ab9-46b3-11ea-b2a2-fa163ebfbd00' contextid='92052dd8-46b3-11ea-b2a2-fa163ebfbd00' xsi_type='nodeRes'><code>LA-test</code><label lang='fr'>LA-test</label><label lang='en'>LA-test</label></asmResource><asmResource id='92061c43-46b3-11ea-b2a2-fa163ebfbd00' contextid='92052dd8-46b3-11ea-b2a2-fa163ebfbd00' xsi_type='context'><text lang='en'/><text lang='fr'/></asmResource></asmRoot></portfolio>"		
-		+"</children>";
-	test_dataFolders_byid['2']['1']= "<children pageindex='1' count='7'>"
-		+"<user id='1'><username>root</username><firstname>root</firstname><lastname></lastname><admin>1</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='2'><username>sys_public</username><firstname>System public account (users with account)</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='3'><username>public</username><firstname>Public account (World)</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='4'><username>olivier</username><firstname>Olivier</firstname><lastname>Gerbé</lastname><admin>0</admin><designer>0</designer><email>olivier.gerbe@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='5'><username>saint-exupery@litterature.fr</username><firstname>Antoine</firstname><lastname>de Saint-Exupéry</lastname><admin>0</admin><designer>0</designer><email>saint-exupery@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='6'><username>beaudelaire@litterature.fr</username><firstname>Charles</firstname><lastname>Beaudelaire</lastname><admin>0</admin><designer>0</designer><email>beaudelaire@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='7'><username>hugo@litterature.fr</username><firstname>Victor</firstname><lastname>Hugo</lastname><admin>0</admin><designer>0</designer><email>hugo@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='8'><username>flaubert@litterature.fr</username><firstname>Gustave</firstname><lastname>Flaubert</lastname><admin>0</admin><designer>0</designer><email>flaubert@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='9'><username>maupassant@litterature.fr</username><firstname>Guy</firstname><lastname>de Maupassant</lastname><admin>0</admin><designer>0</designer><email>maupassant@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='10'><username>camus@litterature.fr</username><firstname>Albert</firstname><lastname>Camus</lastname><admin>0</admin><designer>0</designer><email>camus@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='11'><username>dumas@litterature.fr</username><firstname>Alexandre</firstname><lastname>Dumas</lastname><admin>0</admin><designer>0</designer><email>dumas@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='12'><username>crush@bulles.ca</username><firstname>Crush</firstname><lastname>LaTortue</lastname><admin>0</admin><designer>0</designer><email>crush@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='13'><username>nemo@bulles.ca</username><firstname>Némo</firstname><lastname>LePoisson</lastname><admin>0</admin><designer>0</designer><email>nemo@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='14'><username>adm-ateliers</username><firstname>Administrateur</firstname><lastname>Promising</lastname><admin>0</admin><designer>1</designer><email></email><active>1</active><substitute>0</substitute><other></other></user><user id='16'><username>ens-ateliers</username><firstname>Enseignant</firstname><lastname>Promising</lastname><admin>0</admin><designer>1</designer><email>ens@courriel.ca</email><active>1</active><substitute>0</substitute><other>xlimited</other></user><user id='17'><username>doris@bulles.ca</username><firstname>Doris</firstname><lastname>LePoisson</lastname><admin>0</admin><designer>0</designer><email>doris@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='18'><username>eric.giraudin@gmail.com</username><firstname>Eric</firstname><lastname>Giraudin</lastname><admin>0</admin><designer>1</designer><email>eric.giraudin@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='19'><username>eric.duquenoy@univ-littoral.fr</username><firstname>Éric</firstname><lastname>Duquenoy</lastname><admin>0</admin><designer>1</designer><email>eric.duquenoy@univ-littoral.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='20'><username>la</username><firstname>Lan Anh</firstname><lastname>Dinh</lastname><admin>0</admin><designer>1</designer><email>tlanh.dinh@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='22'><username>nobry</username><firstname>Nobry</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email></email><active>1</active><substitute>0</substitute><other></other></user><user id='38'><username>01-etudiant</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>0</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='39'><username>01-tuteur</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>0</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='40'><username>01-designer</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>1</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='41'><username>cecilekaya</username><firstname>Cécile</firstname><lastname>KAYA</lastname><admin>0</admin><designer>0</designer><email>eric.giraudin@gmail.com</email><active>1</active><substitute>0</substitute><other>undefined</other></user><user id='42'><username>prototype</username><firstname></firstname><lastname>prototype</lastname><admin>0</admin><designer>1</designer><email></email><active>1</active><substitute>0</substitute><other></other></user>"
-		+"<usersfolder id='2.1' count='2' nb_children='6' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.1</code><label lang='en'>Folder 2.1</label><label lang='fr'>Dossier 2.1</label></usersfolder>"
-		+"<usersfolder id='2.2' count='0' nb_children='1' owner='Y'  ownerid='20' modified='2020-02-02 12:19:02.0'><code>folder2.2</code><label lang='en'>Folder 2.2</label><label lang='fr'>Dossier 2.2</label></usersfolder>"
-		+"<usersfolder id='2.3' count='1' nb_children='1' owner='Y'  ownerid='20' modified='2020-01-02 12:19:02.0'><code>folder2.3</code><label lang='en'>Folder 2.3</label><label lang='fr'>Dossier 2.3</label></usersfolder>"
-		+"</children>";
-	test_dataFolders_byid['2']['2']= "<children pageindex='2' count='5'>"
-		+"<user id='1'><username>root</username><firstname>root</firstname><lastname></lastname><admin>1</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='2'><username>sys_public</username><firstname>System public account (users with account)</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='3'><username>public</username><firstname>Public account (World)</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='4'><username>olivier</username><firstname>Olivier</firstname><lastname>Gerbé</lastname><admin>0</admin><designer>0</designer><email>olivier.gerbe@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='5'><username>saint-exupery@litterature.fr</username><firstname>Antoine</firstname><lastname>de Saint-Exupéry</lastname><admin>0</admin><designer>0</designer><email>saint-exupery@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='6'><username>beaudelaire@litterature.fr</username><firstname>Charles</firstname><lastname>Beaudelaire</lastname><admin>0</admin><designer>0</designer><email>beaudelaire@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='7'><username>hugo@litterature.fr</username><firstname>Victor</firstname><lastname>Hugo</lastname><admin>0</admin><designer>0</designer><email>hugo@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='8'><username>flaubert@litterature.fr</username><firstname>Gustave</firstname><lastname>Flaubert</lastname><admin>0</admin><designer>0</designer><email>flaubert@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='9'><username>maupassant@litterature.fr</username><firstname>Guy</firstname><lastname>de Maupassant</lastname><admin>0</admin><designer>0</designer><email>maupassant@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='10'><username>camus@litterature.fr</username><firstname>Albert</firstname><lastname>Camus</lastname><admin>0</admin><designer>0</designer><email>camus@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='11'><username>dumas@litterature.fr</username><firstname>Alexandre</firstname><lastname>Dumas</lastname><admin>0</admin><designer>0</designer><email>dumas@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='12'><username>crush@bulles.ca</username><firstname>Crush</firstname><lastname>LaTortue</lastname><admin>0</admin><designer>0</designer><email>crush@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='13'><username>nemo@bulles.ca</username><firstname>Némo</firstname><lastname>LePoisson</lastname><admin>0</admin><designer>0</designer><email>nemo@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='14'><username>adm-ateliers</username><firstname>Administrateur</firstname><lastname>Promising</lastname><admin>0</admin><designer>1</designer><email></email><active>1</active><substitute>0</substitute><other></other></user><user id='16'><username>ens-ateliers</username><firstname>Enseignant</firstname><lastname>Promising</lastname><admin>0</admin><designer>1</designer><email>ens@courriel.ca</email><active>1</active><substitute>0</substitute><other>xlimited</other></user><user id='17'><username>doris@bulles.ca</username><firstname>Doris</firstname><lastname>LePoisson</lastname><admin>0</admin><designer>0</designer><email>doris@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='18'><username>eric.giraudin@gmail.com</username><firstname>Eric</firstname><lastname>Giraudin</lastname><admin>0</admin><designer>1</designer><email>eric.giraudin@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='19'><username>eric.duquenoy@univ-littoral.fr</username><firstname>Éric</firstname><lastname>Duquenoy</lastname><admin>0</admin><designer>1</designer><email>eric.duquenoy@univ-littoral.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='20'><username>la</username><firstname>Lan Anh</firstname><lastname>Dinh</lastname><admin>0</admin><designer>1</designer><email>tlanh.dinh@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='22'><username>nobry</username><firstname>Nobry</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email></email><active>1</active><substitute>0</substitute><other></other></user><user id='38'><username>01-etudiant</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>0</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='39'><username>01-tuteur</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>0</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='40'><username>01-designer</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>1</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='41'><username>cecilekaya</username><firstname>Cécile</firstname><lastname>KAYA</lastname><admin>0</admin><designer>0</designer><email>eric.giraudin@gmail.com</email><active>1</active><substitute>0</substitute><other>undefined</other></user><user id='42'><username>prototype</username><firstname></firstname><lastname>prototype</lastname><admin>0</admin><designer>1</designer><email></email><active>1</active><substitute>0</substitute><other></other></user>"
-		+"<usersfolder id='2.1' count='2' nb_children='6' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.1</code><label lang='en'>Folder 2.1</label><label lang='fr'>Dossier 2.1</label></usersfolder>"
-		+"</children>";
-	test_dataFolders_byid['2']['3']= "<children pageindex='3' count='2'>"
-		+"<usersfolder id='2.2' count='0' nb_children='1' owner='Y'  ownerid='20' modified='2020-02-02 12:19:02.0'><code>folder2.2</code><label lang='en'>Folder 2.2</label><label lang='fr'>Dossier 2.2</label></usersfolder>"
-		+"<usersfolder id='2.3' count='1' nb_children='1' owner='Y'  ownerid='20' modified='2020-01-02 12:19:02.0'><code>folder2.3</code><label lang='en'>Folder 2.3</label><label lang='fr'>Dossier 2.3</label></usersfolder>"
-		+"</children>";
-	test_dataFolders_byid['2']['4']= "<children pageindex='4' count='5'>"
-		+"<user id='1'><username>root</username><firstname>root</firstname><lastname></lastname><admin>1</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='2'><username>sys_public</username><firstname>System public account (users with account)</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='3'><username>public</username><firstname>Public account (World)</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='4'><username>olivier</username><firstname>Olivier</firstname><lastname>Gerbé</lastname><admin>0</admin><designer>0</designer><email>olivier.gerbe@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='5'><username>saint-exupery@litterature.fr</username><firstname>Antoine</firstname><lastname>de Saint-Exupéry</lastname><admin>0</admin><designer>0</designer><email>saint-exupery@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='6'><username>beaudelaire@litterature.fr</username><firstname>Charles</firstname><lastname>Beaudelaire</lastname><admin>0</admin><designer>0</designer><email>beaudelaire@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='7'><username>hugo@litterature.fr</username><firstname>Victor</firstname><lastname>Hugo</lastname><admin>0</admin><designer>0</designer><email>hugo@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='8'><username>flaubert@litterature.fr</username><firstname>Gustave</firstname><lastname>Flaubert</lastname><admin>0</admin><designer>0</designer><email>flaubert@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='9'><username>maupassant@litterature.fr</username><firstname>Guy</firstname><lastname>de Maupassant</lastname><admin>0</admin><designer>0</designer><email>maupassant@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='10'><username>camus@litterature.fr</username><firstname>Albert</firstname><lastname>Camus</lastname><admin>0</admin><designer>0</designer><email>camus@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='11'><username>dumas@litterature.fr</username><firstname>Alexandre</firstname><lastname>Dumas</lastname><admin>0</admin><designer>0</designer><email>dumas@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='12'><username>crush@bulles.ca</username><firstname>Crush</firstname><lastname>LaTortue</lastname><admin>0</admin><designer>0</designer><email>crush@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='13'><username>nemo@bulles.ca</username><firstname>Némo</firstname><lastname>LePoisson</lastname><admin>0</admin><designer>0</designer><email>nemo@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='14'><username>adm-ateliers</username><firstname>Administrateur</firstname><lastname>Promising</lastname><admin>0</admin><designer>1</designer><email></email><active>1</active><substitute>0</substitute><other></other></user><user id='16'><username>ens-ateliers</username><firstname>Enseignant</firstname><lastname>Promising</lastname><admin>0</admin><designer>1</designer><email>ens@courriel.ca</email><active>1</active><substitute>0</substitute><other>xlimited</other></user><user id='17'><username>doris@bulles.ca</username><firstname>Doris</firstname><lastname>LePoisson</lastname><admin>0</admin><designer>0</designer><email>doris@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='18'><username>eric.giraudin@gmail.com</username><firstname>Eric</firstname><lastname>Giraudin</lastname><admin>0</admin><designer>1</designer><email>eric.giraudin@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='19'><username>eric.duquenoy@univ-littoral.fr</username><firstname>Éric</firstname><lastname>Duquenoy</lastname><admin>0</admin><designer>1</designer><email>eric.duquenoy@univ-littoral.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='20'><username>la</username><firstname>Lan Anh</firstname><lastname>Dinh</lastname><admin>0</admin><designer>1</designer><email>tlanh.dinh@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='22'><username>nobry</username><firstname>Nobry</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email></email><active>1</active><substitute>0</substitute><other></other></user><user id='38'><username>01-etudiant</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>0</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='39'><username>01-tuteur</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>0</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='40'><username>01-designer</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>1</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='41'><username>cecilekaya</username><firstname>Cécile</firstname><lastname>KAYA</lastname><admin>0</admin><designer>0</designer><email>eric.giraudin@gmail.com</email><active>1</active><substitute>0</substitute><other>undefined</other></user><user id='42'><username>prototype</username><firstname></firstname><lastname>prototype</lastname><admin>0</admin><designer>1</designer><email></email><active>1</active><substitute>0</substitute><other></other></user>"
-		+"<usersfolder id='2.1' count='2' nb_children='6' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.1</code><label lang='en'>Folder 2.1</label><label lang='fr'>Dossier 2.1</label></usersfolder>"
-		+"</children>";
-	test_dataFolders_byid['2']['5']= "<children pageindex='5' count='2'>"
-		+"<usersfolder id='2.2' count='0' nb_children='1' owner='Y'  ownerid='20' modified='2020-02-02 12:19:02.0'><code>folder2.2</code><label lang='en'>Folder 2.2</label><label lang='fr'>Dossier 2.2</label></usersfolder>"
-		+"<usersfolder id='2.3' count='1' nb_children='1' owner='Y'  ownerid='20' modified='2020-01-02 12:19:02.0'><code>folder2.3</code><label lang='en'>Folder 2.3</label><label lang='fr'>Dossier 2.3</label></usersfolder>"
-		+"</children>";
-	test_dataFolders_byid['2']["6"]= "<children pageindex='6' count='5'>"
-		+"<user id='1'><username>root</username><firstname>root</firstname><lastname></lastname><admin>1</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='2'><username>sys_public</username><firstname>System public account (users with account)</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='3'><username>public</username><firstname>Public account (World)</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='4'><username>olivier</username><firstname>Olivier</firstname><lastname>Gerbé</lastname><admin>0</admin><designer>0</designer><email>olivier.gerbe@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='5'><username>saint-exupery@litterature.fr</username><firstname>Antoine</firstname><lastname>de Saint-Exupéry</lastname><admin>0</admin><designer>0</designer><email>saint-exupery@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='6'><username>beaudelaire@litterature.fr</username><firstname>Charles</firstname><lastname>Beaudelaire</lastname><admin>0</admin><designer>0</designer><email>beaudelaire@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='7'><username>hugo@litterature.fr</username><firstname>Victor</firstname><lastname>Hugo</lastname><admin>0</admin><designer>0</designer><email>hugo@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='8'><username>flaubert@litterature.fr</username><firstname>Gustave</firstname><lastname>Flaubert</lastname><admin>0</admin><designer>0</designer><email>flaubert@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='9'><username>maupassant@litterature.fr</username><firstname>Guy</firstname><lastname>de Maupassant</lastname><admin>0</admin><designer>0</designer><email>maupassant@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='10'><username>camus@litterature.fr</username><firstname>Albert</firstname><lastname>Camus</lastname><admin>0</admin><designer>0</designer><email>camus@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='11'><username>dumas@litterature.fr</username><firstname>Alexandre</firstname><lastname>Dumas</lastname><admin>0</admin><designer>0</designer><email>dumas@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='12'><username>crush@bulles.ca</username><firstname>Crush</firstname><lastname>LaTortue</lastname><admin>0</admin><designer>0</designer><email>crush@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='13'><username>nemo@bulles.ca</username><firstname>Némo</firstname><lastname>LePoisson</lastname><admin>0</admin><designer>0</designer><email>nemo@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='14'><username>adm-ateliers</username><firstname>Administrateur</firstname><lastname>Promising</lastname><admin>0</admin><designer>1</designer><email></email><active>1</active><substitute>0</substitute><other></other></user><user id='16'><username>ens-ateliers</username><firstname>Enseignant</firstname><lastname>Promising</lastname><admin>0</admin><designer>1</designer><email>ens@courriel.ca</email><active>1</active><substitute>0</substitute><other>xlimited</other></user><user id='17'><username>doris@bulles.ca</username><firstname>Doris</firstname><lastname>LePoisson</lastname><admin>0</admin><designer>0</designer><email>doris@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='18'><username>eric.giraudin@gmail.com</username><firstname>Eric</firstname><lastname>Giraudin</lastname><admin>0</admin><designer>1</designer><email>eric.giraudin@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='19'><username>eric.duquenoy@univ-littoral.fr</username><firstname>Éric</firstname><lastname>Duquenoy</lastname><admin>0</admin><designer>1</designer><email>eric.duquenoy@univ-littoral.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='20'><username>la</username><firstname>Lan Anh</firstname><lastname>Dinh</lastname><admin>0</admin><designer>1</designer><email>tlanh.dinh@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='22'><username>nobry</username><firstname>Nobry</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email></email><active>1</active><substitute>0</substitute><other></other></user><user id='38'><username>01-etudiant</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>0</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='39'><username>01-tuteur</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>0</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='40'><username>01-designer</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>1</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='41'><username>cecilekaya</username><firstname>Cécile</firstname><lastname>KAYA</lastname><admin>0</admin><designer>0</designer><email>eric.giraudin@gmail.com</email><active>1</active><substitute>0</substitute><other>undefined</other></user><user id='42'><username>prototype</username><firstname></firstname><lastname>prototype</lastname><admin>0</admin><designer>1</designer><email></email><active>1</active><substitute>0</substitute><other></other></user>"
-		+"<usersfolder id='2.1' count='2' nb_children='6' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.1</code><label lang='en'>Folder 2.1</label><label lang='fr'>Dossier 2.1</label></usersfolder>"
-		+"</children>";
-	test_dataFolders_byid['2.1']['1']= "<usersfolders pageindex='1' count='2'>"
-		+"<usersfolder id='2.1.1' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.1.1</code><label lang='en'>Folder 2.1.1</label><label lang='fr'>Dossier 2.1.1</label></usersfolder>"
-		+"<usersfolder id='2.1.2' count='1' nb_children='1' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.1.2</code><label lang='en'>Folder 2.1.2</label><label lang='fr'>Dossier 2.1.2</label></usersfolder>"
-		+"</usersfolders>";
-	test_dataFolders_byid['2.1.1']['1']= "<children>"
-		+"<user id='1'><username>root</username><firstname>root</firstname><lastname></lastname><admin>1</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user>"
-		+"</children>";
-	test_dataFolders_byid['2.1.2']['1']= "<usersfolders pageindex='1' count='1'>"
-		+"<usersfolder id='2.1.2.1' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.1.2.1</code><label lang='en'>Folder 2.1.2.1</label><label lang='fr'>Dossier 2.1.2.1</label></usersfolder>"
-		+"</usersfolders>";
-	test_dataFolders_byid['2.3']['1']= "<usersfolders pageindex='1' count='1'>"
-		+"<usersfolder id='2.3.1' count='1' nb_children='6' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.3.1</code><label lang='en'>Folder 2.3.1</label><label lang='fr'>Dossier 2.3.1</label></usersfolder>"
-		+"</usersfolders>";
-	test_dataFolders_byid['2.3.1']['1']= "<usersfolders pageindex='1' count='1'>"
-		+"<usersfolder id='2.3.1.1' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.3.1.1</code><label lang='en'>Folder 2.3.1.1</label><label lang='fr'>Dossier 2.3.1</label></usersfolder>"
-		+"</usersfolders>";
-	test_dataFolders_byid['2.1.2']['1']= "<usersfolders pageindex='1' count='1'>"
-		+"<usersfolder id='2.1.2.1' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder2.1.2.1</code><label lang='en'>Folder 2.1.2.1</label><label lang='fr'>Dossier 2.1.2.1</label></usersfolder>"
-		+"</usersfolders>";
-	test_dataFolders_byid['3']['1']= "<usersfolder id='3' count='2' nb_children='2' owner='Y'  ownerid='20' modified='2020-01-12 12:19:02.0'>"
-			+"<code>folder3</code>"
-			+"<label lang='en'>Folder 3</label>"
-			+"<label lang='fr'>Dossier 3</label>"
-			+"<usersfolders>"
-			+"<usersfolder id='3.1' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder3.1</code><label lang='en'>Folder 3.1</label><label lang='fr'>Dossier 3.1</label></usersfolder>"
-			+"<usersfolder id='3.2' count='2' nb_children='2' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder3.2</code><label lang='en'>Folder 3.2</label><label lang='fr'>Dossier 3.2</label></usersfolder>"
-			+"</usersfolders>"
-			+"</usersfolder>";
-	test_dataFolders_byid['3']['1']= "<children pageindex='1' count='2'>"
-		+"<usersfolder id='3.1' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2020-01-02 12:19:02.0'><code>folder3.1</code><label lang='en'>Folder 3.1</label><label lang='fr'>Dossier 3.1</label></usersfolder>"
-		+"<usersfolder id='3.2' count='2' nb_children='2' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder3.2</code><label lang='en'>Folder 3.2</label><label lang='fr'>Dossier 3.2</label></usersfolder>"
-		+"</children>";
-	test_dataFolders_byid['3.1']['1']= "<usersfolders pageindex='1' count='2'>"
-		+"<usersfolder id='3.1.1' count='0' nb_children='0' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder3.1.1</code><label lang='en'>Folder 3.1.1</label><label lang='fr'>Dossier 3.1.1</label></usersfolder>"
-		+"<usersfolder id='3.1.2' count='0' nb_children='4' owner='Y'  ownerid='20' modified='2019-12-02 12:19:02.0'><code>folder3.1.2</code><label lang='en'>Folder 3.1.2</label><label lang='fr'>Dossier 3.1.2</label></usersfolder>"
-		+"</usersfolders>";
-	test_dataFolders_byid['3.1.1']['1']= "<children>"
-		+"</children>";
-	test_dataFolders_byid['3.1.2']['1']= "<children pageindex='1' count='4'>"
-		+"<user id='1'><username>root</username><firstname>root</firstname><lastname></lastname><admin>1</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='2'><username>sys_public</username><firstname>System public account (users with account)</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='3'><username>public</username><firstname>Public account (World)</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user><user id='4'><username>olivier</username><firstname>Olivier</firstname><lastname>Gerbé</lastname><admin>0</admin><designer>0</designer><email>olivier.gerbe@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='5'><username>saint-exupery@litterature.fr</username><firstname>Antoine</firstname><lastname>de Saint-Exupéry</lastname><admin>0</admin><designer>0</designer><email>saint-exupery@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='6'><username>beaudelaire@litterature.fr</username><firstname>Charles</firstname><lastname>Beaudelaire</lastname><admin>0</admin><designer>0</designer><email>beaudelaire@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='7'><username>hugo@litterature.fr</username><firstname>Victor</firstname><lastname>Hugo</lastname><admin>0</admin><designer>0</designer><email>hugo@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='8'><username>flaubert@litterature.fr</username><firstname>Gustave</firstname><lastname>Flaubert</lastname><admin>0</admin><designer>0</designer><email>flaubert@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='9'><username>maupassant@litterature.fr</username><firstname>Guy</firstname><lastname>de Maupassant</lastname><admin>0</admin><designer>0</designer><email>maupassant@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='10'><username>camus@litterature.fr</username><firstname>Albert</firstname><lastname>Camus</lastname><admin>0</admin><designer>0</designer><email>camus@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='11'><username>dumas@litterature.fr</username><firstname>Alexandre</firstname><lastname>Dumas</lastname><admin>0</admin><designer>0</designer><email>dumas@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='12'><username>crush@bulles.ca</username><firstname>Crush</firstname><lastname>LaTortue</lastname><admin>0</admin><designer>0</designer><email>crush@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='13'><username>nemo@bulles.ca</username><firstname>Némo</firstname><lastname>LePoisson</lastname><admin>0</admin><designer>0</designer><email>nemo@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='14'><username>adm-ateliers</username><firstname>Administrateur</firstname><lastname>Promising</lastname><admin>0</admin><designer>1</designer><email></email><active>1</active><substitute>0</substitute><other></other></user><user id='16'><username>ens-ateliers</username><firstname>Enseignant</firstname><lastname>Promising</lastname><admin>0</admin><designer>1</designer><email>ens@courriel.ca</email><active>1</active><substitute>0</substitute><other>xlimited</other></user><user id='17'><username>doris@bulles.ca</username><firstname>Doris</firstname><lastname>LePoisson</lastname><admin>0</admin><designer>0</designer><email>doris@bulles.ca</email><active>1</active><substitute>0</substitute><other></other></user><user id='18'><username>eric.giraudin@gmail.com</username><firstname>Eric</firstname><lastname>Giraudin</lastname><admin>0</admin><designer>1</designer><email>eric.giraudin@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='19'><username>eric.duquenoy@univ-littoral.fr</username><firstname>Éric</firstname><lastname>Duquenoy</lastname><admin>0</admin><designer>1</designer><email>eric.duquenoy@univ-littoral.fr</email><active>1</active><substitute>0</substitute><other></other></user><user id='20'><username>la</username><firstname>Lan Anh</firstname><lastname>Dinh</lastname><admin>0</admin><designer>1</designer><email>tlanh.dinh@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user><user id='22'><username>nobry</username><firstname>Nobry</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email></email><active>1</active><substitute>0</substitute><other></other></user><user id='38'><username>01-etudiant</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>0</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='39'><username>01-tuteur</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>0</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='40'><username>01-designer</username><firstname>lili</firstname><lastname>Marlene</lastname><admin>0</admin><designer>1</designer><email>iei</email><active>1</active><substitute>0</substitute><other></other></user><user id='41'><username>cecilekaya</username><firstname>Cécile</firstname><lastname>KAYA</lastname><admin>0</admin><designer>0</designer><email>eric.giraudin@gmail.com</email><active>1</active><substitute>0</substitute><other>undefined</other></user><user id='42'><username>prototype</username><firstname></firstname><lastname>prototype</lastname><admin>0</admin><designer>1</designer><email></email><active>1</active><substitute>0</substitute><other></other></user>"
-		+"</children>";
-	var data = null;
-	data = test_dataFolders_byid[id][""+pageindex];
-	UIFactory["UsersFolder"].parseChildren(data,id); 
-	usersfolders_byid[id].displayFolderContentPage(dest,type,langcode,index_class);		
+	 */
+	//---------Simulation---------------
+	var data = "";
+	if (id=='1' && pageindex==1) {
+		data =  "<usersfolder id='1' nb_folders='0' nb_users='3'>";
+		data += "<user id='1'><username>root</username><firstname>root</firstname><lastname></lastname><admin>1</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user>";
+		data += "<user id='2'><username>sys_public</username><firstname>System public account (users with account)</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user>";
+		data += "<user id='3'><username>public</username><firstname>Public account (World)</firstname><lastname></lastname><admin>0</admin><designer>0</designer><email>null</email><active>1</active><substitute>0</substitute><other></other></user>";
+		data += "</usersfolder>";
+	}
+	if (id=='2' && pageindex==1) {
+		data =  "<usersfolder id='1' nb_folders='1' nb_users='0'>";
+		data += "</usersfolder>";
+	}
+	if (id=='2.1') {
+		if (pageindex==1) {
+		data =  "<usersfolder id='2.1' nb_folders='0' nb_users='7'>";
+		data += "<user id='4'><username>olivier</username><firstname>Olivier</firstname><lastname>Gerbé</lastname><admin>0</admin><designer>0</designer><email>olivier.gerbe@gmail.com</email><active>1</active><substitute>0</substitute><other></other></user>";
+		data += "<user id='5'><username>saint-exupery@litterature.fr</username><firstname>Antoine</firstname><lastname>de Saint-Exupéry</lastname><admin>0</admin><designer>0</designer><email>saint-exupery@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user>";
+		data += "<user id='6'><username>beaudelaire@litterature.fr</username><firstname>Charles</firstname><lastname>Beaudelaire</lastname><admin>0</admin><designer>0</designer><email>beaudelaire@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user>";
+		data += "<user id='7'><username>hugo@litterature.fr</username><firstname>Victor</firstname><lastname>Hugo</lastname><admin>0</admin><designer>0</designer><email>hugo@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user>";
+		data += "</usersfolder>";
+		}
+		if (pageindex==2) {
+			data =  "<usersfolder id='2.1' nb_folders='0' nb_users='7'>";
+			data += "<user id='8'><username>flaubert@litterature.fr</username><firstname>Gustave</firstname><lastname>Flaubert</lastname><admin>0</admin><designer>0</designer><email>flaubert@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user>";
+			data += "<user id='9'><username>maupassant@litterature.fr</username><firstname>Guy</firstname><lastname>de Maupassant</lastname><admin>0</admin><designer>0</designer><email>maupassant@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user>";
+			data += "<user id='10'><username>camus@litterature.fr</username><firstname>Albert</firstname><lastname>Camus</lastname><admin>0</admin><designer>0</designer><email>camus@litterature.fr</email><active>1</active><substitute>0</substitute><other></other></user>";
+			data += "</usersfolder>";
+		}
+	}
+	UIFactory.UsersFolder.parseChildren(data,id); 
+	usersfolders_byid[id].displayFolderContentPage(dest,type,langcode,index_class);
+
+
 }
 
 /*=======================================*/
@@ -991,71 +962,14 @@ function confirmDelObject(id,type)
 // =======================================================================
 {
 	document.getElementById('delete-window-body').innerHTML = karutaStr[LANG]["confirm-delete"];
-	var buttons = "<button class='btn' onclick=\"javascript:$('#delete-window').modal('hide');\">" + karutaStr[LANG]["Cancel"] + "</button>";
-	buttons += "<button class='btn btn-danger' onclick=\"javascript:$('#delete-window').modal('hide');UIFactory."+type+".del('"+uuid+"')\">" + karutaStr[LANG]["button-delete"] + "</button>";
+	var buttons = "<button class='btn' onclick=\"$('#delete-window').modal('hide');\">" + karutaStr[LANG]["Cancel"] + "</button>";
+	buttons += "<button class='btn btn-danger' onclick=\"$('#delete-window').modal('hide');UIFactory."+type+".del('"+uuid+"')\">" + karutaStr[LANG]["button-delete"] + "</button>";
 	document.getElementById('delete-window-footer').innerHTML = buttons;
 	$('#delete-window').modal('show');
 }
 
-//*** à déplacer dans langguages *.js
-karutaStr['fr']['users-folders']="Dossiers d'usagers";
-karutaStr['fr']['users-in-rootfolder']="Usagers dans le dossier racine";
-//---------------
-karutaStr['en']['users-folders']="Users Folders";
-karutaStr['en']['users-in-rootfolder']="Users in root folder";
 
 //*** à déplacer pour remplacer dans users.js
-//==============================
-function getUsersList()
-//==============================
-{
-	var html = "";
-	var text0 = karutaStr[LANG]['folders'];
-	html += "<div id='gutter'></div>";
-	html += "<div id='userslist-rightside'>";
-	//-----------------------------------------------------------
-	html += "<div id='folder-users'></div>";
-	//-----------------------------------------------------------
-	html += "</div><!--div id='userslist-rightside'-->";
-
-	html += "<div id='userslist-leftside'>";
-	//--------------------FOLDERS---------------------------------------
-	html += "<div id='usersfolders' class='tree user'>";
-	html += "<h3 id='usersfolder_root' class='treeNode'>";
-	html += "<span id='toggle_usersfolder_root' class='closeSign toggledNode' onclick=\"javascript:loadAndDisplayUsersFolderStruct('collapse_usersfolder_root','root');\"></span>";
-	html += "<span id='usersfolders-label' class='folder-label'>"+text0+"</span>&nbsp<span class='badge number_of_folders' id='number_of_usersfoldersroot'></span>";
-	html += "</h3>";
-	html += "<div id='collapse_usersfolder_root' class='nested'></div>";
-	html += "</div><!--div id='usersfolders'-->";
-
-	//--------------------USERS--------------------------------------
-	var text1 = karutaStr[LANG]['users-in-rootfolder'];
-	html += "<h3 id='users-in-rootfolder'>";
-	html += "	<span id='users-label'>"+text1+"</span>&nbsp<span class='users-nb badge' id='users-nb'></span>";
-	html += "	<button class='btn list-btn' onclick=\"loadAndDisplayUsersFolderContent('folder-users','0');$(window).scrollTop(0);\">"+ karutaStr[LANG]["see"] + "</button>";
-	html += "</h3>";
-	html += "<div id='collapse_usersfolder_0' class='nested'></div>";
-
-	if (USER.admin) {
-		//---------------------BIN-------------------------------------
-		var text2 = karutaStr[LANG]['bin']+" - "+karutaStr[LANG]['inactive_users'];
-		html += "<h3 id='bin-usersfolders-label' class='treeNode'>"+text2+"&nbsp<span class='bin-nb badge' id='bin-usersfolders-nb'></span>";
-		html += "<button class='btn list-btn' onclick=\"UIFactory.UsersFolder.displayBin('folder-users','bin');$(window).scrollTop(0);\">"+ karutaStr[LANG]["see-bin"] + "</button>";
-		html += "</h3>";
-	}
-	//-----------------------------------------------------------
-	var text3 = karutaStr[LANG]['temporary_users'];
-	html += "	<h3 id='temporary-users' style='display:none'>"+text3;
-	html += "		&nbsp<button class='btn list-btn' onclick=\"confirmDelTemporaryUsers()\">";
-	html += 		karutaStr[LANG]["delete-temporary-users"];
-	html += "		</button>";
-	html += "	</h3>";
-	
-	//-----------------------------------------------------------
-	html += "</div><!--div id='userslist-leftside'-->";
-
-	return html;
-}
 
 //==============================
 function getUsersList2()
@@ -1105,128 +1019,113 @@ function getUsersList2()
 	return html;
 }
 
+
+
 //==============================
-function fill_list_users()
-//==============================
-{
-	setLanguageMenu("fill_list_users()");
-	var html = "";
-	html += "<div id='user-header' class='row'>";
-	html += "	<div class='col-1'>";
-	html += "<div class='folder-label btn' title='"+karutaStr[LANG]['create_user']+"'><i class='fas fa-user-plus' id='user-create' onclick=\"javascript:UIFactory['User'].callCreate();\"></i></div>";
-	html += "	</div>";
-	html += "	<div class='col-1'>";
-	html += "<div class='folder-label btn' title='"+karutaStr[LANG]['create_folder']+"'><i class='fas fa-folder-plus' id='folder-create' onclick=\"javascript:UIFactory['UsesFolder'].callCreate();\"></i></div>";
-	html += "	</div>";
-	html += "	<div class='col-9 search' id='search-user-div'></div>";
-	html += "	<div class='col-1'><i class='fas fa-sync-alt' onclick='fill_list_users()' id='refresh' class='fas fa-sync-alt' data-title='"+karutaStr[LANG]["button-refresh"]+"' data-toggle='tooltip' data-placement='bottom'></i></div>";
-	html += "</div>";
-	html += "<div id='user-body'>"+getUsersList()+"</div>";
-
-	$("#main-user").html(html);
-	$("#search-user-div").html(getSearchUser()); // we erase code if any
-	$("#search-user-input").keypress(function(f) {
-		var code= (f.keyCode ? f.keyCode : f.which);
-		if (code == 13)
-			searchUser();
-	});
-	initRoots();
-	/*
-	$.ajaxSetup({async: false});
-	$.ajax({
-		type : "GET",
-		dataType : "xml",
-		url : serverBCK_API+"/credential",
-		data: "",
-		success : function(data) {
-			USER = new UIFactory["User"]($("user",data));
-//			loadLanguages(function(data) {$("#navigation_bar").html(getNavBar('users',null));$("#menu").html(getMenu());$("#list").html(getListUsers());});
-			//----------------
-			$.ajax({
-				type : "GET",
-				dataType : "xml",
-				url : serverBCK_API+"/usersfolders?active=1",
-				success : function(data) {
-					UIFactory["UsersFolder"].parse(data,'root');
-					UIFactory["UsersFolder"].displayTree('active','list');
-				}
-			});
-			$.ajax({
-				type : "GET",
-				dataType : "xml",
-				url : serverBCK_API+"/usersfolders?active=0",
-				success : function(data) {
-					UIFactory["UsersFolder"].parse(data,'bin');
-				}
-			});
-			//----------------
-		},
-		error : function(jqxhr,textStatus) {
-			loadLanguages(function(data) {alertHTML(karutaStr[LANG]['not-logged']);});
-			window.location="login.htm?lang="+LANG;
-
-		}
-	});
-	$.ajaxSetup({async: true});
-	*/
-//	loadUsersFolderStruct('root');
-	
-}
-
-//à déplacer dans Type_User.js
-//======================
-UIFactory["User"].prototype.getAdminUserMenu = function(gid)
-//======================
-{	
-	var html = "";
-	html += "<div class='btn-group'>";
-	if (gid==null) {
-		html += " <button class='btn ' onclick=\"UIFactory['User'].edit('"+this.id+"')\" data-title='"+karutaStr[LANG]["button-edit"]+"' relx='tooltip'>";
-		html += "<span class='fas fa-pencil-alt' aria-hidden='true'></span>";
-		html += "</button>";
-		if (this.username_node.text()!='root' && this.username_node.text()!='public' && this.username_node.text()!='sys_public') {
-			html += "<button class='btn ' onclick=\"UIFactory['User'].confirmRemove('"+this.id+"')\" data-title='"+karutaStr[LANG]["button-delete"]+"' relx='tooltip'>";
-			html += "<i class='fa fa-trash-alt'></i>";
-			html += "</button>";
-		} else {
-			html += "<button class='btn ' disabled='true'>";
-			html += "<i class='fa fa-trash-alt'></i>";
-			html += "</button>";
-		}
-	} else {
-		html += "<button class='btn ' onclick=\"UIFactory['UsersGroup'].confirmRemove('"+gid+"','"+this.id+"')\" data-title='"+karutaStr[LANG]["button-delete"]+"' relx='tooltip'>";
-		html += "<span class='fas fa-trash-alt'></span>";
-		html += "</button>";				
-	}
-	//----------------------------------
-	html += "<button class='btn ' onclick=\"UIFactory['UsersGroup'].editGroupsByUser('"+this.id+"')\"";
-	if (this.username_node.text()!='root' && this.username_node.text()!='public') {
-		html += ">";
-	} else {
-		html += " disabled='true'>";
-	}
-	html += "<i class='fa fa-users fa-lg' ></i>";
-	html += "</button>";
-	//----------------------------------
-	if (this.username_node.text()!='root' && this.username_node.text()!='public') {
-		html += "<button class='btn ' onclick=\"UIFactory.Portfolio.getListPortfolios('"+this.id+"','"+this.firstname+"','"+this.lastname+"')\">";
-		html += "<i class='fa fa-file' ></i>";
-		html += "</button>";
-	}
-	//----------------------------------
-	html += "</div>";
-	return html;
-}
-
-// à déplacer dans karuta-page.js
-function initRoots()
+function initUsersFolders()
 //==============================
 {
-	var data = "<usersfolder id='root' count='0' nb_children='0' owner='Y'  ownerid='1'><code>1</code><label lang='en'>"+karutaStr['en']['folders']+"</label><label lang='fr'>"+karutaStr['fr']['folders']+"</label></usersfolder>";
-	usersfolders_byid['root'] = new UIFactory["UsersFolder"](data);
-	data = "<usersfolder id='bin' count='0' nb_children='0' owner='Y'  ownerid='1'><code>temporary</code><label lang='en'>"+karutaStr['en']['temporary_users']+"</label><label lang='fr'>"+karutaStr['fr']['temporary']+"</label></usersfolder>";
+	var data = "<usersfolder id='active' nb_folder='0' nb_user='0' owner='Y'  ownerid='1'><code>1</code><label lang='en'>"+karutaStr['en']['folders']+"</label><label lang='fr'>"+karutaStr['fr']['folders']+"</label></usersfolder>";
+	usersfolders_byid['active'] = new UIFactory["UsersFolder"](data);
+	data = "<usersfolder id='temporary' nb_folders='0' nb_users='0' owner='Y'  ownerid='1'><code>temporary</code><label lang='en'>"+karutaStr['en']['temporary_users']+"</label><label lang='fr'>"+karutaStr['fr']['temporary']+"</label></usersfolder>";
 	usersfolders_byid['temporary'] = new UIFactory["UsersFolder"](data);
-	data = "<usersfolder id='bin' count='0' nb_children='0' owner='Y'  ownerid='1'><code>1</code><label lang='en'>"+karutaStr['en']['bin']+" - "+karutaStr['en']['inactive_users']+"</label><label lang='fr'>"+karutaStr['fr']['bin']+" - "+karutaStr['fr']['inactive_users']+"</label></usersfolder>";
-	usersfolders_byid['bin'] = new UIFactory["UsersFolder"](data);
+	data = "<usersfolder id='inactive' nb_folders='0' nb_users='0' owner='Y'  ownerid='1'><code>1</code><label lang='en'>"+karutaStr['en']['bin']+" - "+karutaStr['en']['inactive_users']+"</label><label lang='fr'>"+karutaStr['fr']['bin']+" - "+karutaStr['fr']['inactive_users']+"</label></usersfolder>";
+	usersfolders_byid['inactive'] = new UIFactory["UsersFolder"](data);
+}
+
+//=====================================================================================================
+//=====================================================================================================
+//=====================================================================================================
+//============================== FOLDER MANAGEMENT ====================================================
+//=====================================================================================================
+//=====================================================================================================
+//=====================================================================================================
+
+//==================================
+function toggleElt(closeSign,openSign,eltid) { // click on open/closeSign
+//==================================
+	var elt = document.getElementById("toggle_"+eltid);
+	elt.classList.toggle(openSign);
+	elt = document.getElementById("collapse_"+eltid);
+	elt.classList.toggle('open');
+	if ($("#toggle_"+eltid).hasClass(openSign))
+	{
+		localStorage.setItem('sidebar'+eltid,'open');
+	} else {
+		localStorage.setItem('sidebar'+eltid,'closed');
+	}
+}
+
+//==================================
+function toggleOpenElt(closeSign,openSign,eltid)
+{ // click on label
+//==================================
+	var cookie = localStorage.getItem('sidebar'+eltid);
+	if (cookie == "closed") {
+		localStorage.setItem('sidebar'+eltid,'open');
+		document.getElementById("toggle_"+eltid).classList.add('openSign');
+		document.getElementById("collapse_"+eltid).classList.add('open');
+	}
+}
+
+//==================================
+function selectElt(type,uuid)
+{ // click on label
+//==================================
+	$('.active').removeClass('active');
+//	$('#'+uuid).addClass('active');
+	document.getElementById(uuid).classList.add('active');
+}
+
+//==================================
+function selectElts(type,list)
+{ // click on label
+//==================================
+	$('.'+type).removeClass('active');
+	for (var i=0;i<list.length;i++) {
+		$('#'+list[i]).addClass('active');
+	}
+}
+//==================================
+function displayPagesNavbar(nb_index,id,langcode,pageindex,index_class,callback,param1,param2)
+{
+//==================================
+	var html = [];
+	for (var i=0;i<pagegNavbar_list.length;i++) {
+		html[i] = "";
+		$("#"+index_class+pagegNavbar_list[i]).html($(""));
+	}
+	var min_prev = Math.max((pageindex-nbPagesIndexStep), 1);
+	var max_next = Math.min((pageindex+nbPagesIndexStep), nb_index);
+	var str1, srt2;
+	if (1 < min_prev) {
+		str1 = "<span class='"+index_class+" badge' onclick=\"javascript:"+callback+"('"+param1+"','"+param2+"','"+id+"',"+langcode+","+(pageindex-1)+",'"+index_class+"');\" id='"+index_class+i+"_";
+		str2 = "'>"+karutaStr[LANG]["prev"]+"</span><span class='"+index_class+"0'>...</span>";
+		for (var j=0;j<pagegNavbar_list.length;j++) {
+			html[j] += str1+pagegNavbar_list[j]+str2;
+		}
+	}
+	for (var i=min_prev;i<=max_next;i++) {
+		str1 = "<span class='"+index_class+" badge' onclick=\"javascript:"+callback+"('"+param1+"','"+param2+"','"+id+"',"+langcode+","+i+",'"+index_class+"');\" id='"+index_class+i+"_";
+		str2 = "'>"+i+"</span>";
+		for (var j=0;j<pagegNavbar_list.length;j++) {
+			html[j] += str1+pagegNavbar_list[j]+str2;
+		}
+	}
+	if (max_next < nb_index) {
+		str1 = "<span class='"+index_class+"0 badge'>...</span><span class='"+index_class+"' onclick=\"javascript:"+callback+"('"+param1+"','"+param2+"','"+id+"',"+langcode+","+(pageindex+1)+",'"+index_class+"');\" id='"+index_class+i+"_";
+		str2 = "'>"+karutaStr[LANG]["next"]+"</span>";
+		for (var j=0;j<pagegNavbar_list.length;j++) {
+			html[j] += str1+pagegNavbar_list[j]+str2;
+		}
+	}
+	for (var i=0;i<pagegNavbar_list.length;i++) {
+		$("#"+index_class+pagegNavbar_list[i]).html($(html[i]));
+	}
+	var selected_list = [];
+	for (var i=0;i<pagegNavbar_list.length;i++) {
+		selected_list[i] = index_class+pageindex+"_"+pagegNavbar_list[i];
+	}
+	selectElts(index_class,selected_list);
 }
 

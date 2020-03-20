@@ -381,7 +381,7 @@ UIFactory["Node"].prototype.displayMetainfo = function(destid)
 	html += UIFactory.Node.getMetadataInfo(metadatawad,'editcoderoles');
 	html += UIFactory.Node.getMetadataInfo(metadatawad,'editnoderoles');
 	html += UIFactory.Node.getMetadataInfo(metadatawad,'duplicateroles');
-	html += UIFactory.Node.getMetadataInfo(metadatawad,'incrementroles');
+//	html += UIFactory.Node.getMetadataInfo(metadatawad,'incrementroles');
 	html += UIFactory.Node.getMetadataInfo(metadatawad,'query');
 	html += UIFactory.Node.getMetadataInfo(metadatawad,'display');
 	html += UIFactory.Node.getMetadataInfo(metadatawad,'menuroles');
@@ -955,13 +955,13 @@ UIFactory["Node"].prototype.displayMetadataAttributesEditor = function(destid)
 		this.displayMetadataWadAttributeEditor('metadata-part2','showroles');
 	else
 		this.displayMetadataWadAttributeEditor('metadata-part2','showroles',false,true);
-	this.displayMetadataWadAttributeEditor('metadata-part2','printroles');
 //	if ($(this.metadatawad).attr('showroles')!='')
 //		this.displayMetadataWadAttributeEditor(this.id,'private',$(this.metadatawad).attr('private'),true);
 	if (model)
 		this.displayMetadataWadAttributeEditor('metadata-part2','showtoroles');
 	else
 		this.displayMetadataWadAttributeEditor('metadata-part2','showtoroles',false,true);
+	this.displayMetadataWadAttributeEditor('metadata-part2','printroles');
 	this.displayMetadataWadAttributeEditor('metadata-part2','editboxtitle');
 	if (name=='asmContext' && this.resource.type=='TextField')
 		this.displayMetadataWadAttributeEditor('metadata-part2','maxword');

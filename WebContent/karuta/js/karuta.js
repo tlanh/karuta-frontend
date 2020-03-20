@@ -1976,98 +1976,33 @@ function addautocomplete(input,arrayOfValues) {
 	});
 }
 
-//=====================================================================================================
-//=====================================================================================================
-//=====================================================================================================
-//============================== FOLDER MANAGEMENT ====================================================
-//=====================================================================================================
-//=====================================================================================================
-//=====================================================================================================
 
 //==================================
-function toggleElt(closeSign,openSign,eltid) { // click on open/closeSign
+function replaceVariable(text)
 //==================================
-	var elt = document.getElementById("toggle_"+eltid);
-	elt.classList.toggle(openSign);
-	elt = document.getElementById("collapse_"+eltid);
-	elt.classList.toggle('open');
-	if ($("#toggle_"+eltid).hasClass(openSign))
-	{
-		localStorage.setItem('sidebar'+eltid,'open');
-	} else {
-		localStorage.setItem('sidebar'+eltid,'closed');
-	}
-}
-
-//==================================
-function toggleOpenElt(closeSign,openSign,eltid)
-{ // click on label
-//==================================
-	var cookie = localStorage.getItem('sidebar'+eltid);
-	if (cookie == "closed") {
-		localStorage.setItem('sidebar'+eltid,'open');
-		document.getElementById("toggle_"+eltid).classList.add('openSign');
-		document.getElementById("collapse_"+eltid).classList.add('open');
-	}
-}
-
-//==================================
-function selectElt(type,uuid)
-{ // click on label
-//==================================
-	$('.'+type).removeClass('active');
-//	$('#'+uuid).addClass('active');
-	document.getElementById(uuid).classList.add('active');
-}
-
-//==================================
-function selectElts(type,list)
-{ // click on label
-//==================================
-	$('.'+type).removeClass('active');
-	for (var i=0;i<list.length;i++) {
-		$('#'+list[i]).addClass('active');
-	}
-}
-//==================================
-function displayPagesNavbar(nb_index,id,langcode,pageindex,index_class,callback,param1,param2)
 {
-//==================================
-	var html = [];
-	for (var i=0;i<pagegNavbar_list.length;i++) {
-		html[i] = "";
-		$("#"+index_class+pagegNavbar_list[i]).html($(""));
+	var n=0;
+	while (text!=undefined && text.indexOf("{##")>-1 && n<100) {
+		var test_string = text.substring(text.indexOf("{##")+3); // test_string = abcd{##variable##}efgh.....
+		var variable_name = test_string.substring(0,test_string.indexOf("##}"));
+		if (g_variables[variable_name]!=undefined)
+			text = text.replace("{##"+variable_name+"##}", g_variables[variable_name]);
+		n++; // to avoid infinite loop
 	}
-	var min_prev = Math.max((pageindex-nbPagesIndexStep), 1);
-	var max_next = Math.min((pageindex+nbPagesIndexStep), nb_index);
-	var str1, srt2;
-	if (1 < min_prev) {
-		str1 = "<span class='"+index_class+"' onclick=\"javascript:"+callback+"('"+param1+"','"+param2+"','"+id+"',"+langcode+","+(pageindex-1)+",'"+index_class+"');\" id='"+index_class+i+"_";
-		str2 = "'>"+karutaStr[LANG]["prev"]+"</span><span class='"+index_class+"0'>...</span>";
-		for (var j=0;j<pagegNavbar_list.length;j++) {
-			html[j] += str1+pagegNavbar_list[j]+str2;
-		}
+	while (text!=undefined && text.indexOf("##")>-1 && n<100) {
+		var test_string = text.substring(text.indexOf("##")+2); // test_string = abcd##variable##efgh.....
+		var variable_name = test_string.substring(0,test_string.indexOf("##"));
+		if (g_variables[variable_name]!=undefined)
+			text = text.replace("##"+variable_name+"##", g_variables[variable_name]);
+		if (text.indexOf("[")>-1) {
+			var variable_value = variable_name.substring(0,variable_name.indexOf("["))
+			var i = text.substring(text.indexOf("[")+1,text.indexOf("]"));
+			i = replaceVariable(i);
+			var variable_array1 = text.replace("["+i+"]","");
+			if (g_variables[variable_value]!=undefined && g_variables[variable_value].length>=i)
+				text = g_variables[variable_value][i];
+			}
+		n++; // to avoid infinite loop
 	}
-	for (var i=min_prev;i<=max_next;i++) {
-		str1 = "<span class='"+index_class+"' onclick=\"javascript:"+callback+"('"+param1+"','"+param2+"','"+id+"',"+langcode+","+i+",'"+index_class+"');\" id='"+index_class+i+"_";
-		str2 = "'>"+i+"</span>";
-		for (var j=0;j<pagegNavbar_list.length;j++) {
-			html[j] += str1+pagegNavbar_list[j]+str2;
-		}
-	}
-	if (max_next < nb_index) {
-		str1 = "<span class='"+index_class+"0'>...</span><span class='"+index_class+"' onclick=\"javascript:"+callback+"('"+param1+"','"+param2+"','"+id+"',"+langcode+","+(pageindex+1)+",'"+index_class+"');\" id='"+index_class+i+"_";
-		str2 = "'>"+karutaStr[LANG]["next"]+"</span>";
-		for (var j=0;j<pagegNavbar_list.length;j++) {
-			html[j] += str1+pagegNavbar_list[j]+str2;
-		}
-	}
-	for (var i=0;i<pagegNavbar_list.length;i++) {
-		$("#"+index_class+pagegNavbar_list[i]).html($(html[i]));
-	}
-	var selected_list = [];
-	for (var i=0;i<pagegNavbar_list.length;i++) {
-		selected_list[i] = index_class+pageindex+"_"+pagegNavbar_list[i];
-	}
-	selectElts(index_class,selected_list);
+	return text;
 }
