@@ -2134,7 +2134,8 @@ UIFactory["Portfolio"].callShareUsers = function(portfolioid,langcode)
 	$("#edit-window-body-metadata").html("");
 	$("#edit-window-body-metadata-epm").html("");
 	//----------------------------------------------------------------
-	if (Users_byid.length>0) { // users loaded
+//	UIFactory.UsersGroup.displaySelectMultiple('sharing_users');
+		if (Users_byid.length>0) { // users loaded
 		UIFactory["User"].displaySelectMultipleActive('sharing_users');
 		//--------------------------
 		$.ajax({
@@ -2173,6 +2174,7 @@ UIFactory["Portfolio"].callShareUsers = function(portfolioid,langcode)
 			}
 		});
 	}
+	
 	//----------------------------------------------------------------
 	$.ajax({
 		type : "GET",
@@ -2264,7 +2266,7 @@ UIFactory["Portfolio"].callShareUsersGroups = function(portfolioid,langcode)
 	$("#edit-window-body-metadata").html("");
 	$("#edit-window-body-metadata-epm").html("");
 	//----------------------------------------------------------------
-	if (UsersGroups_byid.length>0) { // users groups loaded
+	if (usersgroups_list.length>0) { // users groups loaded
 		UIFactory["UsersGroup"].displaySelectMultipleWithUsersList('sharing_usersgroups');
 		$.ajax({
 			type : "GET",
@@ -2535,18 +2537,7 @@ UIFactory["Portfolio"].getNavBar = function (type,langcode,edit,portfolioid)
 	html += "		<ul class='ml-auto navbar-nav'>";
 	//-------------------- WELCOME PAGE EDIT -----------
 	html += "		<li id='welcome-edit'></li>";
-	if (g_welcome_add && g_designerrole && g_userroles[0]=='designer'){
-		html += "	<li id='welcome-add'>";
-		var databack = false;
-		var callback = "UIFactory['Node'].reloadStruct";
-		var param2 = "'"+g_portfolio_rootid+"'";
-		var param3 = null;
-		var param4 = null;
-		html += "		<a href='#xxx' onclick=\"javascript:importBranch('"+rootid+"','karuta.model','welcome-unit',"+databack+","+callback+","+param2+","+param3+","+param4+");alertHTML('"+karutaStr[LANG]['welcome-added']+"')\">";
-		html += karutaStr[LANG]['welcome-add'];
-		html += "		</a>";
-		html += "	</li>";
-	}
+	html += "		<li id='welcome-add' class='nav-item dropdown'></li>";
 	//-------------------- ACTIONS----------------------
 	var actions = UIFactory.Portfolio.getActions(portfolioid);
 	if (actions!='') {
@@ -3084,10 +3075,9 @@ UIFactory["Portfolio"].displayProjectContent = function(dest,parentcode,langcode
 				portfolio_label = '- no label in '+languages[langcode]+' -';
 			html += "<div id='projectcontent_"+portfolio.id+"' class='project-header'>";
 			html += "	<div class='row row-label'>";
-			html += "		<div class='col-1'/>";
 			html += "		<div class='col-4 project-label' id='portfoliolabel_"+portfolio.id+"' >"+portfolio_label+"</div>";
 			html += "		<div class='col-2 d-none d-md-block project-label'>"+owner+"</div>";
-			html += "		<div class='col-3 d-none d-sm-block comments' id='project-comments_"+$(portfolios_byid[portfolio.id].root).attr("id")+"'> </div><!-- comments -->";
+			html += "		<div class='col-4 d-none d-sm-block comments' id='project-comments_"+$(portfolios_byid[portfolio.id].root).attr("id")+"'> </div><!-- comments -->";
 			html += "		<div class='col-1'>";
 			//------------ buttons ---------------
 			html += "			<div class='dropdown portfolio-menu'>";
@@ -3130,6 +3120,7 @@ UIFactory["Portfolio"].displayProjectContent = function(dest,parentcode,langcode
 			html += "</div><!-- class='project'-->"
 			$("#"+dest).append($(html));
 			//----------------------
+			UIFactory["Portfolio"].displayComments('project-comments_'+$(portfolios_byid[portfolio.id].root).attr("id"),portfolio);
 			var portfolio_list = "";
 			for (var j=0; j<portfolios_list.length;j++){
 				var portfolio1 = portfolios_list[j];

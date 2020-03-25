@@ -191,13 +191,23 @@ UIFactory["User"].prototype.getView = function(dest,type,lang,gid)
 		//------------ buttons ---------------
 		html += "<td class='user-buttons'>";
 		if (USER.admin){
-			html += this.getAdminUserMenu('list');
+			html += this.getAdminUserMenu('list',gid);
 		}
 		html += "</td>";
 	}
-	if (type=='list2') {
+	if (type=='list-forusergroup') {
 		html = "<div class='col-5 firstname'>"+this.firstname_node.text()+"</div>";
 		html += "<div class='col-5 lastname'>"+this.lastname_node.text()+"</div>";
+	}
+	if (type=='list-usergroup') {
+		html = "<div class='col-5 firstname' id='f"+this.id+"_"+gid+"'>"+this.firstname_node.text()+"</div>";
+		html += "<div class='col-5 lastname' id='l"+this.id+"_"+gid+"'>"+this.lastname_node.text()+"</div>";
+		//------------ buttons ---------------
+		html += "<div class='col-1 user-buttons' id='b"+this.id+"_"+gid+"'>";
+		if (USER.admin){
+			html += this.getAdminUserMenu('list-ondrop',gid);
+		}
+		html += "</div>";
 	}
 	if (type=='list1') {
 		html = "<div class='col-3 firstname'>"+this.firstname_node.text()+"</div>";
@@ -974,12 +984,12 @@ UIFactory["User"].deleteEmptyUsers = function()
 }
 
 //======================
-UIFactory["User"].prototype.getAdminUserMenu = function(type)
+UIFactory["User"].prototype.getAdminUserMenu = function(type,gid)
 //======================
 {	
 	var html = "";
 	html += "<div class='btn-group'>";
-	if (type==null) {
+	if (type=='list') {
 		html += " <span class='button btn' onclick=\"UIFactory['User'].edit('"+this.id+"')\" data-title='"+karutaStr[LANG]["button-edit"]+"' relx='tooltip'>";
 		html += "<span class='fas fa-pencil-alt'/>";
 		html += "</span>";
@@ -988,13 +998,15 @@ UIFactory["User"].prototype.getAdminUserMenu = function(type)
 			html += "<span class='fa fa-trash-alt'/>";
 			html += "</span>";
 		}
-	} else {
-		html += "<span class='button btn' onclick=\"UIFactory['UsersGroup'].confirmRemove('"+type+"','"+this.id+"')\" data-title='"+karutaStr[LANG]["button-delete"]+"' relx='tooltip'>";
+	}
+	if (type=="list-ondrop") {
+		html += "<span class='button btn' onclick=\"UIFactory['UsersGroup'].confirmRemove('"+gid+"','"+this.id+"')\" data-title='"+karutaStr[LANG]["button-delete"]+"' relx='tooltip'>";
 		html += "<span class='fa fa-trash-alt'/>";
 		html += "</span>";				
 	}
+
 	//----------------------------------
-	if (type!='list3') {
+	if (type!='list3' && type!="list-ondrop") {
 		//----------------------------------
 		html += "<span class='button btn' onclick=\"UIFactory['UsersGroup'].editGroupsByUser('"+this.id+"')\"";
 		if (this.username_node.text()!='root' && this.username_node.text()!='public') {

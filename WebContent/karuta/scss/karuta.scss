@@ -16,6 +16,10 @@
 		border-color: #ccc;
 	}
 
+	body {
+		background-color: var(--list-background-color);
+	}
+
 	// ----General font size ---------------
 	body,
 	.form-control,
@@ -154,8 +158,7 @@
 			}
 		}
 		.portfolio-row {
-			margin-left: 1px;
-			margin-right: 1px;
+			margin: 2px;
 			color: var(--list-element-text-color);
 			&:hover {
 				background-color: var(--list-element-background-color-complement);
@@ -242,9 +245,6 @@
 		.project-label{
 			cursor:none;
 			font-weight:bold;
-		}
-		.row-label {
-			padding-bottom:5px;
 		}
 		.project {
 			padding:7px;
@@ -528,7 +528,8 @@
 		padding-top:5px;
 	}
 
-	#folder-users {
+	.folder-users {
+		margin-top:20px;
 		color : var(--list-element-text-color);
 		background-color: var(--list-element-background-color);
 		.usersfolder-header {
@@ -644,7 +645,58 @@
 			padding-left:9px;
 			padding-right:9px;
 		}
+		//----- V2 -------
+		.usersgroup {
+			padding:10px;
+			margin-top:5px;
+			color : var(--list-element-text-color);
+			background-color: var(--list-element-background-color);
+			.usersgroup-header {
+				padding:7px;
+				background-color:var(--list-menu-background-color);
+				color:var(--list-button-text-color);
+				.btn  {
+					background-color:var(--list-element-background-color);
+					height:25px;
+					padding-left:9px;
+					padding-right:9px;
+				}
+			}
+			.item-user {
+				margin-left:1px;
+				margin-top:2px;
+				margin-bottom:2px;
+			}
+			.item-folder {
+				margin-left:1px;
+				margin-bottom:2px;
+			}
+			table{
+				width:100%;
+			}
+			.plus-minus {
+				width:20px;
+			}
+			.usersgroup-label { // V2
+				width:50%;
+			}
+			.usersgroup-content{
+				padding:5px;
+			}
+		}
 	}
+
+	#user-create {
+		color : var(--list-element-text-color);
+		background-color: var(--list-button-background-color);
+		margin-top: 20px;
+		padding: 4px 15px;
+		font-size: 14px;
+		display: inline-block;
+		cursor: pointer;
+		border-radius: 3px;
+	}
+
 	#group-users {
 		color : var(--list-element-text-color);
 		background-color: var(--list-element-background-color);
@@ -668,24 +720,40 @@
 		}
 	}
 
-//========================================================
+/* ====================== */
+/*  PAGE PORTFOLIOGROUP   */
+/* ====================== */
 
-#main-portfoliosgroup .btn,
-#main-usersgroup .btn,
-#main-exec-batch .btn,
-#main-exec-report .btn {
-	background-color: var(--list-button-background-color);
-}
-
-
-
-	
-	
-	#usersgroups .usersgroup-users,
-	.usersgroup,
-	.portfoliosgroup {
-		background-color: var(--list-element-background-color);
+	#main-portfoliosgroup {
+		color: var(--list-element-text-color);
+		.btn {
+			color: var(--list-element-text-color);
+			padding-left:9px;
+			padding-right:9px;
+			background-color: var(--list-element-background-color);
+		}
+		.portfoliosgroup{
+			margin-top:5px;
+			background-color:var(--list-menu-background-color);
+			.btn {
+				height:25px;
+			}
+			.row-label {
+				padding:5px;
+			}
+		}
+		.portfoliosgroup-content {
+			background-color: var(--list-element-background-color);
+			.btn {
+				background-color: var(--list-button-background-color);
+			}
+			.row {
+				padding:5px;
+			}
+		}
 	}
+
+
 
 /* ====================== */
 /*     EDIT WINDOW        */
@@ -963,6 +1031,9 @@
 		.navbar-brand {
 			cursor:pointer;
 		}
+		#welcome-edit{
+			padding-top:9px;
+		}
 	}
 
 
@@ -1007,6 +1078,7 @@
 			}
 		}
 		.row {
+			margin-right:0px;  // bootstrap default -15px;
 			margin-left:0px;  // bootstrap default -15px;
 		}
 		.collapsible {
@@ -1155,7 +1227,7 @@
 	}
 
 	.td-buttons {
-		background-color: var(--portfolio-resource-border-color);
+		background-color: var(--portfolio-buttons-background-color);
 		width: 200px;
 		.buttons {
 			float:none;
@@ -1404,32 +1476,20 @@
 
 
 /* ====================== */
-/*     PAGE USERGROUP     */
+/*     EXEC BATCH         */
 /* ====================== */
-
-	.usersgroup .btn {
-		height:25px;
-		padding-left:9px;
-		padding-right:9px;
+#main-exec-batch,
+#main-exec-report {
+	min-height:300px;
+	color : var(--list-title-color);
+	.button,
+	.badge {
+		background-color:var(--list-button-background-color);
+		color: var(--list-element-text-color);
 	}
-
-/* ====================== */
-/*  PAGE PORTFOLIOGROUP   */
-/* ====================== */
-
-	.portfoliosgroup .btn {
-		height:25px;
-		padding-left:9px;
-		padding-right:9px;
-	}
-
-/* ====================== */
-
-#usersgroups .row,
-#selectform-projects .row, {
-	margin-top:2px;
-//	color:var(--list-button-color);
 }
+
+/* ====================== */
 
 
 
@@ -1455,7 +1515,7 @@
 
 
 
-
+/*
 #portfoliosgroup-create,
 #usersgroup-create {
 	color:var(--list-button-color);
@@ -1492,7 +1552,7 @@
 	background-color:var(--list-button-background-color);
 	color:var(--list-button-color);
 }
-/*
+
 #portfoliosgroups a,
 #usersgroups a,
 #projects a,
@@ -1500,7 +1560,7 @@
 #bin a {
 	color:var(--list-button-color);
 }
-*/
+
 .portfolios-not-in-project{
 	margin-left:0px;
 	margin-right:0px;
@@ -1566,18 +1626,8 @@
 	color:var(--list-button-color);
 }
 
-#main-exec-batch,
-#main-exec-report {
-		color:var(--list-icon-section-color);
-}
 
-#main-exec-batch .button,
-#main-exec-report .button {
-	border: 1px solid var(--list-icon-section-color);
-	border-radius:3px;
-	margin-left:5px;
-}
-
+*/
 /* =========#adding_portfolios================================ */
 
 #adding_portfolios .project {
@@ -2070,7 +2120,7 @@ button.selected-label {
 .comments {
 	font-style:italic;
 	font-weight:normal;
-	padding:7px;
+//	padding:7px;
 }
 
 .evo-palette {
