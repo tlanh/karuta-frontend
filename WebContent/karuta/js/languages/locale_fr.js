@@ -93,6 +93,10 @@ karutaStr['fr']['see-bin']="Voir la poubelle";
 karutaStr['fr']['complex']="Chargement partiel";
 karutaStr["fr"]["button-print"] = "Imprimer";
 karutaStr["fr"]["write-mode"] = "Éditer";
+karutaStr["fr"]["button-increase"] = "Augmenter la taille des caractères";
+karutaStr["fr"]["button-decrease"] = "Diminuer la taille des caractères";
+karutaStr["fr"]["copy"] = "Copier";
+karutaStr["fr"]["copied"] = "Copié";
 
 //=========================================
 //========== ERRORS =======================
@@ -247,13 +251,14 @@ karutaStr['fr']['help_text_rename']="Pour déplacer un portfolio dans un autre p
 karutaStr['fr']['users-folders']="Dossiers";
 karutaStr['fr']['users-groups']="Groupes";
 karutaStr['fr']['users-in-rootfolder']="Usagers hors dossier";
+karutaStr['fr']['and-content']="et son contenu.";
 
 //=========================================
 //========== PORTFOLIOS ===================
 //=========================================
 
 karutaStr['fr']['projects']="Mes projets";
-karutaStr['fr']['portfolios-not-in-project']="Portfolios hors projet";
+karutaStr['fr']['portfolios-not-in-project']="Portfolios";
 karutaStr['fr']['portfolios']="Mes portfolios";
 karutaStr['fr']['portfolio']="Mon portfolio";
 karutaStr['fr']['bin']="Poubelle";
@@ -378,6 +383,7 @@ karutaStr['fr']['create_user_portfolios']="Créer un usager et ses portfolios";
 karutaStr['fr']['report']="Exécuter un script de rapport";
 karutaStr['fr']['upload_csv_or_code']="Téléverser un fichier CSV ou Saisir un code de modèle";
 karutaStr['fr']['model_code']="Code du modèle";
+karutaStr['fr']['report-elt-disabled'] = "désactivé";
 
 //=========================================
 //========== RESOURCE =====================
@@ -395,6 +401,7 @@ karutaStr['fr']['dashboard-code']="Code du rapport";
 karutaStr['fr']['report-code']="Code du rapport";
 karutaStr['fr']['csv']="Rôles - Afficher CSV";
 karutaStr['fr']['pdf']="Rôles - Afficher PDF";
+karutaStr['fr']['rtf']="Rôles - Afficher RTF";
 karutaStr['fr']['img']="Rôles - Afficher Image";
 karutaStr['fr']['document-required']="Vous devez spécifier un document avant de le soumettre !";
 karutaStr['fr']['size-upload']="Votre fichier est trop volumineux : seuls les fichiers de moins de " + g_configVar['maxfilesizeupload'] + " Mo sont autorisés !";

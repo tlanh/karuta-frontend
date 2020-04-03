@@ -99,7 +99,7 @@ UIFactory["Node"] = function( node )
 			this.structured_resource = new UIFactory[this.xsi_type](node);
 		}
 		//------------------------------
-		this.loaded = !(g_complex); // if not complex all nodes are loaded
+//		this.loaded = !(g_complex); // if not complex all nodes are loaded
 	}
 	catch(err) {
 		alertHTML("UIFactory['Node']--flag_error:"+flag_error+"--"+err.message+"--id:"+this.id+"--resource_type:"+this.resource_type+"--asmtype:"+this.asmtype);
@@ -424,9 +424,9 @@ UIFactory["Node"].prototype.displayAsmContext = function (dest,type,langcode,edi
 //		$("div[name='lbl-div']","#node_"+uuid).hide();
 	//----------- Comments -----------
 	if (this.edit && this.inline && this.writenode)
-		UIFactory["Node"].displayCommentsEditor('comments_'+uuid,UICom.structure["ui"][uuid]);
+		UIFactory.Node.displayCommentsEditor('comments_'+uuid,UICom.structure["ui"][uuid]);
 	else
-		UIFactory["Node"].displayComments('comments_'+uuid,UICom.structure["ui"][uuid]);
+		UIFactory.Node.displayComments('comments_'+uuid,UICom.structure["ui"][uuid]);
 	//--------------------Metadata Info------------------------------------------
 	if (g_userroles[0]=='designer' || USER.admin) {  
 		this.displayMetainfo("metainfo_"+uuid);
@@ -537,6 +537,12 @@ UIFactory["Node"].prototype.displayAsmNode = function(dest,type,langcode,edit,re
 	if (!gotView)
 		label_html += " "+ this.getView('std_node_'+uuid);
 	$("#label_node_"+uuid).html(label_html);
+	//--------- chckbox comment in report/batch--------------
+	var html_chckbox = "<span class='chkbox-comments x"+this.semantictag+" '>&nbsp;<input ";
+	if (this.semantictag.indexOf('comments')>-1)
+		html_chckbox += "checked=true";
+	html_chckbox += " type='checkbox' onchange=\"UIFactory.Node.toggleComment('"+uuid+"',this)\">&nbsp;"+karutaStr[LANG]['report-elt-disabled']+"<span>";
+	$("div[class='title']","#label_node_"+uuid).append(html_chckbox);
 	//-------------- buttons --------------------------
 	if (edit) {
 		if (this.semtag.indexOf("bubble_level1")>-1)
@@ -1488,7 +1494,7 @@ UIFactory["Node"].prototype.getButtons = function(dest,type,langcode,inline,dept
 									|| g_userroles[0]=='designer' 
 								)
 					)
-				|| 	(this.inline && (	(USER.admin || g_userroles[0]=='designer'|| this.editnoderoles.containsArrayElt(g_userroles) || this.editnoderoles.indexOf(userrole)>-1) ))
+				|| 	(this.inline && (	(USER.admin || g_userroles[0]=='designer'|| this.editnoderoles.containsArrayElt(g_userroles) || this.editnoderoles.indexOf(this.userrole)>-1) ))
 			)
 		{
 			html += "<span data-toggle='modal' data-target='#edit-window' onclick=\"javascript:getEditBox('"+this.id+"')\"><span class='button fas fa-pencil-alt' data-toggle='tooltip' data-title='"+karutaStr[LANG]["button-edit"]+"' data-placement='bottom'></span></span>";
@@ -1510,9 +1516,9 @@ UIFactory["Node"].prototype.getButtons = function(dest,type,langcode,inline,dept
 		if (((this.writenode && this.moveinroles.containsArrayElt(g_userroles)) || USER.admin || g_userroles[0]=='designer') && this.asmtype != 'asmRoot') {
 			var movein = ($(this.metadatawad).attr('movein')==undefined)?'':$(this.metadatawad).attr('movein');
 			if (movein=='')
-				html+= "<span class='button glyphicon glyphicon-random' onclick=\"javascript:UIFactory.Node.selectNode('"+this.id+"',UICom.root)\" data-title='"+karutaStr[LANG]["move"]+"' data-tooltip='true' data-placement='bottom'></span>";
+				html+= "<span class='button fas fa-random' onclick=\"javascript:UIFactory.Node.selectNode('"+this.id+"',UICom.root)\" data-title='"+karutaStr[LANG]["move"]+"' data-tooltip='true' data-placement='bottom'></span>";
 			else
-				html+= "<span class='button glyphicon glyphicon-random' onclick=\"javascript:UIFactory.Node.selectNode('"+this.id+"',UICom.structure.tree[$('#page').attr('uuid')],'"+movein+"')\" data-title='"+karutaStr[LANG]["move"]+"' data-tooltip='true' data-placement='bottom'></span>";
+				html+= "<span class='button fas fa-random' onclick=\"javascript:UIFactory.Node.selectNode('"+this.id+"',UICom.structure.tree[$('#page').attr('uuid')],'"+movein+"')\" data-title='"+karutaStr[LANG]["move"]+"' data-tooltip='true' data-placement='bottom'></span>";
 		}
 		//------------- duplicate node buttons ---------------
 		if ( (g_userroles[0]=='designer' && this.asmtype != 'asmRoot') // always duplicate for designer
@@ -1658,7 +1664,24 @@ UIFactory['Node'].loadStructure = function(uuid)
 	$.ajaxSetup({async: true});
 };
 
+//==================================================
+UIFactory['Node'].toggleComment = function(uuid,input)
+//==================================================
+{
+	var semantictag = UICom.structure.ui[uuid].semantictag;
+	if (input.checked) {
+		semantictag += ' comments';
+		UICom.structure.ui[uuid].semantictag = semantictag;
+		$("#node_"+uuid).addClass('comments');
+	}
+	else {
+		semantictag = semantictag.substring(0,semantictag.indexOf('comments')-1)
+		UICom.structure.ui[uuid].semantictag = semantictag;
+		$("#node_"+uuid).removeClass('comments');
+	}
+	UIFactory["Node"].updateMetadataAttribute(UICom.structure.ui[uuid].id,'semantictag',semantictag);
 
+}
 //----------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------
 //------------------------ getBubbleView -------------------------------------------------------------------------------------
@@ -1956,7 +1979,7 @@ UIFactory["Node"].displayBlock = function(root,dest,depth,langcode,edit,inline,b
 					//-----------------------------------------
 					var graphicers = $("metadata-wad[graphicerroles*="+g_userroles[0]+"]",data);
 					if (contentfreenode=='Y' && (graphicers.length>0 || g_userroles[0]=='designer'))
-						html += "<button class='btn  free-toolbar-menu' id='free-toolbar-menu_"+uuid+"' data-toggle='tooltip' data-placement='right' title='"+karutaStr[languages[langcode]]["free-toolbar-menu-tooltip"]+"'><span class='glyphicon glyphicon-menu-hamburger'></span></button>";
+						html += "<button class='btn  free-toolbar-menu' id='free-toolbar-menu_"+uuid+"' data-toggle='tooltip' data-placement='right' title='"+karutaStr[languages[langcode]]["free-toolbar-menu-tooltip"]+"'><span class='fas fa-bars'></span></button>";
 					//-----------------------------------------
 					html += "</div>";
 				}
@@ -2041,7 +2064,7 @@ UIFactory["Node"].displayBlock = function(root,dest,depth,langcode,edit,inline,b
 					} else { // lang1/lang2/...
 						help_text = helps[langcode];  // lang1/lang2/...
 					}
-					var help = " <a href='javascript://' class='popinfo'><span style='font-size:12px' class='glyphicon glyphicon-question-sign'></span></a> ";
+					var help = " <a href='javascript://' class='popinfo'><span style='font-size:12px' class='fas fa-question-circle'></span></a> ";
 					$("#help_"+uuid).html(help);
 					$(".popinfo").popover({ 
 					    placement : 'right',

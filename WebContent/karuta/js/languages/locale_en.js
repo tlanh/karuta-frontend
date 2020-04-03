@@ -93,6 +93,10 @@ karutaStr['en']['see-bin']="See Bin";
 karutaStr['en']['complex']="Partial Loading";
 karutaStr["en"]["button-print"] = "Print";
 karutaStr["en"]["write-mode"] = "Edit";
+karutaStr["en"]["button-increase"] = "Increase Character Size";
+karutaStr["en"]["button-decrease"] = "Decrease Character Size";
+karutaStr["en"]["copy"] = "Copy";
+karutaStr["en"]["copied"] = "Copied";
 
 //=========================================
 //========== ERRORS =======================
@@ -247,6 +251,7 @@ karutaStr['en']['help_text_rename']="To move a portfolio to another project, cha
 karutaStr['en']['users-folders']="Users Folders";
 karutaStr['en']['users-groups']="Groups";
 karutaStr['en']['users-in-rootfolder']="Users not in folders";
+karutaStr['en']['and-content']="and its content.";
 
 //=========================================
 //========== PORTFOLIOS ===================
@@ -378,6 +383,7 @@ karutaStr['en']['create_user_portfolios']="Create an user and his portfolios";
 karutaStr['en']['report']="Execute Report Script";
 karutaStr['en']['upload_csv_or_code']="Upload a CSV File or Type a Model Code";
 karutaStr['en']['model_code']="Model Code";
+karutaStr['en']['report-elt-disabled'] = "disabled"
 
 //=========================================
 //========== RESOURCE =====================
@@ -395,6 +401,7 @@ karutaStr['en']['dashboard-code']="Dashboard Code";
 karutaStr['en']['report-code']="Report Code";
 karutaStr['en']['csv']="Roles - Display CSV";
 karutaStr['en']['pdf']="Roles - Display PDF";
+karutaStr['en']['rtf']="Rôles - Display RTF";
 karutaStr['en']['img']="Rôles - Display Image";
 karutaStr['en']['document-required']="You have to specify a document before to submit !";
 karutaStr['en']['size-upload']="Your file is so big : it must be less than " + g_configVar['maxfilesizeupload'] + " Mo !";

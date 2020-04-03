@@ -27,7 +27,8 @@ var portfolioid = null;
 var g_userrole = "";
 var g_userroles = [];
 var g_portfolioid = "";
-var g_complex = false;
+var g_model = "";
+//var g_complex = false;
 var g_designerrole = false;
 var g_rc4key = "";
 var g_encrypted = false;
@@ -222,6 +223,12 @@ function getNavBar(type,portfolioid,edit)
 		} 
 		html += "			</ul>";
 		html += "			<ul class='navbar-nav'>";
+		html += "	<li class='nav-item icon'>";
+		html += "		<a class='nav-link' onclick='increaseFontSize()' data-title='"+karutaStr[LANG]["button-increase"]+"' data-toggle='tooltip' data-placement='bottom' style='padding-top:.21rem;'><i style='font-size:120%' class='fa fa-font'></i></a>";
+		html += "	</li>";
+		html += "	<li class='nav-item icon'>";
+		html += "		<a class='nav-link' onclick='decreaseFontSize()' data-title='"+karutaStr[LANG]["button-decrease"]+"' data-toggle='tooltip' data-placement='bottom'><i style='font-size:80%' class='fa fa-font'></i></a>";
+		html += "	</li>";
 		//-----------------USERNAME-----------------------------------------
 		html += "			<li class='nav-item dropdown'>";
 		html += "				<a class='nav-link dropdown-toggle' href='#' id='userDropdown' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'  data-title='"+karutaStr[LANG]["button-change-password"]+"' data-toggle='tooltip' data-placement='bottom'>";
@@ -1217,7 +1224,7 @@ function getEmail(role,emails) {
 function sendEmailPublicURL(encodeddata,email,langcode) {
 //==================================
 	var url = window.location.href;
-	var serverURL = url.substring(0,url.lastIndexOf('/karuta'));
+	var serverURL = url.substring(0,url.lastIndexOf(appliname)+appliname.length);
 	url = serverURL+"/application/htm/public.htm?i="+encodeddata+"&amp;lang="+languages[langcode];
 	//------------------------------
 	var message = "";
@@ -1862,6 +1869,21 @@ function applyNavbarConfiguration()
 }
 
 //==============================
+function applyKarutaConfiguration()
+//==============================
+{
+	var root = document.documentElement;
+	if (g_configVar['font-standard']!=undefined && g_configVar['font-standard']!="")
+		root.style.setProperty('--font-family',g_configVar['font-standard']);
+	if (g_configVar['font-size-coeff']!=undefined && g_configVar['font-size-coeff']!="") 
+		root.style.setProperty('--font-size-coeff',g_configVar['font-size-coeff']);
+	if (g_configVar['font-google']!=undefined && g_configVar['font-google']!="") {
+		$("#font-family").attr("href","https://fonts.googleapis.com/css?family="+g_configVar['font-google']);
+		root.style.setProperty('--font-family',g_configVar['font-google']);
+	}
+}
+
+//==============================
 function getNodeid(semtag,data)
 //==============================
 {
@@ -2085,3 +2107,35 @@ function selectElts(type,list)
 		$('#'+list[i]).addClass('active');
 	}
 }
+
+//=====================================================================================================
+//=====================================================================================================
+//============================== COPY CLIPBOARD =======================================================
+//=====================================================================================================
+//=====================================================================================================
+
+//==================================
+function copyInclipboad(id) 
+//==================================
+{
+	var element = document.getElementById("pcode_"+id);
+	var textArea = document.createElement("textarea");
+	textArea.value = element.textContent;
+	document.body.appendChild(textArea);
+	textArea.select();
+	document.execCommand("Copy");
+	textArea.remove();
+	$(element).tooltip('hide');
+	$(element).attr('title', karutaStr[LANG]['copied'] +" : "+element.textContent);
+	$(element).tooltip('show');
+}
+
+//==================================
+function outCopy(id)
+//==================================
+{
+	var element = document.getElementById("pcode_"+id);
+	$(element).tooltip('hide');
+	$(element).attr('title', karutaStr[LANG]['copy'] +" : "+element.textContent);
+}
+
