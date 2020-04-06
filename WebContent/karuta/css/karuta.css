@@ -114,7 +114,7 @@ body,
 /* ====================== */
 /*     LIST CONTAINER     */
 /* ====================== */
-#list-container #project-portfolios,
+#list-container .porfolios-content,
 #list-container .portfolios-not-in-project,
 #list-container .projects-nb,
 #list-container .bin-nb,
@@ -237,6 +237,49 @@ body,
 #list-container .copy-button:hover .tooltiptext {
   display: in-line;
   opacity: 1;
+}
+#list-container .portfolio-card {
+  margin-top: 15px;
+  border: none;
+  width: 200px;
+  flex: none;
+}
+#list-container .portfolio-card .portfolio-label {
+  cursor: pointer;
+}
+#list-container .portfolio-card .card-header {
+  background-color: var(--list-menu-background-color);
+  color: var(--list-button-text-color);
+  padding: 3px;
+}
+#list-container .portfolio-card .card-body {
+  padding: 3px;
+  color: var(--list-button-text-color);
+  background-color: var(--list-element-background-color);
+}
+#list-container .portfolio-card .card-body .portfolio-code,
+#list-container .portfolio-card .card-body .owner {
+  font-size: 80%;
+}
+#list-container .portfolio-card .card-body .comments {
+  border-bottom: 1px solid var(--list-button-text-color);
+}
+#list-container .portfolio-card .card-footer {
+  background-color: var(--list-menu-background-color);
+  color: var(--list-button-text-color);
+  text-align: center;
+  font-size: 80%;
+  padding: 0px;
+}
+#list-container .portfolio-card .card-button {
+  float: right;
+}
+#list-container .portfolio-card .card-button .btn {
+  background-color: var(--list-element-background-color);
+  margin: 3px;
+}
+#list-container .portfolios-deck-header {
+  margin-bottom: 5px;
 }
 
 #list {
@@ -529,7 +572,6 @@ div.oembedall-container {
 #table_unusers {
   width: 100%;
   color: var(--list-element-text-color);
-  background-color: var(--list-element-background-color);
 }
 #table_users td,
 #table_unusers td {
@@ -549,6 +591,11 @@ div.oembedall-container {
   padding-left: 5px;
 }
 
+#list_users,
+#list_unuses {
+  background-color: var(--list-element-background-color);
+}
+
 #folder-users-pages {
   padding-top: 5px;
 }
@@ -556,7 +603,6 @@ div.oembedall-container {
 .folder-users {
   margin-top: 20px;
   color: var(--list-element-text-color);
-  background-color: var(--list-element-background-color);
 }
 .folder-users .usersfolder-header {
   padding: 7px;
@@ -575,6 +621,10 @@ div.oembedall-container {
 .folder-users .item-folder {
   margin-left: 1px;
   margin-bottom: 2px;
+}
+
+#list1-folder-users-pages {
+  background-color: var(--list-element-background-color);
 }
 
 #create-folder-button {
@@ -610,6 +660,18 @@ div.oembedall-container {
 }
 #main-usersgroup #userslist-leftside .active {
   background-color: var(--list-button-background-color);
+}
+#main-usersgroup #usergroup-userslist-leftside.V2 {
+  float: right;
+  width: calc(50% - 7px);
+  margin-bottom: 10px;
+}
+#main-usersgroup #usergroup-userslist-leftside.V2 .active {
+  background-color: var(--list-button-background-color);
+}
+#main-usersgroup #list-users-active {
+  background-color: var(--list-element-background-color);
+  padding: 15px;
 }
 #main-usersgroup #userslist-rightside {
   width: calc(30% - 7px);
@@ -1314,11 +1376,6 @@ table[name=res-div] {
   padding-right: 0px;
   margin-left: 0px;
 }
-.resource-standard .extra .csv-button,
-.resource-standard .extra .pdf-button {
-  background: var(--portfolio-buttons-background-color);
-  border: 1px solid var(--portfolio-resource-border-color);
-}
 
 .standard-resource-Image-Img-Label .title {
   font-size: inherit;
@@ -1367,9 +1424,6 @@ table[name=res-div] {
   padding-top: 0px;
 }
 
-.standard-node-carddeck .standard-node-card {
-  margin-top: 0px;
-}
 .standard-node-carddeck .content {
   padding-left: 20px;
   padding-right: 20px;
@@ -1408,6 +1462,21 @@ table[name=res-div] {
 }
 .model div[name=cnt-div] {
   margin-left: 15px;
+}
+
+/* ===========================
+DASHBOARD CSV PDF BUTTONS
+  ===========================*/
+.csv-button,
+.pdf-button,
+.img-button {
+  background: var(--portfolio-buttons-background-color);
+  border: 1px solid var(--portfolio-resource-border-color);
+  float: left;
+  height: 34px;
+  text-align: center;
+  padding-top: 7px;
+  display: in-line;
 }
 
 /* ============================ */
@@ -2531,18 +2600,6 @@ select.Y2, option[value=Y2] {
 
 .asmColumn {
   height: 100%;
-}
-
-/* ===========================
-	DASHBOARD CSV PDF BUTTONS
-   ===========================*/
-.csv-button,
-.pdf-button {
-  float: left;
-  height: 34px;
-  text-align: center;
-  padding-top: 7px;
-  display: in-line;
 }
 
 /* ===========================

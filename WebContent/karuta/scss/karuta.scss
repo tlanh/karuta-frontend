@@ -124,7 +124,7 @@
 /* ====================== */
 
 	#list-container {
-		#project-portfolios,
+		.porfolios-content,
 		.portfolios-not-in-project,
 		.projects-nb,
 		.bin-nb,
@@ -265,6 +265,49 @@
 		.copy-button:hover .tooltiptext {
 			display:in-line;
 			opacity: 1;
+		}
+		.portfolio-card{
+			margin-top:15px;
+			border:none;
+			width:200px;
+			flex:none;
+			.portfolio-label{
+				cursor:pointer;
+			}
+			.card-header {
+				background-color:var(--list-menu-background-color);
+				color:var(--list-button-text-color);
+				padding:3px;
+			}
+			.card-body {
+				padding:3px;
+				color:var(--list-button-text-color);
+				background-color: var(--list-element-background-color);
+				.portfolio-code,
+				.owner {
+					font-size:80%;
+				}
+			.comments {
+				border-bottom: 1px solid var(--list-button-text-color);
+			}
+			}
+			.card-footer {
+				background-color:var(--list-menu-background-color);
+				color:var(--list-button-text-color);
+				text-align:center;
+				font-size:80%;
+				padding:0px;
+			}
+			.card-button {
+				float:right;
+				.btn{
+					background-color:var(--list-element-background-color);
+					margin:3px;
+				}
+			}
+		}
+		.portfolios-deck-header {
+			margin-bottom:5px;
 		}
 	}
 
@@ -576,7 +619,6 @@ div.oembedall-container {
 	#table_unusers {
 		width:100%;
 		color : var(--list-element-text-color);
-		background-color: var(--list-element-background-color);
 		td {
 			padding-top:2px;
 			padding-bottom:2px;
@@ -592,6 +634,10 @@ div.oembedall-container {
 			}
 		}
 	}
+	#list_users,
+	#list_unuses {
+		background-color: var(--list-element-background-color);
+	}
 
 	#folder-users-pages {
 		padding-top:5px;
@@ -600,7 +646,7 @@ div.oembedall-container {
 	.folder-users {
 		margin-top:20px;
 		color : var(--list-element-text-color);
-		background-color: var(--list-element-background-color);
+//		background-color: var(--list-element-background-color);
 		.usersfolder-header {
 			padding:7px;
 			background-color:var(--list-menu-background-color);
@@ -620,7 +666,9 @@ div.oembedall-container {
 			margin-bottom:2px;
 		}
 	}
-
+	#list1-folder-users-pages {
+		background-color:var(--list-element-background-color);
+	}
 	#user-header{
 //		color : var(--list-element-text-color);
 	}
@@ -660,6 +708,19 @@ div.oembedall-container {
 				background-color: var(--list-button-background-color);
 			}
 		}
+		#usergroup-userslist-leftside.V2 {
+			float: right;
+			width: calc(50% - 7px);
+			margin-bottom: 10px;
+			.active {
+				background-color: var(--list-button-background-color);
+			}
+		}
+		#list-users-active {
+			background-color: var(--list-element-background-color);
+			padding:15px;
+		}
+
 		#userslist-rightside {
 			width: calc(30% - 7px);
 			margin-top: 2px;
@@ -1420,11 +1481,6 @@ div.oembedall-container {
 			padding-right:0px;
 			margin-left:0px;
 		}
-		.extra .csv-button,
-		.extra .pdf-button {
-			background: var(--portfolio-buttons-background-color);
-			border:1px solid var(--portfolio-resource-border-color);
-		}
 	}
 
 	.standard-resource-Image-Img-Label {
@@ -1483,7 +1539,7 @@ div.oembedall-container {
 	
 	.standard-node-carddeck {
 		.standard-node-card {
-			margin-top:0px;
+//			margin-top:5px;
 		}
 		.content {
 			padding-left:20px;
@@ -1528,6 +1584,23 @@ div.oembedall-container {
 		}
 	}
 	
+	/* ===========================
+	DASHBOARD CSV PDF BUTTONS
+   ===========================*/
+
+	.csv-button,
+	.pdf-button,
+	.img-button {
+		background: var(--portfolio-buttons-background-color);
+		border:1px solid var(--portfolio-resource-border-color);
+		float:left;
+		height:34px;
+		text-align:center;
+		padding-top:7px;
+		display:in-line;
+	}
+
+
 /* ============================ */
 /* ============================ */
 /* ============================ */
@@ -2591,19 +2664,6 @@ table.tablesorter th.restore {
 	height:100%;
 }
 
-
-/* ===========================
-	DASHBOARD CSV PDF BUTTONS
-   ===========================*/
-
-	.csv-button,
-	.pdf-button {
-		float:left;
-		height:34px;
-		text-align:center;
-		padding-top:7px;
-		display:in-line;
-	}
 
 
 
