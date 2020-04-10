@@ -59,6 +59,10 @@
 		opacity: .65;
 	}
 
+	#main-body {
+		min-height:98vh;
+	}
+
 
 
 
@@ -124,6 +128,35 @@
 /* ====================== */
 
 	#list-container {
+		#portfolio-leftside {
+			width: calc(25% - 5px);
+			margin-bottom: 10px;
+			h3 {
+				margin-top:20px;
+			}
+			.active {
+				background-color: var(--list-button-background-color);
+			}
+		}
+	
+		.content1-leftside,
+		.content2-rightside {
+			overflow: auto;
+			max-height: 100vh;
+		}
+	
+		#gutter {
+		  width: 10px;
+		  float: right;
+		}
+		
+		#portfolio-rightside {
+			width: calc(75% - 5px);
+			margin-top: 2px;
+			padding-bottom: 5px;
+			float: right;
+		}
+
 		.porfolios-content,
 		.portfolios-not-in-project,
 		.projects-nb,
@@ -132,6 +165,10 @@
 			background-color: var(--list-element-background-color);
 			padding-bottom:7px;
 		}
+		.porfolios-content:empty {
+			visibility:hidden;
+		}
+		
 		.btn  {
 			background-color:var(--list-button-background-color);
 			color:var(--list-button-text-color);
@@ -185,16 +222,7 @@
 				background-color: var(--list-element-background-color-complement);
 			}
 		}
-		#bin-content {
-			.row-label {
-				margin-left:5px;
-				margin-right:5px;
-			}
-			.row {
-				color:var(--list-element-text-color);
-			}
-		}
-		.project-header {
+		.folder-header {
 			padding:7px;
 			background-color:var(--list-menu-background-color);
 			color:var(--list-button-text-color);
@@ -204,6 +232,7 @@
 			}
 		}
 		h3,
+		h4,
 		#refresh,
 		.projects-nb {
 			color: var(--list-title-color);
@@ -316,25 +345,6 @@
 	  margin-top: 20px;
 	}
 
-	#list-leftside {
-	  width: calc(25% - 5px);
-	  margin-bottom: 10px;
-	  h3 {
-	  	margin-top:20px;
-	  }
-	}
-
-	#gutter {
-	  width: 10px;
-	  float: right;
-	}
-	
-	#list-rightside {
-		width: calc(75% - 5px);
-		margin-top: 2px;
-		padding-bottom: 5px;
-		float: right;
-	}
 	//=============================
 
 	#project-portfolios {
@@ -375,11 +385,19 @@
 		}
 	}
 
+	#search-portfolio-input{
+		height:45px;
+	}
+
 	//=============================
-	#searched-portfolios-content {
+	.portfolios-content {
 		background-color: var(--list-element-background-color);
 		padding-top: 5px;
 		padding-bottom: 5px;
+	}
+
+	.content1-rightside {
+		margin-bottom:2px;
 	}
 
 	#searched-portfolios-header {
@@ -441,6 +459,32 @@
 		}
 	}
 
+	.no-toggledNode {
+		margin-left:0.8rem;
+	}
+
+	.nbfolders {
+			margin-left:5px;
+			color: var(--list-title-color);
+			background-color: var(--list-element-background-color-complement);
+	}
+
+	.nbchildren {
+			margin-left:5px;
+			background-color: var(--list-title-color);
+			color: var(--list-element-background-color-complement);
+	}
+
+	.active {
+		.nbfolders {
+			background-color: var(--list-element-background-color);
+			color: var(--list-element-background-color-complement);
+		}
+		.nbchildren {
+			color: var(--list-title-color);
+			background-color: var(--list-element-background-color-complement);
+		}
+	}
 	.closeSign {
 		cursor: pointer;
 		-webkit-user-select: none; /* Safari 3.1+ */
@@ -452,7 +496,6 @@
 	.closeSign::before {
 		content: "\25B6";
 		display: inline-block;
-		 margin-right: 6px;
 	}
 
 	.openSign::before {
@@ -547,7 +590,7 @@ div.oembedall-container {
 
 
 	#main-user {
-		#userslist-leftside {
+		#user-leftside {
 			width: calc(25% - 5px);
 			margin-bottom: 10px;
 			h3 {
@@ -558,7 +601,7 @@ div.oembedall-container {
 			}
 		}
 		
-		#userslist-rightside {
+		#user-rightside {
 			width: calc(75% - 5px);
 			margin-top: 2px;
 			padding-bottom: 5px;
@@ -575,9 +618,6 @@ div.oembedall-container {
 		}
 		.item:hover{
 			background-color: var(--list-element-background-color-complement);
-		}
-		.no-toggledNode {
-			margin-left:15px;
 		}
 		h3,h4 {
 			color: var(--list-title-color);
@@ -1671,18 +1711,15 @@ div.oembedall-container {
 
 
 
-	#refresh {
+	.refresh {
 		font-size:calc(var(--font-size-coeff) * 1.5rem);
 		float:right;
-		margin-top:12px;
-//		margin-right:20%;
+		margin-bottom:12px;
+		margin-right:10px;
 		cursor:pointer;
+		color:var(--list-button-background-color);
 	}
 
-
-#main-body-list {
-	background-color:var(--list-background-color);
-}
 
 
 
@@ -2672,8 +2709,9 @@ table.tablesorter th.restore {
    ===========================*/
 
 	#search {
-		float:right;
-		width:80%;
+		margin-bottom:20px;
+//		float:right;
+//		width:80%;
 	}
 
 /*
@@ -2707,8 +2745,8 @@ table.tablesorter th.restore {
 
 
 #search-user {
-	float:right;
-	width:80%;
+//	float:right;
+//	width:80%;
 }
 
 #search-choice {

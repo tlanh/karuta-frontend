@@ -26,6 +26,7 @@ karutaStr['en']['register']="Register";
 karutaStr['en']['edit']="Edit";
 karutaStr["en"]["button-edit"] = "Edit";
 karutaStr["en"]["button-delete"] = "Delete";
+karutaStr["en"]["button-delete-content"] = "Delete content";
 karutaStr["en"]["button-restore"] = "Restore";
 karutaStr["en"]["button-remove"] = "Remove";
 karutaStr["en"]["button-submit"] = "Submit";
@@ -168,8 +169,8 @@ karutaStr['en']['color']="Font Color";
 karutaStr['en']['cssclass']="CSS Class";
 karutaStr['en']['top']="Position - Top";
 karutaStr['en']['left']="Position - Left";
-karutaStr['en']['width']="Width (in pixels)";
-karutaStr['en']['height']="Height (in pixels)";
+karutaStr['en']['width']="Width (px)";
+karutaStr['en']['height']="Height (px)";
 karutaStr['en']['public']="Public";
 karutaStr['en']['text-align']="Alignment";
 karutaStr['en']['displayview']="Display View";
@@ -185,7 +186,7 @@ karutaStr['en']['showtoroles']="Show To";
 karutaStr['en']['private']="Hidden";
 karutaStr['en']['hide-metainfo']="Hide Metadata";
 karutaStr['en']['show-metainfo']="Show Metadata";
-karutaStr['en']['padding-top']="Space Before (in pixels)";
+karutaStr['en']['padding-top']="Space Before (px)";
 karutaStr['en']['background-color']="Background Color";
 karutaStr['en']['moveroles']="Ordering";
 karutaStr['en']['movein']="Move in";
@@ -257,11 +258,9 @@ karutaStr['en']['and-content']="and its content.";
 //========== PORTFOLIOS ===================
 //=========================================
 
-karutaStr['en']['projects']="My Projects";
 karutaStr['en']['portfolios-not-in-project']="My Portfolios not in a Project";
-karutaStr['en']['portfolios']="My Portfolios";
+karutaStr['en']['portfolios']="Portfolios";
 karutaStr['en']['portfolio']="My Portfolio";
-karutaStr['en']['bin']="My Bin";
 karutaStr['en']['nogroup']="No Group";
 karutaStr['en']['karuta.model']="Create a Portfolio Model";
 karutaStr['en']['code_portfolio']="Portfolio Code";
@@ -322,13 +321,15 @@ karutaStr['en']['add-newwelcomepage']="Add new Welcome Page";
 //========== FOLDERS ======================
 //=========================================
 
-karutaStr['en']['folders']="My Folders";
-karutaStr['en']['folders-admin']="Folders";
+karutaStr['en']['folders']="Folders";
 
 karutaStr['en']['next']="Next >";
 karutaStr['en']['prev']="< Prev";
 karutaStr['en']['karuta.folder']="Create a portfolio folder";
 karutaStr['en']['create_folder']="Create a Folder";
+karutaStr['en']['create_subfolder']="Create a Subfolder";
+karutaStr['en']['parent_code']="Parent Code";
+karutaStr['en']['folder_code']="Folder Code";
 
 //=========================================
 //========== USERS ========================

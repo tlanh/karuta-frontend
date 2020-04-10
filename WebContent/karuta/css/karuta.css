@@ -54,6 +54,10 @@ body,
   opacity: 0.65;
 }
 
+#main-body {
+  min-height: 98vh;
+}
+
 /* ====================== */
 /*    LIST- WELCOME       */
 /* ====================== */
@@ -114,6 +118,31 @@ body,
 /* ====================== */
 /*     LIST CONTAINER     */
 /* ====================== */
+#list-container #portfolio-leftside {
+  width: calc(25% - 5px);
+  margin-bottom: 10px;
+}
+#list-container #portfolio-leftside h3 {
+  margin-top: 20px;
+}
+#list-container #portfolio-leftside .active {
+  background-color: var(--list-button-background-color);
+}
+#list-container .content1-leftside,
+#list-container .content2-rightside {
+  overflow: auto;
+  max-height: 100vh;
+}
+#list-container #gutter {
+  width: 10px;
+  float: right;
+}
+#list-container #portfolio-rightside {
+  width: calc(75% - 5px);
+  margin-top: 2px;
+  padding-bottom: 5px;
+  float: right;
+}
 #list-container .porfolios-content,
 #list-container .portfolios-not-in-project,
 #list-container .projects-nb,
@@ -121,6 +150,9 @@ body,
 #list-container .portfolios-nb {
   background-color: var(--list-element-background-color);
   padding-bottom: 7px;
+}
+#list-container .porfolios-content:empty {
+  visibility: hidden;
 }
 #list-container .btn {
   background-color: var(--list-button-background-color);
@@ -173,22 +205,16 @@ body,
 #list-container .project .row-label:hover {
   background-color: var(--list-element-background-color-complement);
 }
-#list-container #bin-content .row-label {
-  margin-left: 5px;
-  margin-right: 5px;
-}
-#list-container #bin-content .row {
-  color: var(--list-element-text-color);
-}
-#list-container .project-header {
+#list-container .folder-header {
   padding: 7px;
   background-color: var(--list-menu-background-color);
   color: var(--list-button-text-color);
 }
-#list-container .project-header .btn {
+#list-container .folder-header .btn {
   background-color: var(--list-element-background-color);
 }
 #list-container h3,
+#list-container h4,
 #list-container #refresh,
 #list-container .projects-nb {
   color: var(--list-title-color);
@@ -286,26 +312,6 @@ body,
   margin-top: 20px;
 }
 
-#list-leftside {
-  width: calc(25% - 5px);
-  margin-bottom: 10px;
-}
-#list-leftside h3 {
-  margin-top: 20px;
-}
-
-#gutter {
-  width: 10px;
-  float: right;
-}
-
-#list-rightside {
-  width: calc(75% - 5px);
-  margin-top: 2px;
-  padding-bottom: 5px;
-  float: right;
-}
-
 #project-portfolios .project-label {
   cursor: none;
   font-weight: bold;
@@ -334,10 +340,18 @@ body,
   background-color: var(--list-element-background-color);
 }
 
-#searched-portfolios-content {
+#search-portfolio-input {
+  height: 45px;
+}
+
+.portfolios-content {
   background-color: var(--list-element-background-color);
   padding-top: 5px;
   padding-bottom: 5px;
+}
+
+.content1-rightside {
+  margin-bottom: 2px;
 }
 
 #searched-portfolios-header {
@@ -395,6 +409,31 @@ body,
   background-color: var(--list-element-background-color);
 }
 
+.no-toggledNode {
+  margin-left: 0.8rem;
+}
+
+.nbfolders {
+  margin-left: 5px;
+  color: var(--list-title-color);
+  background-color: var(--list-element-background-color-complement);
+}
+
+.nbchildren {
+  margin-left: 5px;
+  background-color: var(--list-title-color);
+  color: var(--list-element-background-color-complement);
+}
+
+.active .nbfolders {
+  background-color: var(--list-element-background-color);
+  color: var(--list-element-background-color-complement);
+}
+.active .nbchildren {
+  color: var(--list-title-color);
+  background-color: var(--list-element-background-color-complement);
+}
+
 .closeSign {
   cursor: pointer;
   -webkit-user-select: none;
@@ -409,7 +448,6 @@ body,
 .closeSign::before {
   content: "▶";
   display: inline-block;
-  margin-right: 6px;
 }
 
 .openSign::before {
@@ -503,17 +541,17 @@ div.oembedall-container {
 #main-user {
   color: var(--list-element-text-color);
 }
-#main-user #userslist-leftside {
+#main-user #user-leftside {
   width: calc(25% - 5px);
   margin-bottom: 10px;
 }
-#main-user #userslist-leftside h3 {
+#main-user #user-leftside h3 {
   margin-top: 20px;
 }
-#main-user #userslist-leftside .active {
+#main-user #user-leftside .active {
   background-color: var(--list-button-background-color);
 }
-#main-user #userslist-rightside {
+#main-user #user-rightside {
   width: calc(75% - 5px);
   margin-top: 2px;
   padding-bottom: 5px;
@@ -529,9 +567,6 @@ div.oembedall-container {
 }
 #main-user .item:hover {
   background-color: var(--list-element-background-color-complement);
-}
-#main-user .no-toggledNode {
-  margin-left: 15px;
 }
 #main-user h3, #main-user h4 {
   color: var(--list-title-color);
@@ -1541,15 +1576,13 @@ h3 {
 }
 
 /* ====================== */
-#refresh {
+.refresh {
   font-size: calc(var(--font-size-coeff) * 1.5rem);
   float: right;
-  margin-top: 12px;
+  margin-bottom: 12px;
+  margin-right: 10px;
   cursor: pointer;
-}
-
-#main-body-list {
-  background-color: var(--list-background-color);
+  color: var(--list-button-background-color);
 }
 
 /*
@@ -2606,8 +2639,7 @@ select.Y2, option[value=Y2] {
 	SEARCH PORTFOLIO
    ===========================*/
 #search {
-  float: right;
-  width: 80%;
+  margin-bottom: 20px;
 }
 
 /*
@@ -2635,11 +2667,6 @@ select.Y2, option[value=Y2] {
 /* ===========================
 	SEARCH USER
    ===========================*/
-#search-user {
-  float: right;
-  width: 80%;
-}
-
 #search-choice {
   width: 100px;
 }

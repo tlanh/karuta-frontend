@@ -406,7 +406,6 @@ UIFactory["Node"].prototype.displayMetadataAttributesEditor = function(destid)
 		resource_type = this.resource.type;
 	if (name=='asmRoot') {
 		this.displayMetadataAttributeEditor('metadata-root','list-novisible',true);
-//		this.displayMetadataAttributeEditor('metadata-root','complex',true);
 		this.displayMetadataAttributeEditor('metadata-root','export-pdf',true);
 		this.displayMetadataAttributeEditor('metadata-root','export-rtf',true);
 		this.displayMetadataAttributeEditor('metadata-root','export-htm',true);
@@ -496,8 +495,14 @@ UIFactory["Node"].prototype.displayMetadataAttributesEditor = function(destid)
 	else
 		this.displayMetadataWadAttributeEditor('metadata-part2','moveroles');
 	//-----------------------------------------
-	this.displayMetadataWadAttributeEditor('metadata-part2','moveinroles');
-	this.displayMetadataWadAttributeEditor('metadata-part2','movein');
+	if (name=='asmRoot') {
+		this.displayMetadataWadAttributeEditor('metadata-part2','moveinroles',false,true);
+		this.displayMetadataWadAttributeEditor('metadata-part2','movein',false,true);
+		}
+	else {
+		this.displayMetadataWadAttributeEditor('metadata-part2','moveinroles');
+		this.displayMetadataWadAttributeEditor('metadata-part2','movein');
+	}
 	//-----------------------------------------
 	if (model)
 		this.displayMetadataWadAttributeEditor('metadata-part2','showroles');
