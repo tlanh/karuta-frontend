@@ -17,6 +17,7 @@
 		margin-inline-end: 40px;
 	}
 
+
 	.btn-default {
 		border-color: #ccc;
 	}
@@ -115,6 +116,31 @@
 	}
 
 
+/* ====================== */
+/*    SEARCH-RESULT       */
+/* ====================== */
+
+
+	.highlight{
+		background-color:yellow;
+	}
+
+	.result-title{
+		margin-top:20px;
+		font-size:150%;
+	}
+	.result-nb{
+		margin-top:10px;
+		font-size:120%;
+		margin-bottom:10px;
+	}
+
+	.result-page{
+		margin-top:10px;
+		margin-left:20px;
+		color: var(--portfolio-link-color);
+		cursor : pointer;
+	}
 
 
 
@@ -1178,45 +1204,13 @@
 	}
 
 
-	#sub-bar {
-		background-color: var(--portfolio-navbar-background-color);
-		border-color: var(--portfolio-navbar-background-color);
-		.dropdown-menu,
-		.open > a {
-			background-color: var(--portfolio-navbar-background-color);
-			border-color: var(--portfolio-navbar-background-color);
-		}
-		a.dropdown-item:hover {
-			color: var(--portfolio-navbar-background-color);
-		}
-		a {
-			color:var(--portfolio-navbar-text-color);
-		}
-		#toggle-mode {
-			padding-top: 9px;
-			padding-left: 10px;
-			color:var(--portfolio-navbar-text-color);
-		}
-		#toggle-mode-icon {
-			font-size:calc(var(--font-size-coeff) * 1.1rem);
-		}
-		#refresh-portfolio {
-			padding-left: 15px;
-		}
-		.navbar-brand {
-			cursor:pointer;
-		}
-		#welcome-edit{
-			padding-top:9px;
-		}
-	}
 
 
 /* ==================================================================== */
 /*                          PORTFOLIO                                   */
 /* ==================================================================== */
 //--- le libellé Bienvenue de la page WELCOME n'est visible que pour le designer
-
+/*
 	#sub-bar {
 		background-color: var(--portfolio-navbar-background-color);
 		border-color: var(--portfolio-navbar-background-color);
@@ -1244,8 +1238,9 @@
 		a {
 			color:var(--portfolio-navbar-text-color);
 		}
-*/
+
 		#toggle-mode {
+			width:200px;
 			padding-top: 9px;
 			padding-left: 10px;
 			color:var(--portfolio-navbar-text-color);
@@ -1263,10 +1258,60 @@
 			padding-top:9px;
 		}
 	}
+*/
+	#main-portfolio{
+		a {
+			color: var(--portfolio-link-color);
+			cursor:pointer;
+			.portfolio-label:hover {
+				cursor:pointer;
+			}
+		}
+		#sub-bar {
+			color:var(--portfolio-navbar-text-color);
+			background-color: var(--portfolio-navbar-background-color);
+			border-color: var(--portfolio-navbar-background-color);
+			.btn{
+				color:var(--portfolio-navbar-text-color);	
+			}
+			.dropdown-menu,
+			.open > a {
+				background-color: var(--portfolio-navbar-background-color);
+				border-color: var(--portfolio-navbar-background-color);
+			}
+			a.dropdown-item {
+				color: var(--portfolio-navbar-text-color);
+				background-color: var(--portfolio-navbar-background-color);
+			}
+			a.dropdown-item:hover {
+				background-color: var(--portfolio-navbar-text-color);
+				color: var(--portfolio-navbar-background-color);
+			}
+			a {
+				color:var(--portfolio-navbar-text-color);
+			}
+			#toggle-mode {
+				width:200px;
+				padding-top: 9px;
+				padding-left: 10px;
+				color:var(--portfolio-navbar-text-color);
+			}
+			#toggle-mode-icon {
+				font-size:calc(var(--font-size-coeff) * 1.1rem);
+			}
+			#refresh-portfolio {
+				padding-left: 15px;
+			}
+			.navbar-brand {
+				cursor:pointer;
+			}
+			#welcome-edit{
+				padding-top:9px;
+			}
+		}
 
-	#portfolio-container{
 		background-color: var(--portfolio-background-color);
-		&:not([role=designer]) .WELCOME .first-node{ 
+		#portfolio-container:not([role=designer]) .WELCOME .first-node{ 
 			display:none
 		}
 		&[role=designer] {
@@ -1278,26 +1323,16 @@
 		.popover-header {
 			color: var(--portfolio-text-color);
 		}
-		.row-node {
-			border-top:1px solid var(--portfolio-section-separator-color);
-		}
-		a {
-			color: var(--portfolio-link-color);
-			cursor:pointer;
-			.portfolio-label:hover {
-				cursor:pointer;
-			}
-		}
-		.row-node-asmUnitStructure {
-			background-color:var(--portfolio-section-title-background-color);
-		}
 		.dropdown-menu {
 			background-color: var(--portfolio-menu-background-color);
 			color: var(--portfolio-menu-text-color);
+			.dropdown-item,
 			a.dropdown-item {
+				cursor:pointer;
 				background-color: var(--portfolio-menu-background-color);
 				color: var(--portfolio-menu-text-color);
 			}
+			.dropdown-item:hover,
 			a.dropdown-item:hover {
 				background-color: var(--portfolio-menu-text-color);
 				color: var(--portfolio-menu-background-color);
@@ -1363,6 +1398,15 @@
 	.li-code,
 	.li-value {
 		margin-right:5px;
+	}
+
+	.URL2Unit {
+		.resource {
+			color: var(--portfolio-link-color);
+		}
+		.URL2Unit-link {
+			cursor:pointer;
+		}
 	}
 
 /* ====================== */
@@ -1493,6 +1537,32 @@
 			.node {
 				background: #f0f0f0;
 			}
+		}
+	}
+
+/* ========================= */
+/*        VUE translate      */
+/* ========================= */
+
+	.translate {
+		.node-label{
+				padding-top:10px;
+				padding-bottom:10px;
+				background: #f0f0f0;
+		}
+		img {
+			max-width:100%;
+		}
+		.translate-resource-default{
+			padding-top:5px;
+			margin: 5px;
+			border : 1px dashed #a0a0a0;
+		}
+		.resource-label {
+			margin-bottom:5px;
+		}
+		input {
+				background: #ffffee;
 		}
 	}
 
@@ -2429,6 +2499,7 @@ button.selected-label {
 	width:40px;
 }
 	.comments {
+		font-size:75%;
 		font-style:italic;
 		font-weight:normal;
 	//	padding:7px;
@@ -2532,8 +2603,9 @@ table.tablesorter th.restore {
 		background-repeat: no-repeat;
 		background-position: 10px 3px;
 		display:inline-block;
-		height:34px;
+		min-height:34px;
 		width:90%;
+		padding-left:40px;
 	}
 	
 	.selSMILEY-NEUTRAL, .SMILEY-NEUTRAL {
@@ -2541,8 +2613,9 @@ table.tablesorter th.restore {
 		background-repeat: no-repeat;
 		background-position: 10px 3px;
 		display:inline-block;
-		height:34px;
+		min-height:34px;
 		width:90%;
+		padding-left:40px;
 	}
 	
 	.selSMILEY-SAD, .SMILEY-SAD {
@@ -2550,8 +2623,9 @@ table.tablesorter th.restore {
 		background-repeat: no-repeat;
 		background-position: 10px 3px;
 		display:inline-block;
-		height:34px;
+		min-height:34px;
 		width:90%;
+		padding-left:40px;
 	}
 	
 	.selSMILEY-GREEN, .SMILEY-GREEN {
@@ -2559,8 +2633,9 @@ table.tablesorter th.restore {
 		background-repeat: no-repeat;
 		background-position: 10px 3px;
 		display:inline-block;
-		height:34px;
+		min-height:34px;
 		width:90%;
+		padding-left:40px;
 	}
 	
 	.selSMILEY-ORANGE, .SMILEY-ORANGE {
@@ -2568,8 +2643,9 @@ table.tablesorter th.restore {
 		background-repeat: no-repeat;
 		background-position: 10px 3px;
 		display:inline-block;
-		height:34px;
+		min-height:34px;
 		width:90%;
+		padding-left:40px;
 	}
 	
 	.selSMILEY-RED, .SMILEY-RED {
@@ -2577,8 +2653,9 @@ table.tablesorter th.restore {
 		background-repeat: no-repeat;
 		background-position: 10px 3px;
 		display:inline-block;
-		height:34px;
+		min-height:34px;
 		width:90%;
+		padding-left:40px;
 	}
 	
 	.selGREEN-CHECK, .GREEN-CHECK {
@@ -2586,8 +2663,9 @@ table.tablesorter th.restore {
 		background-repeat: no-repeat;
 		background-position: 10px 3px;
 		display:inline-block;
-		height:34px;
+		min-height:34px;
 		width:90%;
+		padding-left:40px;
 	}
 	
 	.selRED-X, .RED-X {
@@ -2595,8 +2673,9 @@ table.tablesorter th.restore {
 		background-repeat: no-repeat;
 		background-position: 10px 3px;
 		display:inline-block;
-		height:34px;
+		min-height:34px;
 		width:90%;
+		padding-left:40px;
 	}
 
 /* ====================
@@ -3271,11 +3350,17 @@ table.tablesorter th.restore {
 /* ====================
 	BLOCK
    ====================*/
+	:root{
+		--block-height:220px;
+		--block-img-height:218px;
+	}
+
 	.standard {
 		.DocumentBlock,
 		.ImageBlock,
 		.URL2UnitBlock,
-		.URLBlock {
+		.URLBlock,
+		.TextFieldBlock {
 			.content {
 				display:none;
 			}
@@ -3285,10 +3370,12 @@ table.tablesorter th.restore {
 		}
 	}
 
-
-	:root{
-		--block-height:220px;
-		--block-img-height:218px;
+	.Url2Block,
+	.DocBlock,
+	.ImgBlock,
+	.UrlBlock,
+	.TxtBlock {
+		height : var(--block-img-height);
 	}
 
 	.asmBlockContainer:first-of-type {

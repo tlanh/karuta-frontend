@@ -293,7 +293,7 @@ UIFactory["Node"].prototype.displayAsmContext = function (dest,type,langcode,edi
 			html = displayHTML[type+"-resource-default"];
 			displayview = type+"-resource-default";
 		}
-	html = html.replace(/#displayview#/g,displayview).replace(/#displaytype#/g,type).replace(/#uuid#/g,uuid).replace(/#nodetype#/g,this.nodetype).replace(/#semtag#/g,this.semtag).replace(/#cssclass#/g,this.cssclass);
+	html = html.replace(/#displayview#/g,displayview).replace(/#displaytype#/g,type).replace(/#uuid#/g,uuid).replace(/#nodetype#/g,this.nodetype).replace(/#resourcetype#/g,this.resource_type).replace(/#semtag#/g,this.semtag).replace(/#cssclass#/g,this.cssclass);
 	//-------------------- display ----------------------
 	if (!refresh) {
 		$("#"+dest).append (html);
@@ -510,6 +510,98 @@ UIFactory["Node"].prototype.displayAsmNode = function(dest,type,langcode,edit,re
 	if (this.getLabel(null,'none',langcode)=="" && this.getButtons()=="" && this.getMenus(langcode)=="")
 		$("div[name='lbl-div']","#node_"+uuid).hide();
 }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+UIFactory["Node"].prototype.displayTranslateNode = function(type,root,dest,depth,langcode,edit,inline,backgroundParent,parent,menu,inblock,refresh)
+//==============================================================================
+//==============================================================================
+//==============================================================================
+{
+	if (refresh==null)
+		refresh = false;
+	var uuid = this.id;
+	this.setMetadata(dest,depth,langcode,edit,inline,backgroundParent,parent,menu,inblock);
+	this.display_node[dest] = {"type":type,"uuid":uuid,"root":root,"dest":dest,"depth":depth,"langcode":langcode,"edit":edit,"inline":inline,"backgroundParent":backgroundParent,"display":type,"parent":parent,"menu":menu,"inblock":inblock};
+	//============================== ASMCONTEXT =============================
+	if (this.nodetype == "asmContext"){
+		var uuid = this.id;
+		//---------------- DISPLAY HTML -------------------------------
+		var html = "";
+		var displayview = "translate-resource-default";
+		html = displayHTML[displayview];
+		html = html.replace(/#displayview#/g,displayview).replace(/#displaytype#/g,type).replace(/#uuid#/g,uuid).replace(/#nodetype#/g,this.nodetype).replace(/#resourcetype#/g,this.resource_type).replace(/#semtag#/g,this.semtag).replace(/#cssclass#/g,this.cssclass);
+		//-------------------- display ----------------------
+		if (!refresh) {
+			$("#"+dest).append (html);
+		} else {
+			$("#node_"+this.id).replaceWith(html);
+		}
+		//---------------- display resource ---------------------------------
+		try {
+			this.resource.displayEditor("resource0_"+uuid,null,g_translate[0],false);
+			if (this.resource.multilingual)
+				this.resource.displayEditor("resource1_"+uuid,null,g_translate[1],false);
+			else
+				$("#resource1_"+uuid).html(karutaStr[LANG]['resource-not-multilingual']);
+		} catch(e){
+			$("#resource0_"+uuid).append(this.resource.getEditor("resource0_"+uuid,null,g_translate[0],false));
+			if (this.multilingual)
+				$("#resource1_"+uuid).append(this.resource.getEditor("resource1_"+uuid,null,g_translate[1],false))
+			else
+				$("#resource1_"+uuid).html(karutaStr[LANG]['resource-not-multilingual']);
+		}
+		//---------------- display label ---------------------------------
+		$("#label0_"+uuid).append(this.getNodeLabelEditor(null,g_translate[0]));
+		if (this.multilingual)
+			$("#label1_"+uuid).append(this.getNodeLabelEditor(null,g_translate[1]));
+		else
+			$("#label1_"+uuid).html(karutaStr[LANG]['label-not-multilingual']);
+	}
+	//============================== NODE ===================================
+	else { // other than asmContext
+		var nodetype = this.asmtype;
+		var uuid = this.id;
+		var html = "";
+		var displayview = "translate-node-default";
+		//---------------- DISPLAY HTML -------------------------------
+		html = displayHTML[displayview];
+		html = html.replace(/#displayview#/g,displayview).replace(/#displaytype#/g,type).replace(/#uuid#/g,uuid).replace(/#nodetype#/g,this.nodetype).replace(/#semtag#/g,this.semtag).replace(/#cssclass#/g,this.cssclass);
+		//-------------------- display ----------------------
+		if (!refresh) {
+			$("#"+dest).append (html);
+		} else {
+			$("#node_"+this.id).replaceWith(html);
+		}
+		//-------------- display structured resource or label --------------------------
+		if (this.structured_resource != null) {
+			this.structured_resource.displayEditor("resource0_"+uuid,null,g_translate[0],false);
+			if (this.multilingual)
+				this.structured_resource.displayEditor("resource1_"+uuid,null,g_translate[1],false);
+			else
+				$("#resource1_"+uuid).html(karutaStr[LANG]['resource-not-multilingual']);
+		} else {
+			$("#label0_"+uuid).append(this.getNodeLabelEditor(null,g_translate[0]));
+			if (this.multilingual)
+				$("#label1_"+uuid).append(this.getNodeLabelEditor(null,g_translate[1]));
+			else
+				$("#label1_"+uuid).html(karutaStr[LANG]['label-not-multilingual']);
+		}
+	}
+	// ===========================================================================
+	// ================================= For each child ==========================
+	// ===========================================================================
+	if (this.structured_resource == null)
+		for( var i=0; i<root.children.length; ++i ) {
+			// Recurse
+			var child = UICom.structure["tree"][root.children[i]];
+			var childnode = UICom.structure["ui"][root.children[i]];
+			var childsemtag = $(childnode.metadata).attr('semantictag');
+			childnode.displayTranslateNode(type,child, 'content-'+uuid, this.depth-1,langcode,edit,inline,backgroundParent,root,menu);
+		}
+	//-------------------------------------------------------
+};
 
 //==================================
 UIFactory["Node"].prototype.getUuid = function()
@@ -771,6 +863,9 @@ UIFactory["Node"].prototype.getEditor = function(type,langcode)
 	var div = $("<div></div>");
 	$(div).append($("<br>"));
 	//-----------------------------
+	var editcoderoles = $(this.metadatawad).attr('editcoderoles');
+	if (editcoderoles==undefined)
+		editcoderoles="";
 	var editnoderoles = $(this.metadatawad).attr('editnoderoles');
 	if (editnoderoles==undefined)
 		editnoderoles="";
@@ -778,7 +873,7 @@ UIFactory["Node"].prototype.getEditor = function(type,langcode)
 		var htmlFormObj = $("<form class='form-horizontal'></form>");
 		var query = $(this.metadatawad).attr('query');
 		if (query==undefined || query=='' || this.asmtype=='asmContext'){
-			if (g_userroles[0]=='designer' || USER.admin) {
+			if (g_userroles[0]=='designer' || USER.admin || editcoderoles.containsArrayElt(g_userroles) || editcoderoles.indexOf(this.userrole)>-1 || editcoderoles.indexOf($(USER.username_node).text())>-1) {
 				var htmlCodeGroupObj = $("<div class='form-group'></div>")
 				var htmlCodeLabelObj = $("<label for='code_"+this.id+"' class='col-sm-3 control-label'>Code</label>");
 				var htmlCodeDivObj = $("<div class='node-code'></div>");
@@ -885,7 +980,10 @@ UIFactory["Node"].prototype.refresh = function()
 	};
 
 	for (dest3 in this.display_node) {
-		this.displayNode(this.display_node[dest3].type,this.display_node[dest3].root, this.display_node[dest3].dest, this.display_node[dest3].depth,this.display_node[dest3].langcode,this.display_node[dest3].edit,this.display_node[dest3].inline,this.display_node[dest3].backgroundParent,this.display_node[dest3].parent,this.display_node[dest3].menu,this.display_node[dest3].inblock,true);
+		if (this.display_node[dest3].type=='translate')
+			this.displayTranslateNode(this.display_node[dest3].type,this.display_node[dest3].root, this.display_node[dest3].dest, this.display_node[dest3].depth,this.display_node[dest3].langcode,this.display_node[dest3].edit,this.display_node[dest3].inline,this.display_node[dest3].backgroundParent,this.display_node[dest3].parent,this.display_node[dest3].menu,this.display_node[dest3].inblock,true);
+		else
+			this.displayNode(this.display_node[dest3].type,this.display_node[dest3].root, this.display_node[dest3].dest, this.display_node[dest3].depth,this.display_node[dest3].langcode,this.display_node[dest3].edit,this.display_node[dest3].inline,this.display_node[dest3].backgroundParent,this.display_node[dest3].parent,this.display_node[dest3].menu,this.display_node[dest3].inblock,true);
 	};
 
 	for (dest4 in this.display_context) {

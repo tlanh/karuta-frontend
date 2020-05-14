@@ -164,118 +164,25 @@ UIFactory["Image"].prototype.getView = function(dest,type,langcode)
 	//---------------------
 	if (dest!=null) {
 		this.display[dest]=langcode;
-		this.displayType[dest]=type;
 	}
 	if (type==null)
 		type='default';
 	//------------------------
 	var image_size = "";
-	if ($(this.width_node[langcode]).text()!=undefined && $(this.width_node[langcode]).text()!='') // backward compatibility
-		image_size = "width='"+$(this.width_node[langcode]).text()+"' "; 
-	if (image_size=="" && $("metadata-epm",this.node).attr('width')!=undefined && $("metadata-epm",this.node).attr('width')!='') // backward compatibility
-		image_size = "width='"+$("metadata-epm",this.node).attr('width')+"' "; 
-	if ($(this.height_node[langcode]).text()!=undefined && $(this.height_node[langcode]).text()!='') // backward compatibility
-		image_size += "height='"+$(this.height_node[langcode]).text()+"' "; 
-	if (image_size.indexOf('height')<0 && $("metadata-epm",this.node).attr('height')!=undefined && $("metadata-epm",this.node).attr('height')!='')
-		image_size += "height='"+$("metadata-epm",this.node).attr('height')+"' "; 
-	if (image_size=="")
-		image_size = "class='image img-fluid'";
-	//------------------------
-	var alt = "";
-	if ($(this.alt_node[langcode]).text()!=undefined) // backward compatibility
-		alt = "alt=\""+$(this.alt_node[langcode]).text()+"\" "; 
-	//------------------------
-	var html ="";
-	if (type=='default') {
-		html +="<div uuid='img_"+this.id+"'>";
-		if ($(this.filename_node[langcode]).text()!="") {
-//			html += "<a href='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&size=L&timestamp=" + new Date().getTime()+"' data-lightbox='image-"+this.id+"' title=''>";
-			html += "<img style='display:inline;' id='image_"+this.id+"' src='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&timestamp=" + new Date().getTime()+"' "+image_size+" "+alt+" />";
-//			html += "</a>";
-		}
-		else
-			html += "<img src='../../karuta/img/image-icon.png' height='25px'/>"+karutaStr[LANG]['no-image'];
-		html += "</div>";
+	var img_width = ($(this.width_node[langcode]).text()!=undefined) ? $(this.width_node[langcode]).text() : "";
+	var img_height = ($(this.height_node[langcode]).text()!=undefined) ? $(this.height_node[langcode]).text() : "";
+	if (img_width!="" && img_width.indexOf('px')<0)
+		img_width += "px";
+	if (img_height!="" && img_height.indexOf('px')<0)
+		img_height += "px";
+	if (img_width=="" && img_height=="")
+		image_size = " class='image img-fluid' ";
+	else {
+		if (img_width!="")
+			image_size += " width='"+img_width + "' ";
+		if (img_height!="")
+			image_size += " height='" + img_height + "' ";
 	}
-	if (type=='span') {
-		html +="<span uuid='img_"+this.id+"'>";
-		if ($(this.filename_node[langcode]).text()!="") {
-//			html += "<a href='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&size=L&timestamp=" + new Date().getTime()+"' data-lightbox='image-"+this.id+"' title=''>";
-			html += "<img style='display:inline;' id='image_"+this.id+"' src='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&timestamp=" + new Date().getTime()+"' "+image_size+" "+alt+" />";
-//			html += "</a>";
-		}
-		else
-			html += "<img src='../../karuta/img/image-icon.png' height='25px'/>"+karutaStr[LANG]['no-image'];
-		html += "</span>";
-	}
-	if (type=='withoutlightbox' && $(this.filename_node[langcode]).text()!="") {
-		html += "<img uuid='img_"+this.id+"' src='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&size=S&timestamp=" + new Date().getTime()+"' "+image_size+" "+alt+" />";
-	}
-	if (type=='withfilename'  && $(this.filename_node[langcode]).text()!=""){
-		html += "<a href='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&size=L&timestamp=" + new Date().getTime()+"' data-lightbox='image-"+this.id+"' title=''>";
-		html += "<img uuid='img_"+this.id+"' src='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&size=S&timestamp=" + new Date().getTime()+"' "+image_size+" "+alt+" />";		
-		html += "</a>";
-		html += " <span>"+$(this.filename_node[langcode]).text()+"</span>";
-	}
-	if (type=='withfilename-withoutlightbox'  && $(this.filename_node[langcode]).text()!=""){
-		html += "<img uuid='img_"+this.id+"' src='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&size=S&timestamp=" + new Date().getTime()+"' "+image_size+" "+alt+" />";		
-		html += " <span>"+$(this.filename_node[langcode]).text()+"</span>";
-	}
-	if (type=='editor'  && $(this.filename_node[langcode]).text()!=""){
-		html += "<img uuid='edit-img_"+this.id+"' src='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&size=S&timestamp=" + new Date().getTime()+"' height='100' "+alt+" />";		
-		html += " <span>"+$(this.filename_node[langcode]).text()+"</span>";
-	}
-	if (type=='block') {
-		html +="<div uuid='img_"+this.id+"' style='height:100%'>";
-		if ($(this.filename_node[langcode]).text()!="") {
-			html += "<table width='100%' height='100%'><tr><td style='vertical-align:middle;text-align:center'>";
-			html += "<a href='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&size=L&timestamp=" + new Date().getTime()+"' data-lightbox='image-"+this.id+"' title=''>";
-			html += "<img style='display:inline;max-height:218px;' id='image_"+this.id+"' src='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&size=S&timestamp=" + new Date().getTime()+"' "+image_size+" "+alt+" />";
-			html += "</a>";
-			html += "</td></tr></table>";
-		} else {
-			html += "<table width='100%' height='100%'><tr><td style='vertical-align:middle;text-align:center'>";
-			html += "<img src='../../karuta/img/image-icon.png' height='150px' "+alt+" />"+karutaStr[LANG]['no-image'];
-			html += "</td></tr></table>";
-		}
-		html += "</div>";
-	}
-	if (type=='url') {
-		html = "../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&size=L&timestamp=" + new Date().getTime();
-	}
-
-	return html;
-};
-
-//==================================
-UIFactory["Image"].prototype.displayView = function(dest,type,langcode)
-//==================================
-{
-	//---------------------
-	if (langcode==null)
-		langcode = LANGCODE;
-	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (this.multilingual!=undefined && !this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
-	if (dest!=null) {
-		this.display[dest]=langcode;
-	}
-	if (type==null)
-		type='default';
-	//------------------------
-	var image_size = "";
-	if ($(this.width_node[langcode]).text()!=undefined && $(this.width_node[langcode]).text()!='') // backward compatibility
-		image_size = "width='"+$(this.width_node[langcode]).text()+"' "; 
-//	if (image_size=="" && $("metadata-epm",this.node).attr('width')!=undefined && $("metadata-epm",this.node).attr('width')!='') // backward compatibility
-//		image_size = "width='"+$("metadata-epm",this.node).attr('width')+"' "; 
-	if ($(this.height_node[langcode]).text()!=undefined && $(this.height_node[langcode]).text()!='') // backward compatibility
-		image_size += "height='"+$(this.height_node[langcode]).text()+"' "; 
-	if (image_size.indexOf('height')<0 && $("metadata-epm",this.node).attr('height')!=undefined && $("metadata-epm",this.node).attr('height')!='')
-		image_size += "height='"+$("metadata-epm",this.node).attr('height')+"' "; 
-	if (image_size=="")
-		image_size = "class='image img-fluid'";
 	//------------------------
 	var alt = "";
 	if ($(this.alt_node[langcode]).text()!=undefined) // backward compatibility
@@ -337,6 +244,14 @@ UIFactory["Image"].prototype.displayView = function(dest,type,langcode)
 		html += "</div>";
 	}
 
+	return html;
+};
+
+//==================================
+UIFactory["Image"].prototype.displayView = function(dest,type,langcode)
+//==================================
+{
+	var html = this.getView(dest,type,langcode);
 	$("#"+dest).html(html);
 	var uuid = this.id;
 	$("#image_"+this.id).click(function(){
@@ -391,7 +306,7 @@ UIFactory["Image"].remove = function(uuid,langcode)
 };
 
 //==================================
-UIFactory["Image"].prototype.displayEditor = function(destid,type,langcode,parent,disabled)
+UIFactory["Image"].prototype.displayEditor = function(destid,type,langcode,disabled,parent)
 //==================================
 {
 	var filename = ""; // to avoid problem : filename with accents	
@@ -407,12 +322,17 @@ UIFactory["Image"].prototype.displayEditor = function(destid,type,langcode,paren
 	html += " <span id='editimage_"+this.id+"_"+langcode+"'>"+this.getView('editimage_'+this.id+"_"+langcode,'editor',langcode)+"</span> ";
 	var url = serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode];
 	html +=" <div id='divfileupload_"+this.id+"_"+langcode+"' >";
-	html +=" <input id='fileupload_"+this.id+"_"+langcode+"' type='file' name='uploadfile' data-url='"+url+"'>";
+	html +=" <input id='fileupload_"+this.id+"_"+langcode+"' type='file' "+((disabled) ? "disabled":"")+" name='uploadfile' data-url='"+url+"'>";
 	html += "</div>";
 	html +=" <div id='progress_"+this.id+"_"+langcode+"''><div class='bar' style='width: 0%;'></div></div>";
 	html += "<span id='fileimage_"+this.id+"_"+langcode+"'>"+$(this.filename_node[langcode]).text()+"</span>";
 	html += "<span id='loaded_"+this.id+langcode+"'></span>"
-	html +=  " <button type='button' class='btn ' onclick=\"UIFactory.Image.remove('"+this.id+"',"+langcode+")\">"+karutaStr[LANG]['button-delete']+"</button>";
+	html +=  " <button type='button' class='btn ' "+((disabled) ? "disabled":"")+" onclick=\"UIFactory.Image.remove('"+this.id+"',"+langcode+")\">"+karutaStr[LANG]['button-delete']+"</button>";
+	if (USER.admin || g_userroles[0]=='designer') {
+		var semtag =  ($("metadata",this.node)[0]==undefined || $($("metadata",this.node)[0]).attr('semantictag')==undefined)?'': $($("metadata",this.node)[0]).attr('semantictag');
+		if (semtag=="config-img-css")
+			html += "<div class='iamge-url'>url : ../../../"+serverBCK+"/resources/resource/file/"+this.id+"</div>";
+	}
 	$("#"+destid).append($(html));
 	var loadedid = 'loaded_'+this.id+langcode;
 	$('#fileupload_'+this.id+"_"+langcode).fileupload({
@@ -452,7 +372,7 @@ UIFactory["Image"].prototype.displayEditor = function(destid,type,langcode,paren
 		var htmlWidthGroupObj = $("<div class='form-group'></div>")
 		var htmlWidthLabelObj = $("<label for='width_"+this.id+"' class='col-sm-3 control-label'>"+karutaStr[LANG]['width']+"</label>");
 		var htmlWidthDivObj = $("<div class='col-sm-9'></div>");
-		var htmlWidthInputObj = $("<input id='width_"+this.id+"_"+langcode+"' type='text' class='form-control' value=\""+width+"\">");
+		var htmlWidthInputObj = $("<input id='width_"+this.id+"_"+langcode+"' type='text' class='form-control' "+((disabled) ? "disabled":"")+" value=\""+width+"\">");
 		var self = this;
 		$(htmlWidthInputObj).change(function (){
 			$(self.width_node[langcode]).text($(this).val());
@@ -469,7 +389,7 @@ UIFactory["Image"].prototype.displayEditor = function(destid,type,langcode,paren
 		var htmlHeightGroupObj = $("<div class='form-group'></div>")
 		var htmlHeightLabelObj = $("<label for='height_"+this.id+"' class='col-sm-3 control-label'>"+karutaStr[LANG]['height']+"</label>");
 		var htmlHeightDivObj = $("<div class='col-sm-9'></div>");
-		var htmlHeightInputObj = $("<input id='height_"+this.id+"_"+langcode+"' type='text' class='form-control' value=\""+height+"\">");
+		var htmlHeightInputObj = $("<input id='height_"+this.id+"_"+langcode+"' type='text' class='form-control' "+((disabled) ? "disabled":"")+" value=\""+height+"\">");
 		var self = this;
 		$(htmlHeightInputObj).change(function (){
 			$(self.height_node[langcode]).text($(this).val());
@@ -486,7 +406,7 @@ UIFactory["Image"].prototype.displayEditor = function(destid,type,langcode,paren
 		var htmlaltGroupObj = $("<div class='form-group'></div>")
 		var htmlaltLabelObj = $("<label for='alt_"+this.id+"' class='col-sm-3 control-label'>"+karutaStr[LANG]['alt']+"</label>");
 		var htmlaltDivObj = $("<div class='col-sm-9'></div>");
-		var htmlaltInputObj = $("<input id='alt_"+this.id+"_"+langcode+"' type='text' class='form-control' value=\""+alt+"\">");
+		var htmlaltInputObj = $("<input id='alt_"+this.id+"_"+langcode+"' type='text' class='form-control' "+((disabled) ? "disabled":"")+" value=\""+alt+"\">");
 		var self = this;
 		$(htmlaltInputObj).change(function (){
 			$(self.alt_node[langcode]).text($(this).val());
@@ -505,7 +425,7 @@ UIFactory["Image"].prototype.displayEditor = function(destid,type,langcode,paren
 			var htmlcodeGroupObj = $("<div class='form-group'></div>")
 			var htmlcodeLabelObj = $("<label for='code_"+this.id+"' class='col-sm-3 control-label'>"+karutaStr[LANG]['code']+"</label>");
 			var htmlcodeDivObj = $("<div class='col-sm-9'></div>");
-			var htmlcodeInputObj = $("<input id='code_"+this.id+"' type='text' class='form-control' value=\""+code+"\">");
+			var htmlcodeInputObj = $("<input id='code_"+this.id+"' type='text' class='form-control' "+((disabled) ? "disabled":"")+" value=\""+code+"\">");
 			var self = this;
 			$(htmlcodeInputObj).change(function (){
 				$(self.code_node).text($(this).val());
@@ -522,7 +442,7 @@ UIFactory["Image"].prototype.displayEditor = function(destid,type,langcode,paren
 			var htmlvalueGroupObj = $("<div class='form-group'></div>")
 			var htmlvalueLabelObj = $("<label for='value_"+this.id+"' class='col-sm-3 control-label'>"+karutaStr[LANG]['value']+"</label>");
 			var htmlvalueDivObj = $("<div class='col-sm-9'></div>");
-			var htmlvalueInputObj = $("<input id='value_"+this.id+"' type='text' class='form-control' value=\""+value+"\">");
+			var htmlvalueInputObj = $("<input id='value_"+this.id+"' type='text' class='form-control' "+((disabled) ? "disabled":"")+" value=\""+value+"\">");
 			var self = this;
 			$(htmlvalueInputObj).change(function (){
 				$(self.value_node).text($(this).val());

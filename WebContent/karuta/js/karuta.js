@@ -33,6 +33,7 @@ var g_designerrole = false;
 var g_rc4key = "";
 var g_encrypted = false;
 var g_display_type = "standard"; // default value
+var g_translate = [];
 var g_bar_type = "vertical"; // default value
 var g_edit = false;
 var g_visible = 'hidden';
@@ -641,7 +642,7 @@ function displayPage(uuid,depth,type,langcode) {
 			}
 		}
 		if (type=='translate')
-			UIFactory['Node'].displayTranslate(UICom.structure['tree'][uuid],'contenu',depth,langcode,g_edit);
+			UICom.structure["ui"][uuid].displayTranslateNode(type,UICom.structure['tree'][uuid],'contenu',depth,langcode,g_edit);
 		if (type=='raw' || type=='model') {
 			UICom.structure["ui"][uuid].displayNode(type,UICom.structure.tree[uuid],'contenu',depth,langcode,g_edit);
 		}
@@ -667,6 +668,13 @@ function displayPage(uuid,depth,type,langcode) {
 	}
 	$('[data-toggle="tooltip"]').tooltip({html: true, trigger: 'hover'});
 	$("#wait-window").modal('hide');
+	if ($("#standard-search-text-input").val()!=undefined && $("#standard-search-text-input").val()!="") {
+		var searched_text = $("#standard-search-text-input").val();
+		var  html = document.getElementById("contenu").innerHTML;
+		var regex = new RegExp(searched_text, 'g');
+		var newhtml  = html.replace(regex,"<span class='highlight'>"+searched_text+"</span>");
+		document.getElementById("contenu").innerHTML = newhtml;
+	}
 	window.scrollTo(scrollLeft, scrollTop);
 }
 
@@ -1352,10 +1360,12 @@ function toggleSideBar() {
 //==================================
 	if ($("#sidebar").is(":visible"))
 	{
+		localStorage.setItem('sidebar-'+g_portfolioid,'hidden');
 		$("#sidebar").hide();
 		g_display_sidebar = false;
 		$("#contenu").removeClass().addClass('col-md-12').addClass('col-sm-12');
 	} else {
+		localStorage.setItem('sidebar-'+g_portfolioid,'visible');
 		$("#contenu").removeClass().addClass('col-md-9').addClass('col-sm-9');
 		$("#sidebar").show();
 		g_display_sidebar = true;
@@ -1564,9 +1574,9 @@ function getFirstWords(html,nb) {
 function setVariables(data)
 //==================================
 {
-	var variable_nodes = $("asmContext:has(metadata[semantictag='g-variable'])",data);
+	var variable_nodes = $("asmContext:has(metadata[semantictag*='g-variable'])",data);
 	for (var i=0;i<variable_nodes.length;i++) {
-		g_variables[UICom.structure["ui"][$(variable_nodes[i]).attr("id")].getLabel(null,'none')] = UICom.structure["ui"][$(variable_nodes[i]).attr("id")].resource.getAttributes().text;
+		g_variables[UICom.structure["ui"][$(variable_nodes[i]).attr("id")].resource.getAttributes().name] = UICom.structure["ui"][$(variable_nodes[i]).attr("id")].resource.getAttributes().value;
 	}
 }
 

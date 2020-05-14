@@ -230,6 +230,16 @@
 		</delete-tree>
 	</xsl:template>
 
+	<xsl:template match="*[metadata/@semantictag='refresh-tree-url2unit']">
+		<xsl:variable name="select">
+			<xsl:call-template name='get-select'>
+				<xsl:with-param name='parent'>subsection-target</xsl:with-param>
+			</xsl:call-template>
+		</xsl:variable>
+		<refresh-tree-url2unit  select="{$select}">
+		</refresh-tree-url2unit>
+	</xsl:template>
+
 	<xsl:template match="*[metadata/@semantictag='share-tree']">
 		<xsl:variable name="id">
 			<xsl:value-of select=".//asmContext[metadata/@semantictag='tree-select']/asmResource[@xsi_type='Get_Resource']/label[@lang=$lang]"></xsl:value-of>
@@ -527,7 +537,7 @@
 		<update-resource type='Calendar' select="{$select}">
 			<attribute name='minViewMode' language-dependent='N'>
 				<txtval>
-					<xsl:value-of select=".//asmContext[metadata/@semantictag='minViewMode']/asmResource[@xsi_type='Field']/text[@lang=$lang]"></xsl:value-of>
+					<xsl:value-of select=".//asmContext[metadata/@semantictag='minViewMode']/asmResource[@xsi_type='Field']/text"></xsl:value-of>
 				</txtval>
 			</attribute>
 			<attribute name='format' language-dependent='Y'>
@@ -543,6 +553,23 @@
 		</update-resource>
 	</xsl:template>
 	
+	<xsl:template match="*[metadata/@semantictag='update-variable']">
+		<xsl:variable name="select">
+			<xsl:call-template name='get-select'>
+				<xsl:with-param name='parent'>subsection-target</xsl:with-param>
+			</xsl:call-template>
+		</xsl:variable>
+		<xsl:variable name="varname">
+			<xsl:value-of select=".//asmContext[metadata/@semantictag='variable-name']/asmResource[@xsi_type='Field']/text"></xsl:value-of>
+		</xsl:variable>
+		<update-resource type='Variable' select="{$select}.{$varname}">
+			<attribute name='value' language-dependent='N'>
+				<xsl:call-template name="txtval">
+					<xsl:with-param name="semtag">variable-value</xsl:with-param>
+				</xsl:call-template>
+			</attribute>
+		</update-resource>
+	</xsl:template>
 
 	<xsl:template match="*[metadata/@semantictag='update-document']">
 		<xsl:variable name="select">

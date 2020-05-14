@@ -51,6 +51,7 @@ var UICom =
 		jQuery.ajax(set);
 		*/
 		$.ajax({
+			async:false,
 			dataType: dataType,
 			type: type,
 			url: url,
@@ -167,15 +168,17 @@ var UICom =
 						var edittargetroles = ($("metadata-wad",child).attr('edittargetroles')==undefined)?'none':$("metadata-wad",child).attr('edittargetroles');
 						var delnoderoles = ($("metadata-wad",child).attr('delnoderoles')==undefined)?'none':$("metadata-wad",child).attr('delnoderoles');
 						$.ajax({
+							async : false,
 							type : "GET",
 							dataType : "xml",
 							url : serverBCK_API+"/nodes/node/" + targetid + "?resources=true",
 							success : function(data) {
+								$(":root",data).attr("id",targetid+$(current).attr("id"));
 								proxies_data[targetid] = data;
 								proxies_parent[targetid] = $(current).attr("id");
 								proxies_edit[targetid] = edittargetroles;
 								proxies_delete[targetid] = delnoderoles;
-								proxies_nodeid[targetid] = id;
+								proxies_nodeid[targetid] = id; // og: ???
 								UICom.parseStructure(data,false,$(current).attr("id"),null,null,true);
 							}
 						});

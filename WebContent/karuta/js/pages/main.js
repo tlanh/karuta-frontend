@@ -116,8 +116,6 @@ function fill_main_page(rootid,role)
 			//-------------------------------------------------
 			UIFactory.Portfolio.displayPortfolio('portfolio-container',g_display_type,LANGCODE,g_edit);
 			// --------------------------
-
-			// --------------------------
 			if (g_display_type=="standard" || g_display_type=="raw") {
 				if (USER.creator)
 					g_edit = true;
@@ -128,6 +126,18 @@ function fill_main_page(rootid,role)
 			if (g_display_type=="model" || g_display_type=="translate") {
 				g_edit = true;
 				$("#sub-bar").html(UIFactory["Portfolio"].getNavBar(g_display_type,LANGCODE,g_edit,g_portfolioid));
+			}
+			$("#standard-search-text-input").keypress(function(f) {
+				var code= (f.keyCode ? f.keyCode : f.which);
+				if (code == 13)
+					UIFactory.Portfolio.search('standard');
+			});
+			// --------------------------
+			g_display_sidebar = (localStorage.getItem('sidebar-'+g_portfolioid) == 'hidden') ? false:true;
+			if (!g_display_sidebar) {
+				$("#sidebar").hide();
+				g_display_sidebar = false;
+				$("#contenu").removeClass().addClass('col-md-12').addClass('col-sm-12');
 			}
 			//---------------------------
 			if (g_encrypted)

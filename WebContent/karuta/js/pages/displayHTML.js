@@ -11,7 +11,7 @@
 	displayView["standard"]["struct"] = ["strcut"];
 	displayView["standard"]["node"] = ["default","row","xwide","card","carddeck","card-carddeck","1/12","2/12","3/12","4/12","5/12","6/12","7/12","8/12","9/12","10/12","11/12"];
 	displayView["standard"]["resource"] = ["default","simple","xwide","card","1/12","2/12","3/12","4/12","5/12","6/12","7/12","8/12","9/12","10/12","11/12"];
-	displayView["standard"]["resource"]["Image"] = ["Img-Label"];
+//	displayView["standard"]["resource"]["Image"] = ["Img-Label"];
 
 	displayView["model"] = {};
 	displayView["model"]["node"] = ["default","card","row"];
@@ -145,6 +145,31 @@
 												"</div>";
 
 	//====================================================================
+	//========================== TRANSLATE ===============================
+	//====================================================================
+	displayHTML["translate-node-default"] =	"<div id='node_#uuid#' class='#displayview# #displaytype# #nodetype# #semtag# #cssclass#  #resourcetype# #priv#'>" +
+											"	<div id='std_node_#uuid#' class='node-label row'>" +
+											"		<span class='col-6 label-node' id='label0_#uuid#'></span><span class='col-6 label-node' id='label1_#uuid#'></span>" +
+											"	</div>" +
+											"	<div class='row'>" +
+											"			<div id='resource0_#uuid#' class='col-6'></div>" +
+											"			<div id='resource1_#uuid#' class='col-6'></div>" +
+											"	</div>" +
+											"	<div id='content-#uuid#' name='cnt-div' class='content standard-node-default-content' ><\div>" +
+											"</div>";
+
+	displayHTML["translate-resource-default"] =	"<div id='node_#uuid#' class='#displayview# #displaytype# #nodetype# #semtag# #cssclass#  #resourcetype# #priv#'>" +
+												"	<div id='std_node_#uuid#' class='resource-label row'>" +
+												"		<span class='col-6 label-node' id='label0_#uuid#'></span><span class='col-6 label-node' id='label1_#uuid#'></span>" +
+												"	</div>" +
+												"	<div class='row'>" +
+												"			<div id='resource0_#uuid#' class='col-6'></div>" +
+												"			<div id='resource1_#uuid#' class='col-6'></div>" +
+												"	</div>" +
+												"</div>";
+
+	
+	//====================================================================
 	//========================== XWIDE ===================================
 	//====================================================================
 	displayHTML["standard-node-xwide"]  =	"<div id='node_#uuid#' class='#displayview# #displaytype# #nodetype# #semtag# #cssclass#  #resourcetype# #priv#'>" +
@@ -161,9 +186,9 @@
 											"</div>";
 
 	displayHTML["standard-resource-xwide"]  =	"<div id='node_#uuid#' class='#displayview# #displaytype# #nodetype# #semtag# #cssclass#  #resourcetype# #priv#'>" +
-									" <div id='sub_node_#uuid#' class='resource-node #displayview#' >" +
+												" <div class='edit-bar'><span id='buttons-#uuid#' class='buttons'/><span id='menus-#uuid#' class='menus'/></div>" +
+												" <div id='sub_node_#uuid#' class='resource-node #displayview#' >" +
 									"	<div id='std_node_#uuid#' name='res-lbl-div' class=''>" +
-									 "		<div id='buttons-#uuid#' class='buttons edit-bar'></div>" +
 									"		<div class='node-label inside-full-height'>" +
 									 "			<div class='label-help'><span id='label_node_#uuid#' class='label-libelle'></span><span id='help_#uuid#' class='ihelp'></span></div>" +
 									 "		</div>" +
@@ -381,7 +406,7 @@
 	
 	var resource1 = "<div id='node_#uuid#' class='resource- #displaytype# #nodetype# #semtag# #cssclass#  #resourcetype# #priv# col-md-";
 	var resource2 = " ' >" +
-					"	<div class='edit-bar'><span id='buttons-#uuid#' name='res-div' class='buttons'/></div>" +
+					"	<div class='edit-bar'><span id='buttons-#uuid#' class='buttons'/></div>" +
 					"	<div id='sub_node_#uuid#' class='node #displayview#' >" +
 					"		<div id='std_node_#uuid#' class='node-label'>" +
 					"			<div name='res-lbl-div'><span id='label_node_#uuid#' class='label-libelle'></span><span id='help_#uuid#' class='ihelp'></span></div>" +

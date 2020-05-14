@@ -111,6 +111,31 @@ body,
 }
 
 /* ====================== */
+/*    SEARCH-RESULT       */
+/* ====================== */
+.highlight {
+  background-color: yellow;
+}
+
+.result-title {
+  margin-top: 20px;
+  font-size: 150%;
+}
+
+.result-nb {
+  margin-top: 10px;
+  font-size: 120%;
+  margin-bottom: 10px;
+}
+
+.result-page {
+  margin-top: 10px;
+  margin-left: 20px;
+  color: var(--portfolio-link-color);
+  cursor: pointer;
+}
+
+/* ====================== */
 /*    LIST- WELCOME       */
 /* ====================== */
 .portfolio-label {
@@ -1099,157 +1124,165 @@ body,
   border-left-color: #fff;
 }
 
-#sub-bar {
-  background-color: var(--portfolio-navbar-background-color);
-  border-color: var(--portfolio-navbar-background-color);
-}
-#sub-bar .dropdown-menu,
-#sub-bar .open > a {
-  background-color: var(--portfolio-navbar-background-color);
-  border-color: var(--portfolio-navbar-background-color);
-}
-#sub-bar a.dropdown-item:hover {
-  color: var(--portfolio-navbar-background-color);
-}
-#sub-bar a {
-  color: var(--portfolio-navbar-text-color);
-}
-#sub-bar #toggle-mode {
-  padding-top: 9px;
-  padding-left: 10px;
-  color: var(--portfolio-navbar-text-color);
-}
-#sub-bar #toggle-mode-icon {
-  font-size: calc(var(--font-size-coeff) * 1.1rem);
-}
-#sub-bar #refresh-portfolio {
-  padding-left: 15px;
-}
-#sub-bar .navbar-brand {
-  cursor: pointer;
-}
-#sub-bar #welcome-edit {
-  padding-top: 9px;
-}
-
 /* ==================================================================== */
 /*                          PORTFOLIO                                   */
 /* ==================================================================== */
-#sub-bar {
+/*
+	#sub-bar {
+		background-color: var(--portfolio-navbar-background-color);
+		border-color: var(--portfolio-navbar-background-color);
+		.dropdown-menu {
+			background-color: var(--portfolio-navbar-background-color);
+			color: var(--portfolio-navbar-text-color);
+			a.dropdown-item {
+				background-color: var(--portfolio-navbar-background-color);
+				color: var(--portfolio-navbar-text-color);
+			}
+			a.dropdown-item:hover {
+				background-color: var(--portfolio-navbar-text-color);
+				color: var(--portfolio-navbar-background-color);
+			}
+		}
+/*
+		.dropdown-menu,
+		.open > a {
+			background-color: var(--portfolio-navbar-background-color);
+			border-color: var(--portfolio-navbar-background-color);
+		}
+		a.dropdown-item:hover {
+			color: var(--portfolio-navbar-background-color);
+		}
+		a {
+			color:var(--portfolio-navbar-text-color);
+		}
+
+		#toggle-mode {
+			width:200px;
+			padding-top: 9px;
+			padding-left: 10px;
+			color:var(--portfolio-navbar-text-color);
+		}
+		#toggle-mode-icon {
+			font-size:calc(var(--font-size-coeff) * 1.1rem);
+		}
+		#refresh-portfolio {
+			padding-left: 15px;
+		}
+		.navbar-brand {
+			cursor:pointer;
+		}
+		#welcome-edit{
+			padding-top:9px;
+		}
+	}
+*/
+#main-portfolio {
+  background-color: var(--portfolio-background-color);
+}
+#main-portfolio a {
+  color: var(--portfolio-link-color);
+  cursor: pointer;
+}
+#main-portfolio a .portfolio-label:hover {
+  cursor: pointer;
+}
+#main-portfolio #sub-bar {
+  color: var(--portfolio-navbar-text-color);
   background-color: var(--portfolio-navbar-background-color);
   border-color: var(--portfolio-navbar-background-color);
-  /*
-  		.dropdown-menu,
-  		.open > a {
-  			background-color: var(--portfolio-navbar-background-color);
-  			border-color: var(--portfolio-navbar-background-color);
-  		}
-  		a.dropdown-item:hover {
-  			color: var(--portfolio-navbar-background-color);
-  		}
-  		a {
-  			color:var(--portfolio-navbar-text-color);
-  		}
-  */
 }
-#sub-bar .dropdown-menu {
-  background-color: var(--portfolio-navbar-background-color);
+#main-portfolio #sub-bar .btn {
   color: var(--portfolio-navbar-text-color);
 }
-#sub-bar .dropdown-menu a.dropdown-item {
+#main-portfolio #sub-bar .dropdown-menu,
+#main-portfolio #sub-bar .open > a {
   background-color: var(--portfolio-navbar-background-color);
-  color: var(--portfolio-navbar-text-color);
+  border-color: var(--portfolio-navbar-background-color);
 }
-#sub-bar .dropdown-menu a.dropdown-item:hover {
+#main-portfolio #sub-bar a.dropdown-item {
+  color: var(--portfolio-navbar-text-color);
+  background-color: var(--portfolio-navbar-background-color);
+}
+#main-portfolio #sub-bar a.dropdown-item:hover {
   background-color: var(--portfolio-navbar-text-color);
   color: var(--portfolio-navbar-background-color);
 }
-#sub-bar #toggle-mode {
+#main-portfolio #sub-bar a {
+  color: var(--portfolio-navbar-text-color);
+}
+#main-portfolio #sub-bar #toggle-mode {
+  width: 200px;
   padding-top: 9px;
   padding-left: 10px;
   color: var(--portfolio-navbar-text-color);
 }
-#sub-bar #toggle-mode-icon {
+#main-portfolio #sub-bar #toggle-mode-icon {
   font-size: calc(var(--font-size-coeff) * 1.1rem);
 }
-#sub-bar #refresh-portfolio {
+#main-portfolio #sub-bar #refresh-portfolio {
   padding-left: 15px;
 }
-#sub-bar .navbar-brand {
+#main-portfolio #sub-bar .navbar-brand {
   cursor: pointer;
 }
-#sub-bar #welcome-edit {
+#main-portfolio #sub-bar #welcome-edit {
   padding-top: 9px;
 }
-
-#portfolio-container {
-  background-color: var(--portfolio-background-color);
-}
-#portfolio-container:not([role=designer]) .WELCOME .first-node {
+#main-portfolio #portfolio-container:not([role=designer]) .WELCOME .first-node {
   display: none;
 }
-#portfolio-container #contenu,
-#portfolio-container .popover-header {
+#main-portfolio #contenu,
+#main-portfolio .popover-header {
   color: var(--portfolio-text-color);
 }
-#portfolio-container .row-node {
-  border-top: 1px solid var(--portfolio-section-separator-color);
-}
-#portfolio-container a {
-  color: var(--portfolio-link-color);
-  cursor: pointer;
-}
-#portfolio-container a .portfolio-label:hover {
-  cursor: pointer;
-}
-#portfolio-container .row-node-asmUnitStructure {
-  background-color: var(--portfolio-section-title-background-color);
-}
-#portfolio-container .dropdown-menu {
+#main-portfolio .dropdown-menu {
   background-color: var(--portfolio-menu-background-color);
   color: var(--portfolio-menu-text-color);
 }
-#portfolio-container .dropdown-menu a.dropdown-item {
+#main-portfolio .dropdown-menu .dropdown-item,
+#main-portfolio .dropdown-menu a.dropdown-item {
+  cursor: pointer;
   background-color: var(--portfolio-menu-background-color);
   color: var(--portfolio-menu-text-color);
 }
-#portfolio-container .dropdown-menu a.dropdown-item:hover {
+#main-portfolio .dropdown-menu .dropdown-item:hover,
+#main-portfolio .dropdown-menu a.dropdown-item:hover {
   background-color: var(--portfolio-menu-text-color);
   color: var(--portfolio-menu-background-color);
 }
-#portfolio-container .row {
+#main-portfolio .row {
   margin-right: 0px;
   margin-left: 0px;
 }
-#portfolio-container .collapsible {
+#main-portfolio .collapsible {
   cursor: pointer;
   float: left;
   margin-right: 5px;
   margin-top: 1px;
   color: var(--portfolio-buttons-color);
 }
-#portfolio-container .createreport .button,
-#portfolio-container .btn-group .button,
-#portfolio-container .menus,
-#portfolio-container .add-button {
+#main-portfolio .createreport .button,
+#main-portfolio .btn-group .button,
+#main-portfolio .menus,
+#main-portfolio .add-button {
   color: var(--portfolio-buttons-color);
 }
-#portfolio-container .main-roles {
+#main-portfolio .main-roles {
   font-size: 70%;
   margin-left: 5px;
 }
-#portfolio-container .main-roles td {
+#main-portfolio .main-roles td {
   border: 1px solid gray;
   padding: 3px;
 }
-#portfolio-container .node-type {
+#main-portfolio .node-type {
   font-size: 90%;
   font-style: italic;
 }
-#portfolio-container .semtag-line-header {
+#main-portfolio .semtag-line-header {
   margin-bottom: 2px;
 }
-#portfolio-container .semtag-value {
+#main-portfolio .semtag-value {
   color: white;
   background-color: #aaa;
 }
@@ -1268,6 +1301,13 @@ body,
 .li-code,
 .li-value {
   margin-right: 5px;
+}
+
+.URL2Unit .resource {
+  color: var(--portfolio-link-color);
+}
+.URL2Unit .URL2Unit-link {
+  cursor: pointer;
 }
 
 /* ====================== */
@@ -1382,6 +1422,29 @@ body,
 /* ========================= */
 .raw .raw-node-default .node {
   background: #f0f0f0;
+}
+
+/* ========================= */
+/*        VUE translate      */
+/* ========================= */
+.translate .node-label {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background: #f0f0f0;
+}
+.translate img {
+  max-width: 100%;
+}
+.translate .translate-resource-default {
+  padding-top: 5px;
+  margin: 5px;
+  border: 1px dashed #a0a0a0;
+}
+.translate .resource-label {
+  margin-bottom: 5px;
+}
+.translate input {
+  background: #ffffee;
 }
 
 /* ========================= */
@@ -2223,6 +2286,7 @@ button.selected-label {
 }
 
 .comments {
+  font-size: 75%;
   font-style: italic;
   font-weight: normal;
 }
@@ -2457,8 +2521,9 @@ select.Y2, option[value=Y2] {
   background-repeat: no-repeat;
   background-position: 10px 3px;
   display: inline-block;
-  height: 34px;
+  min-height: 34px;
   width: 90%;
+  padding-left: 40px;
 }
 
 .selSMILEY-NEUTRAL, .SMILEY-NEUTRAL {
@@ -2466,8 +2531,9 @@ select.Y2, option[value=Y2] {
   background-repeat: no-repeat;
   background-position: 10px 3px;
   display: inline-block;
-  height: 34px;
+  min-height: 34px;
   width: 90%;
+  padding-left: 40px;
 }
 
 .selSMILEY-SAD, .SMILEY-SAD {
@@ -2475,8 +2541,9 @@ select.Y2, option[value=Y2] {
   background-repeat: no-repeat;
   background-position: 10px 3px;
   display: inline-block;
-  height: 34px;
+  min-height: 34px;
   width: 90%;
+  padding-left: 40px;
 }
 
 .selSMILEY-GREEN, .SMILEY-GREEN {
@@ -2484,8 +2551,9 @@ select.Y2, option[value=Y2] {
   background-repeat: no-repeat;
   background-position: 10px 3px;
   display: inline-block;
-  height: 34px;
+  min-height: 34px;
   width: 90%;
+  padding-left: 40px;
 }
 
 .selSMILEY-ORANGE, .SMILEY-ORANGE {
@@ -2493,8 +2561,9 @@ select.Y2, option[value=Y2] {
   background-repeat: no-repeat;
   background-position: 10px 3px;
   display: inline-block;
-  height: 34px;
+  min-height: 34px;
   width: 90%;
+  padding-left: 40px;
 }
 
 .selSMILEY-RED, .SMILEY-RED {
@@ -2502,8 +2571,9 @@ select.Y2, option[value=Y2] {
   background-repeat: no-repeat;
   background-position: 10px 3px;
   display: inline-block;
-  height: 34px;
+  min-height: 34px;
   width: 90%;
+  padding-left: 40px;
 }
 
 .selGREEN-CHECK, .GREEN-CHECK {
@@ -2511,8 +2581,9 @@ select.Y2, option[value=Y2] {
   background-repeat: no-repeat;
   background-position: 10px 3px;
   display: inline-block;
-  height: 34px;
+  min-height: 34px;
   width: 90%;
+  padding-left: 40px;
 }
 
 .selRED-X, .RED-X {
@@ -2520,8 +2591,9 @@ select.Y2, option[value=Y2] {
   background-repeat: no-repeat;
   background-position: 10px 3px;
   display: inline-block;
-  height: 34px;
+  min-height: 34px;
   width: 90%;
+  padding-left: 40px;
 }
 
 /* ====================
@@ -3155,22 +3227,32 @@ td {
 /* ====================
 	BLOCK
    ====================*/
+:root {
+  --block-height:220px;
+  --block-img-height:218px;
+}
+
 .standard .DocumentBlock .content,
 .standard .ImageBlock .content,
 .standard .URL2UnitBlock .content,
-.standard .URLBlock .content {
+.standard .URLBlock .content,
+.standard .TextFieldBlock .content {
   display: none;
 }
 .standard .DocumentBlock .title,
 .standard .ImageBlock .title,
 .standard .URL2UnitBlock .title,
-.standard .URLBlock .title {
+.standard .URLBlock .title,
+.standard .TextFieldBlock .title {
   display: none;
 }
 
-:root {
-  --block-height:220px;
-  --block-img-height:218px;
+.Url2Block,
+.DocBlock,
+.ImgBlock,
+.UrlBlock,
+.TxtBlock {
+  height: var(--block-img-height);
 }
 
 .asmBlockContainer:first-of-type {

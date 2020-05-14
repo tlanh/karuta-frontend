@@ -151,10 +151,11 @@ function dropPortfolioFolder(ev)
 			portfolios_byid[portfolioid].renamePortfolioCode(newportfolio_code);
 			if (parentid!="") {
 				folders_byid[parentid].loaded = false;
-				folders_byid[parentid].loadContent();
+				folders_byid[parentid].loadAndDisplayContent('portfolio',parentid);
 			}
 			UIFactory.PortfolioFolder.displayAll('portfolio');
-			folders_byid[folderid].loadAndDisplayContent('portfolio',parentid);
+			folders_byid[folderid].loaded=false;
+			folders_byid[folderid].loadContent();
 		}
 	}
 }
@@ -1102,7 +1103,6 @@ UIFactory["PortfolioFolder"].displaySearchedPortfolios = function(code,type)
 	$("#"+type+"-rightside-content1").html("");
 	$("#"+type+"-rightside-content2").html("");
 	$("#wait-window").show();
-	$("#menu").html("");
 	cleanList();
 	//----------------
 	$.ajax({

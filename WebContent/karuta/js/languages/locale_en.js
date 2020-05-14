@@ -199,7 +199,7 @@ karutaStr['en']['node-content']="Node Content";
 karutaStr['en']['node-label']="Node Label";
 karutaStr['en']['resource']="Resource";
 karutaStr['en']['metadata']="Metadata";
-karutaStr['en']['css-styles']="CSS Styles";
+karutaStr['en']['css-styles']="Display";
 karutaStr['en']['inparent']="In Parent";
 karutaStr['en']['encrypted']="Encrypt Ressource";
 karutaStr['en']['get_rc4key']="Parts of this document are encrypted.\nFist Visit: Choose a key sentence.\nReturning Visits: Type your key sentence. ";
@@ -237,6 +237,7 @@ karutaStr['en']['seeend']="See - End Date";
 karutaStr['en']['logcode']="Log Code";
 karutaStr['en']['alt']="Alternate Text";
 karutaStr['en']['node-comment']="Node Comments";
+karutaStr['en']['autoload']="Autoload";
 
 //=========================================
 //========== ADMIN ========================
@@ -316,6 +317,13 @@ karutaStr['en']['lastname-label']="Lastname";
 karutaStr['en']['changeOwner']="Change the Owner";
 karutaStr['en']['add-configpage']="Add new Configuration Page";
 karutaStr['en']['add-newwelcomepage']="Add new Welcome Page";
+karutaStr['en']['search-portfolio-text']="Seach ...";
+karutaStr['en']['result-title']="Results for : ";
+karutaStr['en']['result-subtitle']="Search is case sensitive.";
+karutaStr['en']['result-nb']="Number of pages : ";
+karutaStr['en']['refresh-url2unit']="Refresh URL2Units";
+karutaStr['en']['label-not-multilingual']="Label Not Multilingual";
+karutaStr['en']['resource-not-multilingual']="Resource Not Multilingual";
 
 //=========================================
 //========== FOLDERS ======================
@@ -362,6 +370,7 @@ karutaStr['en']['other']="Other";
 karutaStr['en']['delete-temporary-users']="Delete All";
 karutaStr['en']['delete-empty-users']="Delete Selection";
 karutaStr['en']['c-a-s']="C/A/S";
+karutaStr['en']['too-much-users']="There are more than 200 users. Click 'See' button to display them or search using the input above."
 
 //=========================================
 //========== ROLES ========================
@@ -412,6 +421,7 @@ karutaStr['en']['size-upload']="Your file is so big : it must be less than " + g
 //=========================================
 //========== EUROPASS =====================
 //=========================================
+
 karutaStr['en']['mother-tongue']="Mother Tongue";
 karutaStr['en']['foreign-languages']="Foreign Languages";
 karutaStr['en']['add-foreign-language']="Add a foreign Language";
@@ -427,6 +437,7 @@ karutaStr['en']['writing']="WRITING";
 //=========================================
 //========== BUBBLE MAP ===================
 //=========================================
+
 karutaStr['en']['leave-edit-mode']="Leave Edit Mode";
 karutaStr['en']['bubble-label']="Label";
 karutaStr['en']['bubble-links']="Links";
@@ -520,11 +531,15 @@ karutaStr['en']['BubbleMap']="Bubble Map";
 karutaStr['en']['Europass']="Europass";
 
 karutaStr['en']['Item']="Item";
-karutaStr['en']['Get_Resource']="Get_Resource";
-karutaStr['en']['Get_Get_Resource']="Get_Get_Resource";
-karutaStr['en']['Get_Double_Resource']="Get_Double_Resource";
+karutaStr['en']['Get_Resource']="GetResource";
+karutaStr['en']['Get_Get_Resource']="GetGetResource";
+karutaStr['en']['Get_Double_Resource']="GetDoubleResource";
 karutaStr['en']['Proxy']="Proxy";
-karutaStr['en']['Get_Proxy']="Get_Proxy";
+karutaStr['en']['Get_Proxy']="GetProxy";
+
+karutaStr['en']['Variable']="Variable";
+karutaStr['en']['var-name']="Variable Name";
+karutaStr['en']['var-value']="Variable Value";
 
 karutaStr['en']['asmColumn']="asmColumn";
 

@@ -199,7 +199,7 @@ karutaStr['fr']['node-content']="Contenu du noeud";
 karutaStr['fr']['node-label']="Libellé du noeud";
 karutaStr['fr']['resource']="Ressource";
 karutaStr['fr']['metadata']="Métadonnées";
-karutaStr['fr']['css-styles']="Styles CSS";
+karutaStr['fr']['css-styles']="Présentation";
 karutaStr['fr']['inparent']="Dans le parent";
 karutaStr['fr']['encrypted']="Encrypter la ressource";
 karutaStr['fr']['get_rc4key']="Des parties de ce document sont encryptées.\nPremière visite : Choisissez une phrase clé.\nVisites suivantes : Tapez votre phrase clé.";
@@ -237,6 +237,7 @@ karutaStr['fr']['seeend']="Voir - Date fin";
 karutaStr['fr']['logcode']="Code Log";
 karutaStr['fr']['alt']="Texte alternatif";
 karutaStr['fr']['node-comment']="Commentaires du noeud";
+karutaStr['fr']['autoload']="Autoload";
 
 //=========================================
 //========== ADMIN ========================
@@ -316,6 +317,13 @@ karutaStr['fr']['lastname-label']="Nom";
 karutaStr['fr']['changeOwner']="Changer le propriétaire";
 karutaStr['fr']['add-configpage']="Ajouter la nouvelle page de configuration";
 karutaStr['fr']['add-newwelcomepage']="Ajouter la nouvelle page de bienvenue";
+karutaStr['fr']['search-portfolio-text']="Recherche ...";
+karutaStr['fr']['result-title']="Résultats de la recherche pour : ";
+karutaStr['fr']['result-subtitle']="La recherche est sensible à la casse.";
+karutaStr['fr']['result-nb']="Nombre de pages : ";
+karutaStr['fr']['refresh-url2unit']="Actualiser les URL2Units";
+karutaStr['fr']['label-not-multilingual']="Libellé non multilingue";
+karutaStr['fr']['resource-not-multilingual']="Ressource non multilingue";
 
 //=========================================
 //========== FOLDERS ======================
@@ -362,6 +370,7 @@ karutaStr['fr']['other']="Autre";
 karutaStr['fr']['delete-temporary-users']="Supprimer tous";
 karutaStr['fr']['delete-empty-users']="Supprimer la sélection";
 karutaStr['fr']['c-a-s']="C/A/S";
+karutaStr['fr']['too-much-users']="Il y a plus de 200 usagers actifs. Cliquez sur le bouton 'Voir' pour les afficher ou faites une recherche ci-dessus."
 
 //=========================================
 //========== ROLES ========================
@@ -412,6 +421,7 @@ karutaStr['fr']['size-upload']="Votre fichier est trop volumineux : seuls les fi
 //=========================================
 //========== EUROPASS =====================
 //=========================================
+
 karutaStr['fr']['mother-tongue']="Langue maternelle";
 karutaStr['fr']['foreign-languages']="Langues étrangères";
 karutaStr['fr']['add-foreign-language']="Ajouter une langue étrangère";
@@ -427,6 +437,7 @@ karutaStr['fr']['writing']="ÉCRIRE";
 //=========================================
 //========== BUBBLE MAP ===================
 //=========================================
+
 karutaStr['fr']['leave-edit-mode']="Quitter le mode d'édition";
 karutaStr['fr']['bubble-label']="Libellé";
 karutaStr['fr']['bubble-links']="Liens";
@@ -520,11 +531,15 @@ karutaStr['fr']['BubbleMap']="Bubble Map";
 karutaStr['fr']['Europass']="Europass";
 
 karutaStr['fr']['Item']="Item";
-karutaStr['fr']['Get_Resource']="Get_Resource";
-karutaStr['fr']['Get_Get_Resource']="Get_Get_Resource";
-karutaStr['fr']['Get_Double_Resource']="Get_Double_Resource";
+karutaStr['fr']['Get_Resource']="GetResource";
+karutaStr['fr']['Get_Get_Resource']="GetGetResource";
+karutaStr['fr']['Get_Double_Resource']="GetDoubleResource";
 karutaStr['fr']['Proxy']="Proxy";
-karutaStr['fr']['Get_Proxy']="Get_Proxy";
+karutaStr['fr']['Get_Proxy']="GetProxy";
+
+karutaStr['fr']['Variable']="Variable";
+karutaStr['fr']['var-name']="Nom de la variable";
+karutaStr['fr']['var-value']="Valeur de la variable";
 
 karutaStr['fr']['asmColumn']="asmColumn";
 
