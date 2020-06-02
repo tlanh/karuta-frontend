@@ -151,27 +151,6 @@ UIFactory["Node"].prototype.displayNode = function(type,root,dest,depth,langcode
 			else { // other than asmContext
 				this.displayAsmNode(dest,type,langcode,edit,refresh,depth);
 			}
-			//---------------------------- BUTTONS AND BACKGROUND COLOR -----------------------------------------------------------------
-			// ---------- if by error button color == background color we set button color to white or black to be able to see them -----
-			var buttons_color = eval($(".button").css("color"));
-			var buttons_background_style = UIFactory.Node.getMetadataEpm(this.metadataepm,'background-color',false);
-			if (buttons_background_style!="") {
-				var buttons_background_color = buttons_background_style.substring(buttons_background_style.indexOf(":")+1,buttons_background_style.indexOf(";"));
-				if (buttons_background_color==buttons_color)
-					if (buttons_color!="#000000")
-						changeCss("#node_"+uuid+" .button", "color:black;");
-					else
-						changeCss("#node_"+uuid+" .button", "color:white;");
-			}
-			var buttons_node_background_style = UIFactory.Node.getMetadataEpm(this.metadataepm,'node-background-color',false);
-			if (buttons_node_background_style!="") {
-				var buttons_node_background_color = buttons_node_background_style.substring(buttons_node_background_style.indexOf(":")+1,buttons_node_background_style.indexOf(";"));
-				if (buttons_node_background_color==buttons_color)
-					if (buttons_color!="#000000")
-						changeCss("#node_"+uuid+" .button", "color:black;");
-					else
-						changeCss("#node_"+uuid+" .button", "color:white;");
-			}
 			//----------- help ---------------------------------------------
 			var data = this.node;
 			if ($("metadata-wad",data)[0]!=undefined && $($("metadata-wad",data)[0]).attr('help')!=undefined && $($("metadata-wad",data)[0]).attr('help')!=""){
@@ -294,6 +273,7 @@ UIFactory["Node"].prototype.displayAsmContext = function (dest,type,langcode,edi
 			displayview = type+"-resource-default";
 		}
 	html = html.replace(/#displayview#/g,displayview).replace(/#displaytype#/g,type).replace(/#uuid#/g,uuid).replace(/#nodetype#/g,this.nodetype).replace(/#resourcetype#/g,this.resource_type).replace(/#semtag#/g,this.semtag).replace(/#cssclass#/g,this.cssclass);
+	html = html.replace(/#node-orgclass#/g,this.displayitselforg)
 	//-------------------- display ----------------------
 	if (!refresh) {
 		$("#"+dest).append (html);
@@ -303,13 +283,13 @@ UIFactory["Node"].prototype.displayAsmContext = function (dest,type,langcode,edi
 	//-------------------- STYLES ---------------------------------------
 	var style = "";
 	//-------------------- node style -------------------
-	style = this.getNodeStyle(uuid);
+	style = r_replaceVariable(this.getNodeStyle(uuid));
 	$("#node_"+uuid).attr("style",style);
 	//-------------------- label style -------------------
-	style = this.getLabelStyle(uuid);
+	style = r_replaceVariable(this.getLabelStyle(uuid));
 	$("*[name='res-lbl-div']","#node_"+uuid).attr("style",style);
 	//-------------------- resource style -------------------
-	style = this.getContentStyle();
+	style = r_replaceVariable(this.getContentStyle());
 	$("*[name='res-div']","#node_"+uuid).attr("style",style);
 	//---------------- display resource ---------------------------------
 	if (this.edit && this.inline && this.writenode && this.editable_in_line)
@@ -342,7 +322,8 @@ UIFactory["Node"].prototype.displayAsmContext = function (dest,type,langcode,edi
 	}
 	//----------------- hide lbl-div if empty ------------------------------------
 	if (this.getLabel(null,'none',langcode)=="" && this.getButtons(langcode)=="" && this.getMenus(langcode)=="")
-		$("div[name='res-lbl-div']","#node_"+uuid).hide();
+		if (this.displayview=='xwide' || this.displayview.indexOf("/12")>-1)
+			$("div[name='res-lbl-div']","#node_"+uuid).hide();
 	//----------- Comments -----------
 	if (this.edit && this.inline && this.writenode)
 		UIFactory.Node.displayCommentsEditor('comments_'+uuid,UICom.structure["ui"][uuid]);
@@ -367,7 +348,7 @@ UIFactory["Node"].prototype.displayAsmNode = function(dest,type,langcode,edit,re
 	if (nodetype=='asmUnitStructure')
 		this.depth=100;	
 	var displayview = "";
-	//---------------- DISPLAY -------------------------------
+	//---------------- DISPLAY ------------------------------- // .replace("#content-orgclass#","row row-cols-2");
 	if (this.depth!=1 && this.depth<10 && nodetype=='asmStructure') {
 		if (this.displayview!='' & type!='raw')
 			displayview = type+"-node-"+this.displayview;
@@ -375,6 +356,8 @@ UIFactory["Node"].prototype.displayAsmNode = function(dest,type,langcode,edit,re
 			displayview = type+"-struct-default";
 		html = displayHTML[displayview];
 		html = html.replace(/#displayview#/g,displayview).replace(/#displaytype#/g,type).replace(/#uuid#/g,uuid).replace(/#nodetype#/g,this.nodetype).replace(/#semtag#/g,this.semtag).replace(/#cssclass#/g,this.cssclass);
+		html = html.replace(/#node-orgclass#/g,this.displayitselforg)
+		html = html.replace(/#content-orgclass#/g,this.displaychildorg)
 		$("#"+dest).append (html);
 		$("#label_node_"+uuid).click(function() {displayPage(uuid,1,type,langcode,g_edit)});
 	} else if (this.depth!=1 && this.depth<10 && nodetype=='asmUnit') {
@@ -384,6 +367,8 @@ UIFactory["Node"].prototype.displayAsmNode = function(dest,type,langcode,edit,re
 			displayview = type+"-struct-default";
 		html = displayHTML[displayview];
 		html = html.replace(/#displayview#/g,displayview).replace(/#displaytype#/g,type).replace(/#uuid#/g,uuid).replace(/#nodetype#/g,this.nodetype).replace(/#semtag#/g,this.semtag).replace(/#cssclass#/g,this.cssclass);
+		html = html.replace(/#node-orgclass#/g,this.displayitselforg)
+		html = html.replace(/#content-orgclass#/g,this.displaychildorg)
 		$("#"+dest).append (html);
 		$("#label_node_"+uuid).click(function() {displayPage(uuid,100,type,langcode,g_edit)});
 	} else {
@@ -408,6 +393,8 @@ UIFactory["Node"].prototype.displayAsmNode = function(dest,type,langcode,edit,re
 			html = displayHTML[displayview];
 		}
 		html = html.replace(/#displayview#/g,displayview).replace(/#displaytype#/g,type).replace(/#uuid#/g,uuid).replace(/#nodetype#/g,this.nodetype).replace(/#semtag#/g,this.semtag).replace(/#cssclass#/g,this.cssclass);
+		html = html.replace(/#node-orgclass#/g,this.displayitselforg)
+		html = html.replace(/#content-orgclass#/g,this.displaychildorg)
 		if (nodetype=='asmUnit')
 			html = html.replace(/#first#/g,"first-node");
 		if (!refresh) {
@@ -419,7 +406,7 @@ UIFactory["Node"].prototype.displayAsmNode = function(dest,type,langcode,edit,re
 	//-------------------- node style -------------------
 	var style = "";
 	if (this.depth>0 && type!='raw') {
-		style =  this.getNodeStyle(uuid);
+		style = r_replaceVariable(this.getNodeStyle(uuid));
 		$("#node_"+uuid).attr("style",style);
 	}
 	//-------------------- label style -------------------
@@ -435,11 +422,12 @@ UIFactory["Node"].prototype.displayAsmNode = function(dest,type,langcode,edit,re
 		style += UIFactory.Node.getMetadataEpm(this.metadataepm,'inparent-background-color',false);
 		style += UIFactory.Node.getMetadataEpm(this.metadataepm,'inparent-othercss',false);
 	}
+	style = r_replaceVariable(style);
 	if (type!='raw')
 		$("div[name='lbl-div']","#node_"+uuid).attr("style",style);
 	//-------------------- content style -------------------
 	if (type!='model' && type!='raw') {
-		style = this.getContentStyle(uuid);
+		style = r_replaceVariable(this.getContentStyle(uuid));
 		$("div[name='cnt-div']","#node_"+uuid).attr("style",style);
 	}
 	//-------------------- collapsible -------------------
@@ -519,8 +507,10 @@ UIFactory["Node"].prototype.displayTranslateNode = function(type,root,dest,depth
 //==============================================================================
 //==============================================================================
 {
-	if (refresh==null)
-		refresh = false;
+	if (depth<0)
+		return;
+	if (this.nodetype=='asmUnitStructure')
+		depth = 100;	
 	var uuid = this.id;
 	this.setMetadata(dest,depth,langcode,edit,inline,backgroundParent,parent,menu,inblock);
 	this.display_node[dest] = {"type":type,"uuid":uuid,"root":root,"dest":dest,"depth":depth,"langcode":langcode,"edit":edit,"inline":inline,"backgroundParent":backgroundParent,"display":type,"parent":parent,"menu":menu,"inblock":inblock};
@@ -547,7 +537,7 @@ UIFactory["Node"].prototype.displayTranslateNode = function(type,root,dest,depth
 				$("#resource1_"+uuid).html(karutaStr[LANG]['resource-not-multilingual']);
 		} catch(e){
 			$("#resource0_"+uuid).append(this.resource.getEditor("resource0_"+uuid,null,g_translate[0],false));
-			if (this.multilingual)
+			if (this.resource.multilingual)
 				$("#resource1_"+uuid).append(this.resource.getEditor("resource1_"+uuid,null,g_translate[1],false))
 			else
 				$("#resource1_"+uuid).html(karutaStr[LANG]['resource-not-multilingual']);
@@ -558,6 +548,12 @@ UIFactory["Node"].prototype.displayTranslateNode = function(type,root,dest,depth
 			$("#label1_"+uuid).append(this.getNodeLabelEditor(null,g_translate[1]));
 		else
 			$("#label1_"+uuid).html(karutaStr[LANG]['label-not-multilingual']);
+		//---------------- comments ---------------------------------
+		UIFactory.Node.displayCommentsEditor('comments0_'+uuid,UICom.structure["ui"][uuid],null,g_translate[0]);
+		if (this.multilingual)
+			UIFactory.Node.displayCommentsEditor('comments1_'+uuid,UICom.structure["ui"][uuid],null,g_translate[1]);
+		else
+			$("#comments1_"+uuid).html(karutaStr[LANG]['resource-not-multilingual']);
 	}
 	//============================== NODE ===================================
 	else { // other than asmContext
@@ -588,19 +584,25 @@ UIFactory["Node"].prototype.displayTranslateNode = function(type,root,dest,depth
 			else
 				$("#label1_"+uuid).html(karutaStr[LANG]['label-not-multilingual']);
 		}
+		//---------------- comments ---------------------------------
+			UIFactory.Node.displayCommentsEditor('comments0_'+uuid,UICom.structure["ui"][uuid],null,g_translate[0]);
+		if (this.multilingual)
+			UIFactory.Node.displayCommentsEditor('comments1_'+uuid,UICom.structure["ui"][uuid],null,g_translate[1]);
+		else
+			$("#comments1_"+uuid).html(karutaStr[LANG]['resource-not-multilingual']);
+		// ===========================================================================
+		// ================================= For each child ==========================
+		// ===========================================================================
+		if (this.structured_resource == null)
+			for( var i=0; i<root.children.length; ++i ) {
+				// Recurse
+				var child = UICom.structure["tree"][root.children[i]];
+				var childnode = UICom.structure["ui"][root.children[i]];
+				var childsemtag = $(childnode.metadata).attr('semantictag');
+				childnode.displayTranslateNode(type,child, 'content-'+uuid, depth-1,langcode,edit,inline,backgroundParent,root,menu);
+			}
+		//-------------------------------------------------------
 	}
-	// ===========================================================================
-	// ================================= For each child ==========================
-	// ===========================================================================
-	if (this.structured_resource == null)
-		for( var i=0; i<root.children.length; ++i ) {
-			// Recurse
-			var child = UICom.structure["tree"][root.children[i]];
-			var childnode = UICom.structure["ui"][root.children[i]];
-			var childsemtag = $(childnode.metadata).attr('semantictag');
-			childnode.displayTranslateNode(type,child, 'content-'+uuid, this.depth-1,langcode,edit,inline,backgroundParent,root,menu);
-		}
-	//-------------------------------------------------------
 };
 
 //==================================
@@ -1194,32 +1196,32 @@ UIFactory["Node"].displaySidebar = function(root,destid,type,langcode,edit,paren
 				{
 					var html = "";
 					var depth = 99;
-					html += "<a style='cursor:pointer' id='sidebar_"+uuid+"' href='#' class='nav-item";
+					html += "<li style='cursor:pointer' id='sidebar_"+uuid+"' href='#' class='nav-item";
 					if (privatevalue)
 						html+= " private";
-					html += "' onclick=\"displayPage('"+uuid+"',"+depth+",'"+type+"','"+langcode+"',"+g_edit+")\" >"+text+"</a>";
+					html += "' onclick=\"displayPage('"+uuid+"',"+depth+",'"+type+"','"+langcode+"',"+g_edit+")\" >"+text+"</li>";
 					$("#"+destid).append($(html));
 				}
 				if(name == "asmUnit" && level==1) // Click on Unit
 				{
 					var html = "";
 					var depth = 99;
-					html += "<a class='dropdown-item' href='#' onclick=\"displayPage('"+uuid+"',"+depth+",'"+type+"','"+langcode+"',"+g_edit+")\" id='sidebar_"+uuid+"'>"+text+"</a>";
+					html += "<li class='dropdown-item' href='#' onclick=\"displayPage('"+uuid+"',"+depth+",'"+type+"','"+langcode+"',"+g_edit+")\" id='sidebar_"+uuid+"'>"+text+"</li>";
 					$("#"+destid).append($(html));
 				}
 				if(name == "asmStructure" && level==0) // Click on Structure
 				{
 					var depth = 1;
 					var html = "";
-					html += "<li class='nav-item dropdown";
+					html += "<div class='nav-item dropdown";
 					if (privatevalue)
 						html+= "private"
-					html += "' id='parent-"+uuid+"' role='tablist'>";
-					html += "<a class='dropdown-toggle' href='#' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>"+text+"</a>";
+					html += "' style='cursor:pointer' id='parent-"+uuid+"' role='tablist'>";
+					html += "<li class='dropdown-toggle' style='cursor:pointer' href='#' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>"+text+"</li>";
 					html += "<div id='dropdown"+uuid+"' class='dropdown-menu' aria-labelledby='sidebar_"+uuid+"'>";
-					html += "<a class='dropdown-item' href='#' onclick=\"displayPage('"+uuid+"',"+depth+",'"+type+"','"+langcode+"',"+g_edit+")\" id='sidebar_"+uuid+"'>"+text+"</a>";
+					html += "<li class='dropdown-item'  style='cursor:pointer'href='#' onclick=\"displayPage('"+uuid+"',"+depth+",'"+type+"','"+langcode+"',"+g_edit+")\" id='sidebar_"+uuid+"'>"+text+"</li>";
 					html += "</div><!-- panel-collapse -->";
-					html += "</li>";
+					html += "</div>";
 					$("#"+destid).append($(html));
 					UIFactory["Node"].displayHorizontalMenu(UICom.structure["tree"][root.children[i]],'dropdown'+uuid,type,langcode,g_edit,uuid,1);
 				}
@@ -1310,10 +1312,10 @@ UIFactory["Node"].displayCommentsEditor = function(destid,node,type,langcode)
 		if (type==null)
 			type = 'default';
 		text = $(UICom.structure['ui'][uuid].context_text_node[langcode]).text();
-		html += "<h4>"+karutaStr[LANG]['comments']+"</h4>";
-		html += "<div id='div_"+uuid+"'><textarea id='"+uuid+"_edit_comment' class='form-control' style='height:200px'>"+text+"</textarea></div>";
+		html += "<h4>"+karutaStr[languages[LANGCODE]]['comments']+"</h4>";
+		html += "<div id='div_"+uuid+"'><textarea id='"+uuid+langcode+"_edit_comment' class='form-control' style='height:200px'>"+text+"</textarea></div>";
 		$("#"+destid).append($(html));
-		$("#"+uuid+"_edit_comment").wysihtml5({toolbar:{"size":"xs","font-styles": false,"html":true,"blockquote": false,"image": false,"link": false},"uuid":uuid,"locale":LANG,'events': {'change': function(){UICom.structure['ui'][currentTexfieldUuid].updateComments();},'focus': function(){currentTexfieldUuid=uuid;currentTexfieldInterval = setInterval(function(){UICom.structure['ui'][currentTexfieldUuid].resource.update(langcode);}, g_wysihtml5_autosave);},'blur': function(){clearInterval(currentTexfieldInterval);}}});
+		$("#"+uuid+langcode+"_edit_comment").wysihtml5({toolbar:{"size":"xs","font-styles": false,"html":true,"blockquote": false,"image": false,"link": false},"uuid":uuid,"locale":LANG,'events': {'change': function(){UICom.structure['ui'][currentTexfieldUuid].updateComments();},'focus': function(){currentTexfieldUuid=uuid;currentTexfieldInterval = setInterval(function(){UICom.structure['ui'][currentTexfieldUuid].resource.update(langcode);}, g_wysihtml5_autosave);},'blur': function(){clearInterval(currentTexfieldInterval);}}});
 	} else {
 		$("#"+destid).hide();
 	}
@@ -1331,7 +1333,7 @@ UIFactory["Node"].prototype.updateComments = function(langcode)
 	if (!this.multilingual)
 		langcode = NONMULTILANGCODE;
 	//---------------------
-	var value = $.trim($("#"+this.id+"_edit_comment").val());
+	var value = $.trim($("#"+this.id+langcode+"_edit_comment").val());
 	$(this.context_text_node[langcode]).text(value);
 	this.save();
 	//----------------
@@ -1519,7 +1521,7 @@ UIFactory["Node"].prototype.getButtons = function(dest,type,langcode,inline,dept
 	//-----------------------------------
 	if (this.edit) {
 		//------------ edit button ---------------------
-		if ( (depth>1 || (depth==1 && this.asmtype != 'asmStructure' || this.asmtype != 'asmUnit'))&&
+		if ( (depth>1 || (depth==1 && this.asmtype != 'asmStructure' && this.asmtype != 'asmUnit')) &&
 					(!this.inline && ( 	(this.writenode && !this.incrementroles!='Y' && this.resnopencil!='Y' && this.nodenopencil!='Y' && (this.editnoderoles.containsArrayElt(g_userroles) || this.editresroles.containsArrayElt(g_userroles)))
 									|| USER.admin
 									|| g_userroles[0]=='designer' 
@@ -1597,8 +1599,15 @@ UIFactory['Node'].reloadStruct = function(uuid)
 		success : function(data) {
 			UICom.parseStructure(data,true);
 			g_portfolio_current = data;
-			$("#sidebar").html("");
-			UIFactory["Portfolio"].displaySidebar(UICom.root,'sidebar',null,null,g_edit,UICom.rootid);
+			if (g_bar_type.indexOf('horizontal')>-1) {
+				$("#menu_bar").html("");
+				$("#menu_bar").show();
+				UIFactory["Portfolio"].displayHorizontalMenu(UICom.root,'menu_bar',null,null,g_edit,UICom.rootid);
+			} else {
+				$("#sidebar").html("");
+				$("#menu_bar").hide();
+				UIFactory["Portfolio"].displaySidebar(UICom.root,'sidebar',null,null,g_edit,UICom.rootid);
+			}
 			var uuid = $("#page").attr('uuid');
 			if (g_display_type=='model')
 				displayPage(UICom.rootid,1,g_display_type,LANGCODE,g_edit);
@@ -1624,7 +1633,15 @@ UIFactory['Node'].reloadUnit = function()
 		success : function(data) {
 			UICom.parseStructure(data,false,parentid);
 			$("#"+uuid,g_portfolio_current).replaceWith($(":root",data));
-			UIFactory["Portfolio"].displaySidebar(UICom.root,'sidebar',null,null,g_edit,UICom.rootid);
+			if (g_bar_type.indexOf('horizontal')>-1) {
+				$("#menu_bar").html("");
+				$("#menu_bar").show();
+				UIFactory.Portfolio.displayHorizontalMenu(UICom.root,'menu_bar',g_display_type,null,g_edit,UICom.rootid);
+			} else {
+				$("#sidebar").html("");
+				$("#menu_bar").hide();
+				UIFactory.Portfolio.displaySidebar(UICom.root,'sidebar',g_display_type,null,g_edit,UICom.rootid);
+			}
 			if (g_display_type=='model')
 				displayPage(UICom.rootid,1,g_display_type,LANGCODE,g_edit);
 			else

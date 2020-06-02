@@ -38,6 +38,7 @@ UIFactory["URL2Portfolio"] = function(node,condition)
 	}
 	this.lastmodified_node = $("lastmodified",$("asmResource[xsi_type='URL2Portfolio']",node));
 	//--------------------
+	this.code_node = $("code",$("asmResource[xsi_type='URL2Portfolio']",node));
 	this.uuid_node = $("uuid",$("asmResource[xsi_type='URL2Portfolio']",node));
 	this.label_node = [];
 	for (var i=0; i<languages.length;i++){
@@ -136,11 +137,15 @@ UIFactory["URL2Portfolio"].update = function(selected_item,itself,langcode,type)
 {
 	$(itself.lastmodified_node).text(new Date().toLocaleString());
 	var value = $(selected_item).attr('value');
+	var code = $(selected_item).attr('code');
 	//---------------------
-	if (itself.encrypted)
+	if (itself.encrypted) {
 		value = "rc4"+encrypt(value,g_rc4key);
+		code = "rc4"+encrypt(code,g_rc4key);
+	}
 	//---------------------
 	$(itself.uuid_node).text(value);
+	$(itself.code_node).text(value);
 	for (var i=0; i<languages.length;i++){
 		var label = $(selected_item).attr('label_'+languages[i]);
 		//---------------------
@@ -163,34 +168,24 @@ UIFactory["URL2Portfolio"].prototype.displayEditor = function(destid,type,langco
 	var queryattr_value = this.query;
 	if (queryattr_value!=undefined && queryattr_value!='') {
 		//------------
-		var srce_indx = queryattr_value.lastIndexOf('.');
-		var srce = queryattr_value.substring(srce_indx+1);
-		var semtag_indx = queryattr_value.substring(0,srce_indx).lastIndexOf('.');
-		var semtag = queryattr_value.substring(semtag_indx+1,srce_indx);
-		var target = queryattr_value.substring(srce_indx+1); // label or text
+		var target_indx = queryattr_value.lastIndexOf('.');
+		var target = queryattr_value.substring(target_indx+1);
 		//------------
-		var portfoliocode = r_replaceVariable(queryattr_value.substring(0,semtag_indx));
-		var selfcode = $("code",$("asmRoot>asmResource[xsi_type='nodeRes']",UICom.root.node)).text();
-		if (portfoliocode.indexOf('.')<0 && selfcode.indexOf('.')>0 && portfoliocode!='self')  // There is no project, we add the project of the current portfolio
-			portfoliocode = selfcode.substring(0,selfcode.indexOf('.')) + "." + portfoliocode;
-		if (portfoliocode=='self') {
-			portfoliocode = selfcode;
-			cachable = false;
-		}
+		var portfoliocode = r_replaceVariable(queryattr_value.substring(0,target_indx));
 		//------------
 		var self = this;
 		if (cachable && g_URL2Portfolio_caches[queryattr_value]!=undefined && g_URL2Portfolio_caches[queryattr_value]!="")
-			UIFactory["URL2Portfolio"].parse(destid,type,langcode,g_URL2Portfolio_caches[queryattr_value],self,disabled,srce,resettable,target,semtag);
+			UIFactory["URL2Portfolio"].parse(destid,type,langcode,g_URL2Portfolio_caches[queryattr_value],self,disabled,resettable,target);
 		else
 			$.ajax({
 				async : false,
 				type : "GET",
 				dataType : "xml",
-				url : serverBCK_API+"/nodes?portfoliocode=" + portfoliocode + "&semtag="+semtag,
+				url : serverBCK_API+"/portfolios?active=1&search="+portfoliocode,
 				success : function(data) {
 					if (cachable)
 						g_URL2Portfolio_caches[queryattr_value] = data;
-					UIFactory["URL2Portfolio"].parse(destid,type,langcode,data,self,disabled,srce,resettable,target,semtag);
+					UIFactory["URL2Portfolio"].parse(destid,type,langcode,data,self,disabled,resettable,target);
 				}
 			});
 	}
@@ -198,7 +193,7 @@ UIFactory["URL2Portfolio"].prototype.displayEditor = function(destid,type,langco
 
 
 //==================================
-UIFactory["URL2Portfolio"].parse = function(destid,type,langcode,data,self,disabled,srce,resettable,target,semtag) {
+UIFactory["URL2Portfolio"].parse = function(destid,type,langcode,data,self,disabled,resettable,target) {
 //==================================
 	//---------------------
 	if (langcode==null)
@@ -242,84 +237,36 @@ UIFactory["URL2Portfolio"].parse = function(destid,type,langcode,data,self,disab
 			UIFactory["URL2Portfolio"].update(this,self,langcode);
 		});
 		$(select).append($(select_item_a));
-		//--------------------
-		var nodes = $("node",data);
 		//---------------------
 		if (target=='label') {
-			for ( var i = 0; i < $(nodes).length; i++) {
-				var resource = null;
-				if ($("asmResource",nodes[i]).length==3) // test if asmcontext
-					resource = $("asmResource[xsi_type!='nodeRes'][xsi_type!='context']",nodes[i]); 
-				else
-					resource = $("asmResource[xsi_type='nodeRes']",nodes[i]);
-				var code = $('code',resource).text();
-				var display_code = true;
-				if (code.indexOf("@")>-1) {
-					display_code = false;
-					code = code.substring(0,code.indexOf("@"))+code.substring(code.indexOf("@")+1);
-				}
-				if (code.indexOf("#")>-1) {
-					code = code.substring(0,code.indexOf("#"))+code.substring(code.indexOf("#")+1);
-				}
-				var select_item = $(html);
-				html = "<a class='dropdown-item' value='"+$(nodes[i]).attr('id')+"' code='"+$('code',resource).text()+"' class='sel"+code+"' ";
+			var items = $("portfolio>asmRoot",data);
+			for ( var i = 0; i < items.length; i++) {
+				var uuid = $(items[i]).attr('id');
+				var code = $("code",$("asmRoot>asmResource[xsi_type='nodeRes']",items[i])).text();
+				var label = {};
 				for (var j=0; j<languages.length;j++){
-					html += "label_"+languages[j]+"=\""+$(srce+"[lang='"+languages[j]+"']",resource).text()+"\" ";
+					label[j] = $("label[lang="+languages[j]+"]",$("asmRoot>asmResource[xsi_type='nodeRes']",items[i])).text();
+				}
+				html = "<a class='dropdown-item' value='"+uuid+"' code='"+code+"' ";
+				for (var j=0; j<languages.length;j++){
+					html += "label_"+languages[j]+"=\""+label[j]+"\" ";
 				}
 				html += ">";
-				if (display_code)
-					html += "<div class='li-code'>"+code+"</div> <span class='li-label'>"+$(srce+"[lang='"+languages[langcode]+"']",resource).text()+"</span></a>";
-				else
-					html += "<span class='li-label'>"+$(srce+"[lang='"+languages[langcode]+"']",resource).text()+"</span></a>";
-				
+				html += "<div class='li-code'>"+code+"</div> <span class='li-label'>"+label[langcode]+"</span></a>";
 				var select_item_a = $(html);
 				$(select_item_a).click(function (ev){
-					if (($('code',resource).text()).indexOf("#")>-1)
-						$("#button_"+self.id).html(code+" "+$(this).attr("label_"+languages[langcode]));
-					else
-						$("#button_"+self.id).html($(this).attr("label_"+languages[langcode]));
-					var code = $(this).attr("code");
-					if (code.indexOf("@")>-1) {
-						code = code.substring(0,code.indexOf("@"))+code.substring(code.indexOf("@")+1);
-					}
-					if (code.indexOf("#")>-1) {
-						code = code.substring(0,code.indexOf("#"))+code.substring(code.indexOf("#")+1);
-					}
-					$("#button_"+self.id).attr('class', 'btn btn-default select select-label').addClass("sel"+code);
+					$("#button_"+self.id).html($(this).attr("label_"+languages[langcode]));
 					UIFactory["URL2Portfolio"].update(this,self,langcode);
 				});
 				$(select).append($(select_item_a));
 				//-------------- update button -----
 				if (code!="" && self_code==$('code',resource).text()) {
 					if (($('code',resource).text()).indexOf("#")>-1)
-						$("#button_"+self.id).html(code+" "+$(srce+"[lang='"+languages[langcode]+"']",resource).text());
+						$("#button_"+self.id).html(code+" "+label[langcode]);
 					else
-						$("#button_"+self.id).html($(srce+"[lang='"+languages[langcode]+"']",resource).text());
+						$("#button_"+self.id).html(label[langcode]);
 					$("#button_"+self.id).attr('class', 'btn btn-default select select-label').addClass("sel"+code);
 				}
-			}
-		}
-		//---------------------
-		if (target=='text') {
-			for ( var i = 0; i < $(nodes).length; i++) {
-				var resource = $("asmResource[xsi_type!='nodeRes'][xsi_type!='context']",nodes[i]); 
-				html = "<li></li>";
-				var select_item = $(html);
-				html = "<a  value='"+$('value',resource).text()+"' code='"+$('code',resource).text()+"' class='sel"+code+"' ";
-				for (var j=0; j<languages.length;j++){
-					html += "label_"+languages[j]+"=\""+$(srce+"[lang='"+languages[j]+"']",resource).text()+"\" ";
-				}
-				html += ">";
-				
-				html += $(srce+"[lang='"+languages[langcode]+"']",resource).text()+"</a>";
-				var select_item_a = $(html);
-				$(select_item_a).click(function (ev){
-					$("#button_"+self.id).html($(this).attr("label_"+languages[langcode]));
-					$("#button_"+self.id).attr('class', 'btn btn-default select select-label').addClass("sel"+code);
-					UIFactory["URL2Portfolio"].update(this,self,langcode);
-				});
-				$(select_item).append($(select_item_a))
-				$(select).append($(select_item));
 			}
 		}
 		//---------------------

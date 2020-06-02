@@ -36,6 +36,9 @@ UIFactory["Node"].prototype.setMetadata = function(dest,depth,langcode,edit,inli
 	//------------------metadata----------------------------
 	this.nodetype = $(data).prop("nodeName"); // name of the xml tag
 	this.writenode = ($(node.node).attr('write')=='Y')? true:false;
+	this.deletenode = ($(node.node).attr('delete')=='Y')? true:false;
+	this.submitnode = ($(node.node).attr('submit')=='Y')? true:false;
+	//------------------------
 	this.semtag =  ($("metadata",data)[0]==undefined || $($("metadata",data)[0]).attr('semantictag')==undefined)?'': $($("metadata",data)[0]).attr('semantictag');
 	this.collapsed = 'N';
 	if (!g_designerrole)
@@ -69,7 +72,9 @@ UIFactory["Node"].prototype.setMetadata = function(dest,depth,langcode,edit,inli
 		this.menu = false;
 	}
 	this.cssclass = ($(node.metadataepm).attr('cssclass')==undefined)?'':$(node.metadataepm).attr('cssclass');
-	this.displayview = ($(node.metadataepm).attr('displayview')==undefined)?'':$(node.metadataepm).attr('displayview');
+	this.displayview = ($(node.metadataepm).attr('displayview')==undefined)?'default':$(node.metadataepm).attr('displayview');
+	this.displayitselforg = ($(node.metadataepm).attr('displayitselforg')==undefined)?'default':$(node.metadataepm).attr('displayitselforg');
+	this.displaychildorg = ($(node.metadataepm).attr('displaychildorg')==undefined)?'default':$(node.metadataepm).attr('displaychildorg');
 	//-------------------- test if visible
 	this.visible =  ( this.displayed=='N' && (g_userroles[0]=='designer'  || USER.admin)
 				|| ( this.displayed=='Y' && ( this.seenoderoles.indexOf(USER.username)>-1 
@@ -401,7 +406,7 @@ UIFactory["Node"].prototype.displayMetadataAttributesEditor = function(destid)
 	var semtag =  ($("metadata",this.node)[0]==undefined)?'': $($("metadata",this.node)[0]).attr('semantictag');
 	if (semtag==undefined) // for backward compatibility - node without semantic tag
 		semtag = '';
-	var resource_type = "";
+	var resource_type = this.xsi_type;
 	if (this.resource!=null)
 		resource_type = this.resource.type;
 	if (name=='asmRoot') {
@@ -536,7 +541,7 @@ UIFactory["Node"].prototype.displayMetadataAttributesEditor = function(destid)
 		$("#metadata_texts").append($(html));
 		this.displayMetadatawWadTextAttributeEditor('metadata_texts','editboxtitle');
 	//----------------------Search----------------------------
-	if (resource_type=='Get_Resource' || resource_type=='Get_Double_Resource' || resource_type=='Get_Get_Resource' || resource_type=='Proxy' || resource_type=='Get_Proxy' || resource_type=='Action' || resource_type=='URL2Unit' || name=='asmUnitStructure' || name=='asmUnit' || name=='asmStructure') {
+	if (resource_type=='Get_Resource' || resource_type=='Get_Double_Resource' || resource_type=='Get_Get_Resource' || resource_type=='Proxy' || resource_type=='Get_Proxy' || resource_type=='Action' || resource_type=='URL2Unit' || resource_type=='URL2Portfolio' || name=='asmUnitStructure' || name=='asmUnit' || name=='asmStructure') {
 		html  = "<label>"+karutaStr[languages[langcode]]['query'+resource_type]+"</label>";
 		$("#metadata_texts").append($(html));
 		this.displayMetadatawWadTextAttributeEditor('metadata_texts','query');
@@ -734,7 +739,7 @@ UIFactory["Node"].getMetadataInfo = function(data,attribute)
 {
 	var html = "";
 	if (data.getAttribute(attribute)!=undefined && data.getAttribute(attribute)!="")
-		html += "<span>"+attribute+":"+data.getAttribute(attribute)+"| </span>";
+		html += "<span>"+attribute+":"+data.getAttribute(attribute)+"|</span>";
 	return html;
 };
 
@@ -744,27 +749,31 @@ UIFactory["Node"].getMetadataEpmInfo = function(data,attribute)
 {
 	var html = "";
 	if ($("metadata-epm",data).attr(attribute)!=undefined && $("metadata-epm",data).attr(attribute)!="")
-		html += "<span>"+attribute+":"+$("metadata-epm",data).attr(attribute)+"| </span>";
+		html += "<span>"+attribute+":"+$("metadata-epm",data).attr(attribute)+"|</span>";
 	return html;
 };
 
 //==================================================
-UIFactory["Node"].prototype.displayMetainfo = function(destid)
+UIFactory["Node"].prototype.displayMetainfo = function(dest)
 //==================================================
 {
-	var data = this.node;
-	var html = "";
-	var type = $(data).prop("nodeName");
+	//-----------------------------------------
+	var type = this.asmtype;
 	if (type=='asmContext') {
-		var asmResources = $("asmResource",data);
-		type = $(asmResources[2]).attr('xsi_type');
+		resource = $("asmResource[xsi_type!='nodeRes'][xsi_type!='context']",this.node);
+		type = this.resource.type;
 	}
+	//-----------------------------------------
+	var html = "";
 	html += "<span>"+karutaStr[languages[LANGCODE]][type]+" - </span>";
-	var metadata = data.querySelector("metadata");
-	var metadatawad = data.querySelector("metadata-wad");
-	if (metadata.getAttribute('semantictag')!=undefined && metadata.getAttribute('semantictag')!="")
-		html += "<span>semantictag:"+metadata.getAttribute('semantictag')+"| </span>";
-	html += UIFactory.Node.getMetadataInfo(metadatawad,'seenoderoles');
+	html += "<span>semantictag:"+this.semtag+"|</span>";
+	html += "<span>multilingual-node:"+this.multilingual+"|</span>";
+	if (this.asmtype=='asmContext') {
+		html += "<span>multilingual-resource:"+this.resource.multilingual+"|</span>";
+	}	
+	html += "<span>seenoderoles:"+this.seenoderoles+"|</span>";
+	//-----------------------------------------
+	var metadatawad = this.node.querySelector("metadata-wad");
 	html += UIFactory.Node.getMetadataInfo(metadatawad,'seestart');
 	html += UIFactory.Node.getMetadataInfo(metadatawad,'seeend');
 	html += UIFactory.Node.getMetadataInfo(metadatawad,'editresroles');
@@ -787,7 +796,8 @@ UIFactory["Node"].prototype.displayMetainfo = function(destid)
 	html += UIFactory.Node.getMetadataInfo(metadatawad,'moveroles');
 	html += UIFactory.Node.getMetadataInfo(metadatawad,'inline');
 	html += UIFactory.Node.getMetadataInfo(metadatawad,'printroles');
-	$("#"+destid).html(html);
+	//-----------------------------------------
+	$("#"+dest).html(html);
 };
 
 //==================================================
@@ -807,6 +817,8 @@ UIFactory["Node"].prototype.displayMetaEpmInfo = function(destid)
 	$("#"+destid).html(html);
 	html += UIFactory.Node.getMetadataEpmInfo(data,'cssclass');
 	html += UIFactory.Node.getMetadataEpmInfo(data,'displayview');
+	html += UIFactory.Node.getMetadataEpmInfo(data,'displayitselforg');
+	html += UIFactory.Node.getMetadataEpmInfo(data,'displaychildorg');
 	//------------------------------------
 	html += UIFactory.Node.getMetadataEpmInfo(data,'nds-margin-top');
 	html += UIFactory.Node.getMetadataEpmInfo(data,'nds-othercss');
@@ -825,7 +837,6 @@ UIFactory["Node"].prototype.displayMetaEpmInfo = function(destid)
 	html += UIFactory.Node.getMetadataEpmInfo(data,'font-style');
 	html += UIFactory.Node.getMetadataEpmInfo(data,'text-align');
 	html += UIFactory.Node.getMetadataEpmInfo(data,'font-size');
-	html += UIFactory.Node.getMetadataEpmInfo(data,'font-weight');
 	html += UIFactory.Node.getMetadataEpmInfo(data,'color');
 	html += UIFactory.Node.getMetadataEpmInfo(data,'padding-top');
 	html += UIFactory.Node.getMetadataEpmInfo(data,'background-color');
@@ -1253,11 +1264,6 @@ UIFactory["Node"].prototype.displayMetadataEpmDisplayViewAttributeEditor = funct
 {
 	var nodeid = this.id;
 	var langcode = LANGCODE;
-	var asmtype = this.asmtype;
-	var nodetype = (asmtype=='asmContext') ? "resource" : "node";
-	var resourcetype = null;
-	if (this.resource!=null)
-		resourcetype = UICom.structure["ui"][nodeid].resource.type;
 	if (value==null || value==undefined || value=='undefined')
 		value = "";
 	var html = "";
@@ -1265,8 +1271,6 @@ UIFactory["Node"].prototype.displayMetadataEpmDisplayViewAttributeEditor = funct
 	html += "	<div class='input-group-prepend'>";
 	html += "		<div class='input-group-text'>";
 	html += karutaStr[languages[langcode]][attribute];
-	if (attribute=='seenoderoles')
-		html += "<a data-toggle='collapse' data-target='#see-calendar' aria-expanded='false'>&nbsp;<span class='fa fa-calendar'></span></a>"
 	html += "</div>";
 	html += "	</div>";
 	html += "	<div id='"+attribute+nodeid+"' class='form-control'>"+value+"</div>";
@@ -1274,10 +1278,9 @@ UIFactory["Node"].prototype.displayMetadataEpmDisplayViewAttributeEditor = funct
 		html += "<div class='input-group-append'>";
 		html += "	<button class='btn btn-select-role dropdown-toggle' type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'></button>";
 		html += "	<div class='dropdown-menu dropdown-menu-right button-role-caret'>";
-		html += "			<div class='dropdown-item' onclick=\"$('#"+attribute+nodeid+"').html('');UIFactory.Node.updateMetadataEpmAttribute('"+nodeid+"','"+attribute+"','');\")>&nbsp;</div>";
 		//---------------------
-		for (dest in displayView[g_display_type][nodetype]) {
-			var value = displayView[g_display_type][nodetype][dest];
+		for (x in displayView[g_display_type][this.asmtype]) {
+			var value = displayView[g_display_type][this.asmtype][x];
 			html += "		<div  class='dropdown-item' onclick=\"$('#"+attribute+nodeid+"').html('"+value+"');UIFactory.Node.updateMetadataEpmAttribute('"+nodeid+"','"+attribute+"','"+value+"')\")>"+value+"</div>";
 		}
 		html += "	</div>";
@@ -1287,6 +1290,55 @@ UIFactory["Node"].prototype.displayMetadataEpmDisplayViewAttributeEditor = funct
 	$("#"+destid).append($(html));
 };
 
+//==================================================
+UIFactory["Node"].prototype.displayMetadataEpmDisplayOrgAttributeEditor = function(destid,attribute,value,yes_no,disabled)
+//==================================================
+{
+	var nodeid = this.id;
+	var langcode = LANGCODE;
+	var parent_displayorg = $("metadata-epm",$(this.node).parent()).attr('displaychildorg');
+	if (parent_displayorg==null || parent_displayorg==undefined || parent_displayorg=='undefined')
+		parent_displayorg = "default";
+	if (value==null || value==undefined || value=='undefined')
+		value = "";
+	if (this.structured_resource!=null && attribute=="displaychildorg")
+		return
+	if (attribute=='displayitselforg' && displayOrg[this.asmtype][parent_displayorg]!=undefined && displayOrg[this.asmtype][parent_displayorg].length==1) {
+		if (value!=displayOrg[this.asmtype][parent_displayorg][0])
+			UIFactory.Node.updateMetadataEpmAttribute(nodeid,attribute,displayOrg[this.asmtype][parent_displayorg][0]);
+		return
+	}
+	var html = "";
+	html += "<div class='input-group '>";
+	html += "	<div class='input-group-prepend'>";
+	html += "		<div class='input-group-text'>";
+	html += karutaStr[languages[langcode]][attribute];
+	html += "</div>";
+	html += "	</div>";
+	html += "	<div id='"+attribute+nodeid+"' class='form-control'>"+value+"</div>";
+	if(disabled==null || !disabled) {
+		html += "<div class='input-group-append'>";
+		html += "	<button class='btn btn-select-role dropdown-toggle' type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'></button>";
+		html += "	<div class='dropdown-menu dropdown-menu-right button-role-caret'>";
+		//---------------------
+		if (attribute=='displayitselforg')
+			for (x in displayOrg[this.asmtype][parent_displayorg]) {
+				var value = displayOrg[this.asmtype][parent_displayorg][x];
+				var label = displayOrg[this.asmtype]["str"+parent_displayorg][x];
+				html += "		<div  class='dropdown-item' onclick=\"$('#"+attribute+nodeid+"').html('"+value+"');UIFactory.Node.updateMetadataEpmAttribute('"+nodeid+"','"+attribute+"','"+value+"')\")>"+label+"</div>";
+			}
+		else
+			for (x in displayOrg[this.asmtype]["children"]) {
+				var value = displayOrg[this.asmtype]["children"][x];
+				var label = displayOrg[this.asmtype]["strchildren"][x];
+				html += "		<div  class='dropdown-item' onclick=\"$('#"+attribute+nodeid+"').html('"+value+"');UIFactory.Node.updateMetadataEpmAttribute('"+nodeid+"','"+attribute+"','"+value+"')\")>"+label+"</div>";
+			}
+		html += "	</div>";
+		html += "</div>";
+	}
+	html += "</div>";
+	$("#"+destid).append($(html));
+};
 
 //==================================================
 UIFactory["Node"].prototype.displayMetadataEpmAttributeEditor = function(destid,attribute,value)
@@ -1419,6 +1471,9 @@ UIFactory["Node"].prototype.displayMetadataEpmAttributesEditor = function(destid
 			this.displayMetadataEpmAttributeEditor('metadata-epm-part1','cssclass',$(this.metadataepm).attr('cssclass'));
 			if (name!='asmRoot') {
 				this.displayMetadataEpmDisplayViewAttributeEditor('metadata-epm-part1','displayview',$(this.metadataepm).attr('displayview'));
+				this.displayMetadataEpmDisplayOrgAttributeEditor('metadata-epm-part1','displayitselforg',$(this.metadataepm).attr('displayitselforg'));
+				if (name!='asmContext')
+					this.displayMetadataEpmDisplayOrgAttributeEditor('metadata-epm-part1','displaychildorg',$(this.metadataepm).attr('displaychildorg'));
 			}
 			//------------------------------------
 			this.displayMetadataEpmAttributeEditor('metadata-epm-node','nds-margin-top',$(this.metadataepm).attr('nds-margin-top'));
