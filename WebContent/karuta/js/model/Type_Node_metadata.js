@@ -39,7 +39,7 @@ UIFactory["Node"].prototype.setMetadata = function(dest,depth,langcode,edit,inli
 	this.deletenode = ($(node.node).attr('delete')=='Y')? true:false;
 	this.submitnode = ($(node.node).attr('submit')=='Y')? true:false;
 	//------------------------
-	this.semtag =  ($("metadata",data)[0]==undefined || $($("metadata",data)[0]).attr('semantictag')==undefined)?'': $($("metadata",data)[0]).attr('semantictag');
+	this.semantictag =  ($("metadata",data)[0]==undefined || $($("metadata",data)[0]).attr('semantictag')==undefined)?'': $($("metadata",data)[0]).attr('semantictag');
 	this.collapsed = 'N';
 	if (!g_designerrole)
 		this.collapsed = (sessionStorage.getItem('collapsed'+uuid)==undefined)?'N':sessionStorage.getItem('collapsed'+uuid);
@@ -91,8 +91,8 @@ UIFactory["Node"].prototype.setMetadata = function(dest,depth,langcode,edit,inli
 	this.submitteddate = ($(node.metadatawad).attr('submitteddate')==undefined)?'none':$(node.metadatawad).attr('submitteddate');
 	this.duplicateroles = ($(node.metadatawad).attr('duplicateroles')==undefined)?'none':$(node.metadatawad).attr('duplicateroles');
 	this.incrementroles = ($(node.metadatawad).attr('incrementroles')==undefined)?'none':$(node.metadatawad).attr('incrementroles');
-	this.menuroles = ($(node.metadatawad).attr('menuroles')==undefined)?'none':$(node.metadatawad).attr('menuroles');
-	this.menulabels = ($(node.metadatawad).attr('menulabels')==undefined)?'none':$(node.metadatawad).attr('menulabels');
+	this.menuroles =r_replaceVariable(($(node.metadatawad).attr('menuroles')==undefined)?'none':$(node.metadatawad).attr('menuroles'));
+	this.menulabels = r_replaceVariable(($(node.metadatawad).attr('menulabels')==undefined)?'none':$(node.metadatawad).attr('menulabels'));
 	if (this.resource!=undefined || this.resource!=null)
 		this.editable_in_line = this.resource.type!='Proxy' && this.resource.type!='Audio' && this.resource.type!='Video' && this.resource.type!='Document' && this.resource.type!='Image' && this.resource.type!='URL';
 }
@@ -427,10 +427,10 @@ UIFactory["Node"].prototype.displayMetadataAttributesEditor = function(destid)
 			this.displayMetadataAttributeEditor('metadata-part1','multilingual-resource',true);
 		}
 	}
-	if (name=='asmContext') {
-		if (this.resource.type=='Field' || this.resource.type=='TextField' || this.resource.type=='Get_Resource' || this.resource.type=='Get_Get_Resource' || this.resource.type=='Get_Double_Resource')
-			this.displayMetadataAttributeEditor('metadata-part1','encrypted',true);
-	}
+//	if (name=='asmContext') {
+//		if (this.resource.type=='Field' || this.resource.type=='TextField' || this.resource.type=='Get_Resource' || this.resource.type=='Get_Get_Resource' || this.resource.type=='Get_Double_Resource')
+//			this.displayMetadataAttributeEditor('metadata-part1','encrypted',true);
+//	}
 	if (USER.admin && Object.keys(UICom.roles).length>2)
 		this.displayRights('metadata-rights');
 	if (model)
@@ -766,7 +766,7 @@ UIFactory["Node"].prototype.displayMetainfo = function(dest)
 	//-----------------------------------------
 	var html = "";
 	html += "<span>"+karutaStr[languages[LANGCODE]][type]+" - </span>";
-	html += "<span>semantictag:"+this.semtag+"|</span>";
+	html += "<span>semantictag:"+this.semantictag+"|</span>";
 	html += "<span>multilingual-node:"+this.multilingual+"|</span>";
 	if (this.asmtype=='asmContext') {
 		html += "<span>multilingual-resource:"+this.resource.multilingual+"|</span>";
@@ -1526,6 +1526,12 @@ UIFactory["Node"].updateMetadataAttribute = function(nodeid,attribute,value,chec
 	var node = UICom.structure["ui"][nodeid].node;
 	if (checked!=undefined && !checked)
 		value = "N";
+	if (attribute=='multilingual-node')
+		UICom.structure["ui"][nodeid].multilingual =  (value=="Y");
+	if (attribute=='semantictag')
+		UICom.structure["ui"][nodeid].semantictag = value;
+	if (attribute=='multilingual-resource')
+		UICom.structure["ui"][nodeid].resource.multilingual = (value=="Y");
 	$($("metadata",node)[0]).attr(attribute,value);
 	UICom.UpdateMetadata(nodeid);
 	if (g_userroles[0]=='designer' || USER.admin) {  
