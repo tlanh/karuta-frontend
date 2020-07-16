@@ -820,6 +820,46 @@ UIFactory["Portfolio"].getid_bycode = function(code,resources)
 	return result;
 };
 
+//==================================
+UIFactory["Portfolio"].getLabel_bycode = function(code,langcode) 
+//==================================
+{
+	//---------------------
+	if (langcode==null)
+		langcode = LANGCODE;
+	//---------------------
+	var result = "";
+	var url = serverBCK_API+"/portfolios/portfolio/code/" + code;
+	$.ajax({
+		async: false,
+		type : "GET",
+		dataType : "xml",
+		url : url,
+		success : function(data) {
+			var portfolio = $("portfolio", data);
+			result = $("label[lang='"+languages[langcode]+"']",$("asmRoot>asmResource[xsi_type='nodeRes']",portfolio)[0]).text();
+		}
+	});
+	return result;
+};
+
+//==================================
+UIFactory["Portfolio"].getRootid_bycode = function(code) 
+//==================================
+{
+	var result = "";
+	var url = serverBCK_API+"/portfolios/portfolio/code/" + code;
+	$.ajax({
+		async: false,
+		type : "GET",
+		dataType : "xml",
+		url : url,
+		success : function(data) {
+			result = $("asmRoot",data).attr("id");
+		}
+	});
+	return result;
+};
 
 //==================================
 UIFactory["Portfolio"].instantiate_bycode = function(sourcecode,targetcode,callback)
@@ -1313,6 +1353,8 @@ UIFactory["Portfolio"].getActions = function(portfolioid)
 		html += "<a class='dropdown-item'  onclick=\"$('#contenu').html('');UICom.structure.ui['"+g_portfolio_rootid+"'].displaySemanticTags('contenu')\">"+karutaStr[LANG]['list-semtags']+"</a>";
 		if (UIFactory.URL2Unit.testIfURL2Unit(g_portfolio_current))
 			html += "<a class='dropdown-item'  onclick=\"$('#wait-window').show();UIFactory.URL2Unit.bringUpToDate('"+portfolioid+"');$('#wait-window').hide();\">"+karutaStr[LANG]['refresh-url2unit']+"</a>";
+		if (UIFactory.URL2Portfolio.testIfURL2Portfolio(g_portfolio_current))
+			html += "<a class='dropdown-item'  onclick=\"$('#wait-window').show();UIFactory.URL2Portfolio.bringUpToDate('"+portfolioid+"');$('#wait-window').hide();\">"+karutaStr[LANG]['refresh-url2portfolio']+"</a>";
 		if(languages.length>1) {
 			html += UIFactory.Portfolio.getTranslateMenu();
 		}
@@ -2499,8 +2541,7 @@ UIFactory["Portfolio"].search = function(type)
 //==================================
 {
 	var value = $("#"+type+"-search-text-input").val();
-//	var nodes = $("asmUnit:has(asmResource[xsi_type='nodeRes']:contains('"+value+"'))",g_portfolio_current);
-	var nodes = $("asmUnit:has(asmResource:has(label[lang='"+LANG+"']:contains('"+value+"'),text[lang='"+LANG+"']:contains('"+value+"')))",g_portfolio_current);
+	var nodes = $("asmUnit:has(asmResource:has(label[lang='"+LANG+"']:contains(\""+value+"\"),text[lang='"+LANG+"']:contains(\""+value+"\")))",g_portfolio_current);
 	var html="";
 	html += "<div class='result-title'>"+karutaStr[LANG]["result-title"]+value+"</div>";
 	html += "<div class='result-subtitle'>"+karutaStr[LANG]["result-subtitle"]+"</div>";

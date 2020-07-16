@@ -211,13 +211,13 @@ function applyLoginConfiguration()
 	$('#welcome1').html(g_configVar['login-logo']);
 	$("#welcome1").attr("style",g_configVar['login-logo_style']);
 	//---------------------
-	if (g_configVar['login-subtitle']!=undefined) {
+	if (g_configVar['login-subtitle']!=undefined && g_configVar['login-subtitle']!="") {
 		$('#welcome2').html(g_configVar['login-subtitle']);
 		$("#welcome2").attr("style",g_configVar['login-subtitle-style']);
 	} else 
 		$('#welcome2').html(welcome2[LANG]);
 	//---------------------
-	if (g_configVar['login-subtext']!=undefined) {
+	if (g_configVar['login-subtext']!=undefined && g_configVar['login-subtext']!="") {
 		$('#welcome3').html(g_configVar['login-subtext']);
 		$("#welcome3").attr("style",g_configVar['login-subtext-style']);
 	} else 
@@ -336,6 +336,11 @@ function setLoginTechnicalVariables()
 			g_configVar['maintenance-display'] = getText('config-maintenance-display','Get_Resource','value',data);
 			g_configVar['maintenance-text'] = getText('config-maintenance-text','TextField','text',data,LANGCODE);
 			g_configVar['maintenance-text-style'] = getContentStyle('config-maintenance-text',data);
+		},
+		error : function() {
+			loadLanguages(function() {
+				getLanguage();
+			});
 		}
 	});
 }

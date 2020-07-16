@@ -8,13 +8,6 @@ var serverBCK = "../../../karuta-backend"+bckname; // fileserver backend
 var serverBCK_API = "../../../karuta-backend"+bckname+"/rest/api";
 var cas_url = "";
 var new_bck = false;
-if (new_bck) {
-	bckname = '-new';
-	serverBCK = "../../../karuta-backend"+bckname; // fileserver backend
-	serverBCK_API = "../../../karuta-backend"+bckname+"/api";
-	appliname = 'karuta3.0-new';
-	karutaname = 'karuta3.0-new'; // to share the same 'karuta-core' with multiple front-end
-}
 //-------- LANGUAGES------------
 var languages = [];
 languages [0] = 'fr';
@@ -50,16 +43,15 @@ var welcome4 = {};			//  Welcome title
 var welcome5 = {}; 			//  Welcome sub-title
 	welcome5["fr"] = "PORTFOLIO OPEN SOURCE";
 	welcome5["en"] = "OPEN SOURCE PORTFOLIO";
-	var listinfo = {};       // Welcome text
-	listinfo["fr"] = "";
-	listinfo["en"] = "";
 //-----------PUBLIC PAGE -----------------------
 var welcome = {};// Welcome title
 	welcome["fr"] = "<img class='img-fluid' src='../../karuta/img/logofonbleu.jpg'/>";
 	welcome["en"] = "<img class='img-fluid' src='../../karuta/img/logofonbleu.jpg'/>";
 //--------- PUBLIC EMAIL LOGO - MESSAGE -------
 var url = window.location.href;
-var serverURL = url.substring(0,url.lastIndexOf(appliname)+appliname.length);
+var serverURL = url.substring(0,url.indexOf("/application/htm"));
+if (url.indexOf("/application/htm")<0)
+	serverURL = url.substring(0,url.indexOf("/karuta/htm"));
 var g_sendEmailPublicURL_logo = serverURL+"/karuta/img/logofonbleu.jpg";
 var g_sendEmailPublicURL_message ="&lt;img src='"+g_sendEmailPublicURL_logo+"' style='width:300px;margin-bottom:4px;margin-top:30px;'&gt;";
 g_sendEmailPublicURL_message +=  "&lt;div style='margin:30px;border-radius:4px;padding:10px;border: 1px solid lightGrey;box-shadow: 3px 3px 3px #CCC'&gt;";

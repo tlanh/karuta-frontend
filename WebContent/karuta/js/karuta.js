@@ -74,7 +74,7 @@ function setDesignerRole(role)
 		var html = "";
 		if (g_bar_type.indexOf('horizontal')>-1) {
 			UIFactory.Portfolio.displayPortfolio('portfolio-container',g_display_type,LANGCODE,g_edit);
-			$("#portfolio-container").attr('role',role);			
+			$("#portfolio-container").attr('role',role);
 		}
 		else {
 			html += "	<div id='main-row' class='row'>";
@@ -1228,15 +1228,22 @@ function getEmail(role,emails) {
 function sendEmailPublicURL(encodeddata,email,langcode) {
 //==================================
 	var url = window.location.href;
-	var serverURL = url.substring(0,url.lastIndexOf(appliname)+appliname.length);
+	var serverURL = url.substring(0,url.indexOf("/application/htm"));
+	if (url.indexOf("/application/htm")<0)
+		serverURL = url.substring(0,url.indexOf("/karuta/htm"));
 	url = serverURL+"/application/htm/public.htm?i="+encodeddata+"&amp;lang="+languages[langcode];
 	//------------------------------
 	var message = "";
-	message = g_sendEmailPublicURL_message.replace("#firstname#",USER.firstname);
-	message = message.replace("#lastname#",USER.lastname);
+	message = g_sendEmailPublicURL_message.replace("##firstname##",USER.firstname);
+	message = message.replace("##lastname##",USER.lastname);
 	message = message.replace("#want-sharing#",karutaStr[LANG]['want-sharing']);
 	message = message.replace("#see#",karutaStr[LANG]['see']);
 	message = message.replace("#do not edit this#",url);
+	//------------------------------
+//	var message = g_config['send-email-logo'] + g_config['send-email-message'];
+//	message = message.replace("##firstname##",USER.firstname);
+//	message = message.replace("##lastname##",USER.lastname);
+//	message = message.replace("##click-here##","<a href='"+url+"'>"+g_config['send-email-image']+"</a>");
 	//------------------------------
 	var xml ="<node>";
 	xml +="<sender>"+$(USER.email_node).text()+"</sender>";
@@ -1597,15 +1604,16 @@ function logout()
 		type: "GET",
 		dataType: "text",
 		url: serverBCK_API+"/credential/logout",
+		data: "",
 		success: function(data) {
-			window.location="login.htm?lang="+LANG;
+		window.location="login.htm?lang="+LANG;
 		},
 		error: function(data) {
-			window.location="login.htm?lang="+LANG;
+		window.location="login.htm?lang="+LANG;
 		}
 	});
 }
- 
+
 //==============================
 function hideAllPages()
 //==============================
@@ -1868,8 +1876,10 @@ String.prototype.toNoAccents = function()
 function applyNavbarConfiguration()
 //==============================
 {
-	$('#navbar-brand-logo').html(g_configVar['navbar-brand-logo']);
-	$("#navbar-brand-logo").attr("style",g_configVar['navbar-brand-logo-style']);
+	if (g_configVar['navbar-brand-logo']!="")
+		$('#navbar-brand-logo').html(g_configVar['navbar-brand-logo']);
+	if (g_configVar['navbar-brand-logo-style']!="")
+		$("#navbar-brand-logo").attr("style",g_configVar['navbar-brand-logo-style']);
 	if (g_configVar['navbar-display-mailto']=='0')
 		$("#navbar-mailto").hide();
 	if (g_configVar['navbar-display-language']=='0')

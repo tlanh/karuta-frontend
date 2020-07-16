@@ -10,7 +10,7 @@ function show_main_page(rootid,role)
 	$("#refresh").attr("onclick","fill_main_page()");
 	$("body").removeClass();
 	$("body").addClass("portfolio-container")
-	$("#portfolio-container").html("");
+//	$("#portfolio-container").html("");
 	$("#portfolio-container").attr('role',g_userroles[0]);
 	$("#main-portfolio").show();
 	$("#refresh").hide();
@@ -28,6 +28,7 @@ function fill_main_page(rootid,role)
 	var html = "";
 	$("#portfolio-container").html(html);
 	g_welcome_add = false;
+	//-------------------------------------------
 	if (rootid!=null){
 		var parentid = $($(UICom.structure.ui[rootid].node).parent()).attr('id');
 		if ($($(UICom.structure.ui[rootid].node).parent())) {
@@ -42,6 +43,7 @@ function fill_main_page(rootid,role)
 	userrole = role;
 	if (userrole=='undefined')
 		userrole = "";
+	//-------------------------------------------
 	if (!USER.admin) {
 		$.ajax({ // get group-role for the user
 			Accept: "application/xml",
@@ -71,8 +73,8 @@ function fill_main_page(rootid,role)
 		g_visible = localStorage.getItem('metadata');
 		toggleMetadata(g_visible);
 	}
+	//-------------------------------------------
 	var url = serverBCK_API+"/portfolios/portfolio/" + g_portfolioid + "?resources=true";
-	$.ajaxSetup({async: true});
 	$.ajax({
 		type : "GET",
 		dataType : "xml",
@@ -108,8 +110,9 @@ function fill_main_page(rootid,role)
 			//-------------------------------------------------
 			var config_unit = $("asmUnit:has(metadata[semantictag*='configuration-unit'])",data);
 			if (config_unit.length==0) { // for backward compatibility and portfolios without config
-				resetConfigurationPortfolioVariable();
-				setCSSportfolio("");
+//				if (g_configDefaultVar.length>0)
+					resetConfigurationPortfolioVariable();
+//				setCSSportfolio("");
 				setCSSportfolioOLD(data);
 			} else {
 				setConfigurationPortfolioVariable(config_unit,true);
@@ -189,8 +192,6 @@ function fill_main_page(rootid,role)
 			}
 			//---------------------------
 			fillEditBoxBody();
-
-//								UIFactory.Node.reloadUnit(UICom.rootid); // for IE9
 		},
 		error : function(jqxhr,textStatus) {
 			if (jqxhr.status=="403") {

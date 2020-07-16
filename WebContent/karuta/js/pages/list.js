@@ -22,7 +22,7 @@ function getListSubBar()
 function setWelcomeTitles()
 //==============================
 {
-	if (g_configVar['list-welcome-title-color']!=undefined) { //configuration portfolio has been read
+	if (g_configVar['list-welcome-title-color']!=undefined && g_configVar['list-welcome-title-color']!="") { //configuration portfolio has been read
 		var root = document.documentElement;
 		root.style.setProperty('--list-welcome-title-color',g_configVar['list-welcome-title-color']);
 		root.style.setProperty('--list-welcome-subtitle-color',g_configVar['list-welcome-subtitle-color']);
@@ -33,6 +33,10 @@ function setWelcomeTitles()
 		$("#welcome-title").attr('style', g_configVar['list-welcome-title-css']);
 		$("#welcome-baseline").html(g_configVar['list-welcome-subtitle']);
 		$("#welcome-baseline").attr('style', g_configVar['list-welcome-subtitle-css']);
+	} else {
+		$("#welcome-title").html(welcome4[LANG]);
+		$("#welcome-baseline").html(welcome5[LANG]);
+
 	}
 }
 
@@ -106,8 +110,8 @@ function fill_list_page()
 		html += "		<a class='dropdown-item' onclick=\"javascript:UIFactory.Portfolio.import(false)\" >"+karutaStr[LANG]['import_portfolio']+"</a>";
 		html += "		<a class='dropdown-item' onclick=\"javascript:UIFactory.Portfolio.import(true)\" >"+karutaStr[LANG]['import_zip']+"</a>";
 		html += "		<div class='dropdown-divider'></div>";
-		html += "		<a class='dropdown-item' onclick=\"javascript:UIFactory.Portfolio.importFile(false,true)\" >"+karutaStr[LANG]['import_instance']+"</a>";
-		html += "		<a class='dropdown-item' onclick=\"javascript:UIFactory.Portfolio.importZip(true,true)\" >"+karutaStr[LANG]['import_zip_instance']+"</a>";
+		html += "		<a class='dropdown-item' onclick=\"javascript:UIFactory.Portfolio.import(false,true)\" >"+karutaStr[LANG]['import_instance']+"</a>";
+		html += "		<a class='dropdown-item' onclick=\"javascript:UIFactory.Portfolio.import(true,true)\" >"+karutaStr[LANG]['import_zip_instance']+"</a>";
 		html += "	</div>";
 		html += "</div>";
 		$("#menu").html(html);
