@@ -80,6 +80,7 @@ function r_replaceVariable(text)
 //==================================
 {
 	var n=0;
+	var text_original = text;
 	while (text!=undefined && text.indexOf("{##")>-1 && n<100) {
 		var test_string = text.substring(text.indexOf("{##")+3); // test_string = abcd{##variable##}efgh.....
 		var variable_name = test_string.substring(0,test_string.indexOf("##}"));
@@ -705,13 +706,14 @@ g_report_actions['for-each-portfolio'] = function (destid,action,no,data)
 		else
 			searchvalue = eval("json.lines["+line+"]."+select.substring(6));
 	}
-
+	var items_list = [];
 	$.ajax({
 		type : "GET",
 		dataType : "xml",
 		url : serverBCK_API+"/portfolios?active=1&search="+searchvalue,
 		success : function(data) {
-			UIFactory["Portfolio"].parse(data);
+			UIFactory["Portfolio"].parse_add(data);
+			var items = $("portfolio",data);
 			var value = "";
 			var condition = "";
 			var portfolioid = "";
@@ -721,9 +723,9 @@ g_report_actions['for-each-portfolio'] = function (destid,action,no,data)
 			var tableau = new Array();
 			var sortvalue = "";
 			if (sortag!=undefined && sortag!="") {
-				for ( var j = 0; j < portfolios_list.length; j++) {
-					portfolioid = portfolios_list[j].id;
-					var code = portfolios_list[j].code_node.text();
+				for ( var j = 0; j < items.length; j++) {
+					portfolioid = $(items[i]).attr('id');
+					var code = $("code",$("asmRoot>asmResource[xsi_type='nodeRes']",items[i])).text();
 					//------------------------------------
 					if (select.indexOf("code*=")>-1) {
 						if (select.indexOf("'")>-1)
@@ -774,12 +776,16 @@ g_report_actions['for-each-portfolio'] = function (destid,action,no,data)
 				}
 				var newTableau = tableau.sort(sortOn1);
 				for ( var i = 0; i < newTableau.length; i++) {
-					portfolios_list[i] = portfolios_byid[newTableau[i][1]]
+					items_list[i] = portfolios_byid[newTableau[i][1]]
 				}
-				portfolios_list.length = newTableau.length;
+				items_list.length = newTableau.length;
+			} else {
+				for ( var i = 0; i < items.length; i++) {
+					items_list[i] = portfolios_byid[$(items[i]).attr('id')]
+				}
 			}
 			//----------------------------------
-			for ( var j = 0; j < portfolios_list.length; j++) {
+			for ( var j = 0; j < items_list.length; j++) {
 				if (countvar!=undefined) {
 					g_variables[countvar] = j;
 				}
@@ -790,7 +796,7 @@ g_report_actions['for-each-portfolio'] = function (destid,action,no,data)
 					for (var i=0;i<ref_inits.length;i++)
 						g_variables[ref_inits[i]] = new Array();
 				}
-				var code = portfolios_list[j].code_node.text();
+				var code = items_list[j].code_node.text();
 				//------------------------------------
 				if (select.indexOf("code*=")>-1) {
 					if (select.indexOf("'")>-1)
@@ -819,7 +825,7 @@ g_report_actions['for-each-portfolio'] = function (destid,action,no,data)
 				}
 				//------------------------------------
 				if (condition){
-					portfolioid = portfolios_list[j].id;
+					portfolioid = items_list[j].id;
 					portfolioid_current = portfolioid;
 					$.ajax({
 						async:false,
@@ -860,13 +866,15 @@ g_report_actions['for-each-portfolios-nodes'] = function (destid,action,no,data)
 	var userid = data;
 	if (userid==null)
 		userid = USER.id;
+	var items_list = [];
 	$.ajax({
 		async:false,
 		type : "GET",
 		dataType : "xml",
 		url : serverBCK_API+"/portfolios?active=1&user="+userid,
 		success : function(data) {
-			UIFactory["Portfolio"].parse(data);
+			UIFactory["Portfolio"].parse_add(data);
+			var items = $("portfolio",data);
 			var select = $(action).attr("select");
 			select = r_replaceVariable(select);
 			var value = "";
@@ -879,9 +887,9 @@ g_report_actions['for-each-portfolios-nodes'] = function (destid,action,no,data)
 			var tableau = new Array();
 			var sortvalue = "";
 			if (sortag!=undefined && sortag!="") {
-				for ( var j = 0; j < portfolios_list.length; j++) {
-					portfolioid = portfolios_list[j].id;
-					var code = portfolios_list[j].code_node.text();
+				for ( var j = 0; j < items.length; j++) {
+					portfolioid = $(items[i]).attr('id');
+					var code = $("code",$("asmRoot>asmResource[xsi_type='nodeRes']",items[i])).text();
 					if (select.indexOf("code*=")>-1) {
 						if (select.indexOf("'")>-1)
 							value = select.substring(7,select.length-1);  // inside quote
@@ -925,17 +933,21 @@ g_report_actions['for-each-portfolios-nodes'] = function (destid,action,no,data)
 				}
 				var newTableau = tableau.sort(sortOn1);
 				for ( var i = 0; i < newTableau.length; i++) {
-					portfolios_list[i] = portfolios_byid[newTableau[i][1]]
+					items_list[i] = portfolios_byid[newTableau[i][1]]
 				}
-				portfolios_list.length = newTableau.length;
+				items_list.length = newTableau.length;
+			} else {
+				for ( var i = 0; i < items.length; i++) {
+					items_list[i] = portfolios_byid[$(items[i]).attr('id')]
+				}
 			}
 			//----------------------------------
-			for ( var j = 0; j < portfolios_list.length; j++) {
+			for ( var j = 0; j < items_list.length; j++) {
 				if (countvar!=undefined) {
 					g_variables[countvar] = j;
 				}
 				//------------------------------------
-				var code = portfolios_list[j].code_node.text();
+				var code = items_list[j].code_node.text();
 				if (select.indexOf("code*=")>-1) {
 					value = select.substring(7,select.length-1);  // inside quote
 					condition = code.indexOf(value)>-1;
@@ -1051,7 +1063,7 @@ g_report_actions['node_resource'] = function (destid,action,no,data)
 			//----------------------------
 			if (selector.type=='resource') {
 				try {
-					text = UICom.structure["ui"][nodeid].resource.getView("dashboard_"+nodeid,null,null,true);
+					text = UICom.structure["ui"][nodeid].resource.getView("dashboard_"+nodeid,'none',null,true);
 				} catch(e){
 					text = UICom.structure["ui"][nodeid].structured_resource.getView("dashboard_"+nodeid,null,null,true);
 				}
@@ -1331,6 +1343,9 @@ g_report_actions['csv-value'] = function (destid,action,no,data)
 			if (selector.type=='node label') {
 				text = UICom.structure["ui"][nodeid].getLabel();
 			}
+			if (selector.type=='node code') {
+				text = UICom.structure["ui"][nodeid].getCode();
+			}
 			if (selector.type=='node value') {
 				text = UICom.structure["ui"][nodeid].getValue();
 			}
@@ -1393,14 +1408,19 @@ g_report_actions['europass'] = function (destid,action,no,data)
 	var style = "";
 	var attr_help = "";
 	var selector = r_getSelector('asmUnitStructure.EuropassL','');
-	var node = $(selector.jquery,data);
-	if (node.length>0 || select.substring(0,1)=="."){
-		var nodeid = $(node).attr("id");
-		var text = "<table id='"+destid+"europass' style='width:100%;margin-top:30px;'></table>";
-		$("#"+destid).append($(text));
-		var europass_node = UICom.structure["ui"][nodeid];
-		//----------------------------
-		europass_node.structured_resource.displayView(destid+"europass",null,'report',nodeid,null,false);
+	var nodes = $(selector.jquery,data);
+	if (nodes.length>0 || select.substring(0,1)=="."){
+		for (var enode=0;enode<nodes.length;enode++) {
+			var semantictag = $("metadata",nodes[enode]).attr('semantictag');
+			if (semantictag=='EuropassL') {
+				var nodeid = $(nodes[enode]).attr("id");
+				var text = "<table id='"+destid+"europass' style='width:100%;margin-top:30px;'></table>";
+				$("#"+destid).append($(text));
+				var europass_node = UICom.structure["ui"][nodeid];
+				//----------------------------
+				europass_node.structured_resource.displayView(destid+"europass",null,'report',nodeid,null,false);
+			}
+		}
 	}
 }
 
@@ -1662,12 +1682,12 @@ function report_getModelAndPortfolio(model_code,node,destid,g_dashboard_models)
 				url : urlS,
 				success : function(data) {
 					g_dashboard_models[model_code] = data;
-					try {
+//					try {
 						r_processPortfolio(0,data,destid,node,0);
-					}
-					catch(err) {
-						alertHTML("Error in Dashboard : " + err.message);
-					}
+//					}
+//					catch(err) {
+//						alertHTML("Error in Dashboard : " + err.message);
+//					}
 					$("#wait-window").hide();
 					$("#wait-window").modal('hide');
 				}
@@ -2030,6 +2050,9 @@ g_report_actions['draw-web-title'] = function (destid,action,no,data)
 			if (selector.type=='node label') {
 				text = UICom.structure["ui"][nodeid].getLabel(null,'none');
 			}
+			if (selector.type=='node code') {
+				text = UICom.structure["ui"][nodeid].getCode();
+			}
 			if (selector.type=='node value') {
 				text = UICom.structure["ui"][nodeid].getValue();
 			}
@@ -2077,6 +2100,9 @@ g_report_actions['draw-web-axis'] = function (destid,action,no,data)
 			}
 			if (selector.type=='node label') {
 				text = UICom.structure["ui"][nodeid].getLabel(null,'none');
+			}
+			if (selector.type=='node code') {
+				text = UICom.structure["ui"][nodeid].getCode();
 			}
 			if (selector.type=='node value') {
 				text = UICom.structure["ui"][nodeid].getValue();
@@ -2136,6 +2162,9 @@ g_report_actions['draw-web-line'] = function (destid,action,no,data)
 			if (selector.type=='node value') {
 				text = UICom.structure["ui"][nodeid].getValue();
 			}
+			if (selector.type=='node code') {
+				text = UICom.structure["ui"][nodeid].getCode();
+			}
 			if (selector.type=='node context') {
 				text = UICom.structure["ui"][nodeid].getContext("svg_context_"+nodeid,'none');
 			}
@@ -2187,14 +2216,17 @@ g_report_actions['draw-web-line'] = function (destid,action,no,data)
 				if (selector.type=='node value') {
 					text = UICom.structure["ui"][nodeid].getValue();
 				}
+				if (selector.type=='node code') {
+					text = UICom.structure["ui"][nodeid].getCode();
+				}
 				if (selector.type=='node context') {
 					text = UICom.structure["ui"][nodeid].getContext("svg_context_"+nodeid,'none');
 				}
 			};
-			var line = makeSVG('line',{'x1':10,'y1':975-20*no,'x2':10,'y2':975-20*no,'class':'svg-web-value'+pos});
+			var line = makeSVG('line',{'x1':10,'y1':975-20*pos,'x2':10,'y2':975-20*pos,'class':'svg-web-value'+pos});
 //			var line = makeSVG('line',{'x1':10,'y1':25+20*no,'x2':10,'y2':25+20*no,'class':'svg-web-value'+no});
 			document.getElementById(destid).appendChild(line);
-			var svgtext = makeSVG('text',{'x':20,'y':980-20*no,'font-size':svgfontsize,'font-family':svgfontname},text);
+			var svgtext = makeSVG('text',{'x':20,'y':980-20*pos,'font-size':svgfontsize,'font-family':svgfontname},text);
 //			var svgtext = makeSVG('text',{'x':20,'y':30+20*no,'font-size':svgfontsize,'font-family':svgfontname},text);
 			document.getElementById(destid).appendChild(svgtext);
 		}
