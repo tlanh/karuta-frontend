@@ -120,10 +120,6 @@ UIFactory["URL"].prototype.getView = function(dest,type,langcode)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
 	if (dest!=null) {
 		this.display[dest] = {langcode: langcode, type : type};
 	}
@@ -133,8 +129,6 @@ UIFactory["URL"].prototype.getView = function(dest,type,langcode)
 	var html = "";
 	//---------------------
 	var url = $(this.url_node[langcode]).text();
-	if (url!="" && url.indexOf("http")<0)
-		url = "http://"+url;
 	var label = $(this.label_node[langcode]).text();
 	if (label=="")
 		label = url;
@@ -144,17 +138,11 @@ UIFactory["URL"].prototype.getView = function(dest,type,langcode)
 		else
 			html =  " "+karutaStr[LANG]['no-URL'];
 	}
-if(type=='standard') {
+	if(type=='standard' || type=='none') {
 		if (url!="")
 			html = "<a href='"+url+"' target='_blank'><img src='../../karuta/img/link-icon.png' style='width:25px'> "+label+"</a>";
 		else
 			html =  "<img src='../../karuta/img/link-icon.png' style='width:25px'> "+karutaStr[LANG]['no-URL'];
-	}
-	if (type=='free-positioning'){
-		if (url!="")
-			html = "<a href='"+url+"'><div class='url-up'><p style='text-align:center;'>"+label+"</p></div><div class='url-bottom'><span>URL</span></div></a>";
-		else
-			html = "<div class='url-up'><p style='text-align:center;'>"+karutaStr[LANG]['no-URL']+"</p></div><div class='url-bottom'><span>URL</span></div>";
 	}
 	if (type=='icon-url-label'){
 		if (url!="")
@@ -178,55 +166,7 @@ if(type=='standard') {
 UIFactory["URL"].prototype.displayView = function(dest,type,langcode)
 //==================================
 {
-	//---------------------
-	if (langcode==null)
-		langcode = LANGCODE;
-	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
-	if (dest!=null) {
-		this.display[dest] = {langcode: langcode, type : type};
-	}
-	//---------------------
-	if (type==null)
-		type = "standard";
-	var html = "";
-	//---------------------
-	var url = $(this.url_node[langcode]).text();
-	if (url!="" && url.indexOf("http")<0)
-		url = "http://"+url;
-	var label = $(this.label_node[langcode]).text();
-	if (label=="")
-		label = url;
-	if(type=='url') {
-		if (url!="")
-			html = "<a href='"+url+"' target='_blank'> "+label+"</a>";
-		else
-			html =  " "+karutaStr[LANG]['no-URL'];
-	}
-	if(type=='standard') {
-		if (url!="")
-			html = "<a href='"+url+"' target='_blank'><img src='../../karuta/img/link-icon.png' style='width:25px'> "+label+"</a>";
-		else
-			html =  "<img src='../../karuta/img/link-icon.png' style='width:25px'> "+karutaStr[LANG]['no-URL'];
-	}
-	if (type=='icon-url-label'){
-		if (url!="")
-			html = "<a href='"+url+"' target='_blank'><img src='../../karuta/img/link-icon.png' style='width:25px'> "+label+urlIcon["web"]+"</a>";
-		else
-			html =  "<img src='../../karuta/img/link-icon.png' style='width:25px'><p style='text-align:center;'>"+karutaStr[LANG]['no-URL']+"</p>";
-	}
-	if (type=='icon-url'){
-		if (url!="")
-			html = "<a href='"+url+"' target='_blank'><img src='../../karuta/img/link-icon.png' style='width:25px'> "+urlIcon["web"]+"</a>";
-		else
-			html =  "<img src='../../karuta/img/link-icon.png' style='width:25px'>"+karutaStr[LANG]['no-URL'];
-	}
-	if (type=='icon'){
-		html = urlIcon["web"];
-	}
+	var html = this.getView(dest,type,langcode);
 	$("#"+dest).html(html);
 };
 
@@ -242,8 +182,6 @@ UIFactory["URL"].update = function(obj,itself,type,langcode,parent)
 	//---------------------
 	var label = $("input[name='label']",obj).val();
 	var url = $("input[name='url']",obj).val();
-	if (url!="" && url.indexOf("http")<0)
-		url = "http://"+url;
 	if(type!=null && type=='same')
 		label = url;
 	//---------------------
@@ -268,10 +206,6 @@ UIFactory["URL"].prototype.getEditor = function(type,langcode,disabled,parent)
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
 	//---------------------
 	if (type==null)
 		type = 'default';
@@ -367,7 +301,10 @@ UIFactory["URL"].prototype.save = function(parent)
 //==================================
 {
 	UICom.UpdateResource(this.id,writeSaved);
-	this.refresh();
+	if (this.blockparent!=null)
+		this.blockparent.refresh();
+	else
+		this.refresh();
 	if (parent!=null) // --- structured resource
 		parent.refresh();
 };

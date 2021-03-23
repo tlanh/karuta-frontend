@@ -95,8 +95,6 @@ UIFactory["Dashboard"].prototype.getAttributes = function(type,langcode)
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	if (this.multilingual!=undefined && !this.multilingual)
-		langcode = 0;
 	//---------------------
 	if (dest!=null) {
 		this.display[dest]=langcode;
@@ -121,10 +119,6 @@ UIFactory["Dashboard"].prototype.getView = function(dest,langcode)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
 	if (dest!=null) {
 		this.display[dest] = langcode;
 	}
@@ -140,10 +134,6 @@ UIFactory["Dashboard"].prototype.displayView = function(dest,langcode)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
 	if (dest!=null) {
 		this.display[dest] = langcode;
 	}
@@ -151,7 +141,8 @@ UIFactory["Dashboard"].prototype.displayView = function(dest,langcode)
 	$("#"+dest).html(html);
 //	report_not_in_a_portfolio = false;
 	//-----------------------------------------------------
-	$("#extra_"+uuid).append($("<div class='row'><div id='extra_button_"+uuid+"' class='dashboard-buttons col-md-offset-1 col-md-2 btn-group'></div><div id='pdf_button_"+uuid+"' class='col-md-1 btn-group'></div><div id='dashboard_"+uuid+"' class='createreport col-md-offset-1 col-md-11'></div></div>"));
+	$("#extra_"+uuid).append($("<div id='extra_button_"+uuid+"' class='dashboard-buttons btn-group'></div>"));
+	$("#extra_"+uuid).append($("<div id='dashboard_"+uuid+"' class='createreport'></div>"));
 	var root_node = g_portfolio_current;
 	var parent_node = UICom.structure.ui[$(this.parent).attr("id")];
 	genDashboardContent("dashboard_"+uuid,uuid,parent_node,root_node);
@@ -160,7 +151,6 @@ UIFactory["Dashboard"].prototype.displayView = function(dest,langcode)
 	if (g_userroles[0]!='designer')
 		$("#sub_node_"+uuid).hide();
 	//---------- display csv or pdf -------
-	var html_csv_pdf = ""
 	var csv_roles = $(UICom.structure["ui"][uuid].resource.csv_node).text();
 	if (csv_roles.indexOf('all')>-1 || csv_roles.containsArrayElt(g_userroles) || (csv_roles!='' && (g_userroles[0]=='designer' || USER.admin))) {
 		$("#extra_button_"+uuid).append($("<div class='csv-button button' onclick=\"javascript:xml2CSV('dashboard_"+uuid+"')\">CSV</div>"));				
@@ -204,9 +194,6 @@ UIFactory["Dashboard"].prototype.getEditor = function(type,langcode,disabled)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
 	if (disabled==null)
 		disabled = false;
 	//---------------------

@@ -23,7 +23,27 @@ var g_current_node_uuid = null;
 var g_users = {};
 //-----------------------
 
+var jqueryBatchSpecificFunctions = {};
+jqueryBatchSpecificFunctions['.resourceTextContains('] = "asmResource[xsi_type!='context'][xsi_type!='nodeRes']>text[lang='#lang#']:contains(";
+jqueryBatchSpecificFunctions['.resourceCodeContains('] = "asmResource[xsi_type!='context'][xsi_type!='nodeRes']>code:contains(";
+jqueryBatchSpecificFunctions['.resourceValueContains('] = "asmResource[xsi_type!='context'][xsi_type!='nodeRes']>value:contains(";
+jqueryBatchSpecificFunctions['.nodeLabelContains('] = "asmResource[xsi_type='nodeRes']>label[lang='#lang#']:contains(";
+jqueryBatchSpecificFunctions['.nodeCodeContains('] = "asmResource[xsi_type='nodeRes']>code:contains(";
+jqueryBatchSpecificFunctions['.resourceFilenameContains('] = "asmResource[xsi_type!='context'][xsi_type!='nodeRes']>filename[lang='#lang#']:contains(";
 
+//==================================
+function getTest(test)
+//==================================
+{
+	for (fct in jqueryBatchSpecificFunctions) {
+		if (test.indexOf(fct)>-1) {
+			test = ".has(\"" + test.replace(fct,jqueryBatchSpecificFunctions[fct]) + "\")";
+			if (test.indexOf("#lang#")>-1)
+				test = test.replace(/#lang#/g,languages[LANGCODE]);
+		}
+	}
+	return test;
+}
 
 //==================================
 function initBatchVars()
@@ -42,6 +62,23 @@ function initBatchVars()
 function getTxtvals(node)
 //==================================
 {
+	var str = getTxtvalsWithoutReplacement(node);
+	return r_replaceVariable(str.trim());
+}
+
+//==================================
+function b_replaceVariable(text)
+//==================================
+{
+	if (text.indexOf("//")>-1)
+		text = eval("g_json."+text.substring(2));
+	return text;
+}
+
+//==================================
+function getTxtvalsWithoutReplacement(node)
+//==================================
+{
 	var str = "";
 	var txtvals = $("txtval",node);
 	for (var i=0; i<txtvals.length; i++){
@@ -53,9 +90,12 @@ function getTxtvals(node)
 				fct = select.substring(9,select.indexOf(','))
 				select = select.substring(select.indexOf(',')+1,select.indexOf(')'))
 			}
-			if (select.indexOf("//")>-1)
-				text = eval("g_json."+select.substring(2));
-			else if (select.indexOf("/")>-1)
+			if (select.indexOf("//")>-1) {
+				if (select=="//today")
+					text = new Date().toLocaleString();
+				else
+					text = eval("g_json."+select.substring(2));
+			} else if (select.indexOf("/")>-1)
 				text = eval("g_users['"+select.substring(1)+"']");
 			else
 				text = eval("g_json.lines["+g_noline+"]."+select);
@@ -63,6 +103,8 @@ function getTxtvals(node)
 				text = eval(fct+"('"+text+"')");
 		} else {
 			text = $(txtvals[i]).text();
+			if (text=="//today")
+				text = new Date().toLocaleString();
 			if (text.indexOf('numline()')>-1) {
 				text = text.replace(/numline()/g,g_noline);
 				text = eval(text);
@@ -89,9 +131,12 @@ function getvarvals(node)
 					fct = items[i].substring(9,items[i].indexOf(','));
 					items[i] = items[i].substring(items[i].indexOf(',')+1,items[i].indexOf(')'));
 				}
-				if (items[i].indexOf("//")>-1)
-					text = eval("g_json."+items[i].substring(2));
-				else if (items[i].indexOf("/")>-1)
+				if (select.indexOf("//")>-1) {
+					if (select=="//today")
+						text = new Date().toLocaleString();
+					else
+						text = eval("g_json."+select.substring(2));
+				} else if (items[i].indexOf("/")>-1)
 					text = eval("g_json.lines["+g_noline+"]."+items[i].substring(1));
 				else 
 					text = items[i];
@@ -119,13 +164,27 @@ function getTargetUrl(node)
 	var semtag = select.substring(idx+1);
 	if (semtag=='#current_node')
 		url = serverBCK_API+"/nodes/node/"+g_current_node_uuid;
-	else if (semtag=='#uuid')
+	else if (semtag=='#uuid') {
+		if (treeref.indexOf("//")>-1)
+			treeref = eval("g_json."+treeref.substring(2));
+		else if (treeref.indexOf("/")>-1)
+			treeref = eval("g_json.lines["+g_noline+"]."+treeref.substring(1));
 		url = serverBCK_API+"/nodes/node/"+treeref;
-	else if (treeref.indexOf("#")>-1)
+	} else if (treeref.indexOf("#")>-1)
 		url = serverBCK_API+"/nodes?portfoliocode=" + treeref.substring(1) + "&semtag="+semtag;	
 	else
 		url = serverBCK_API+"/nodes?portfoliocode=" + g_trees[treeref][1] + "&semtag="+semtag;
 	return r_replaceVariable(url);
+}
+
+//==================================
+function getSemtag(node)
+//==================================
+{
+	var select = $(node).attr("select");
+	var idx = select.lastIndexOf(".");
+	var semtag = select.substring(idx+1);
+	return semtag;
 }
 
 //==================================
@@ -139,9 +198,13 @@ function getSourceUrl(node)
 	var semtag = select.substring(idx+1);
 	if (semtag=='#current_node')
 		url = serverBCK_API+"/nodes/node/"+g_current_node_uuid;
-	else if (semtag=='#uuid')
+	else if (semtag=='#uuid') {
+		if (treeref.indexOf("//")>-1)
+			treeref = eval("g_json."+treeref.substring(2));
+		else if (treeref.indexOf("/")>-1)
+			treeref = eval("g_json.lines["+g_noline+"]."+treeref.substring(1));
 		url = serverBCK_API+"/nodes/node/"+treeref;
-	else if (treeref.indexOf("#")>-1)
+	} else if (treeref.indexOf("#")>-1)
 		url = serverBCK_API+"/nodes?portfoliocode=" + treeref.substring(1) + "&semtag="+semtag;	
 	else
 		url = serverBCK_API+"/nodes?portfoliocode=" + g_trees[treeref][1] + "&semtag="+semtag;
@@ -242,6 +305,7 @@ g_actions['for-each-tree'] = function forEachTree(node)
 				portfolio [1] = $("code",$("asmRoot>asmResource[xsi_type='nodeRes']",trees[i])).text();
 				var treeref = $(node).attr('id');
 				g_trees[treeref] = portfolio;
+			$("#batch-log").append("<br>------------- current-tree -----------------");
 				$("#batch-log").append("<br>- tree selected - code:"+portfolio [1]+" - portfolioid:"+portfolio [0]);
 				processListActions($("actions",node).children());
 			}
@@ -264,6 +328,7 @@ g_actions['for-each-user'] = function (node)
 	var email = getTxtvals($("email",node));
 	if (username!="")
 		$.ajax({
+			async: false,
 			type : "GET",
 			dataType : "xml",
 			url : serverBCK_API+"/users?username="+username,
@@ -273,6 +338,7 @@ g_actions['for-each-user'] = function (node)
 					var username = UsersActive_list[j].username_node.text();
 					var userref = $(node).attr('id');
 					g_users[userref] = username;
+			$("#batch-log").append("<br>------------- current-user -----------------");
 					$("#batch-log").append("<br>- user selected - username:"+username);
 					processListActions($("actions",node).children());
 						//------------------------------------
@@ -281,6 +347,7 @@ g_actions['for-each-user'] = function (node)
 		});
 	else
 		$.ajax({
+			async: false,
 			type : "GET",
 			dataType : "xml",
 			url : serverBCK_API+"/users?email="+email,
@@ -473,6 +540,7 @@ g_actions['inactivate-user'] = function inactivateUser(node)
 					$("active",data).text('0');
 					data = xml2string(data);
 					$.ajax({
+						async : false,
 						type : "PUT",
 						dataType : "text",
 						url : url,
@@ -530,6 +598,7 @@ g_actions['activate-user'] = function activateUser(node)
 					$("active",data).text('1');
 					data = xml2string(data);
 					$.ajax({
+						async : false,
 						type : "PUT",
 						dataType : "text",
 						url : url,
@@ -703,6 +772,7 @@ g_actions['leave-usergroup'] = function LeaveUserGroup(node)
 					else {
 						//---- leave group --------------
 						$.ajax({
+							async : false,
 							type : 'DELETE',
 							dataType : "text",
 							url : serverBCK_API+"/usersgroups?group=" + groupid + "&user=" + user_id,
@@ -1046,6 +1116,7 @@ g_actions['update-tree-root'] = function updateTreeRoot(node)
 						xml += "<label lang='"+languages[lan]+"'>"+$("label[lang='"+languages[lan]+"']",$("asmResource[xsi_type='nodeRes']",data)).text()+"</label>";
 				xml += "</asmResource>";
 				$.ajax({
+					async : false,
 					type : "PUT",
 					contentType: "application/xml",
 					dataType : "text",
@@ -1112,6 +1183,7 @@ g_actions['share-tree'] = function shareTree(node)
 					//---- share tree --------------
 					var url = serverBCK_API+"/rolerightsgroups/rolerightsgroup/" + groupid + "/users";
 					$.ajax({
+						async : false,
 						type : "POST",
 						contentType: "application/xml",
 						dataType : "xml",
@@ -1162,6 +1234,7 @@ g_actions['share-tree-byemail'] = function (node)
 			//---- share tree --------------
 			var url = serverBCK_API+"/rolerightsgroups/rolerightsgroup/" + groupid + "/users";
 			$.ajax({
+				async : false,
 				type : "POST",
 				contentType: "application/xml",
 				dataType : "xml",
@@ -1333,6 +1406,11 @@ g_actions['update-resource'] = function updateResource(node)
 	var ok = 0;
 	var type = $(node).attr("type");
 	var attributes = $("attribute",node)
+	var test = $(node).attr("test");
+	if (test!=undefined) {
+		test = r_replaceVariable(test);
+		test=getTest(test);
+	}
 	//------------ Target --------------------
 	var url = getTargetUrl(node);
 	//--------------------------------
@@ -1349,6 +1427,7 @@ g_actions['update-resource'] = function updateResource(node)
 			} else {							// get by code and semtag
 				nodes = $("node",data);
 			}
+			nodes = eval("$(nodes)"+test);
 			if (nodes.length>0){
 				for (var i=0; i<nodes.length; i++){
 					//-------------------
@@ -1375,20 +1454,20 @@ g_actions['update-resource'] = function updateResource(node)
 						url : serverBCK_API+"/resources/resource/" + nodeid,
 						success : function(data) {
 							ok++;
-							$("#batch-log").append("<br>- resource updated ("+nodeid+")");
+							$("#batch-log").append("<br>- resource updated "+type+" - attributes :"+attributes[0]);
 						},
 						error : function(data) {
-							$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in update resource("+nodeid+")");
+							$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in update resource "+type+" - attribute :"+attributes[0]);
 						}
 					});
 					//-------------------
 				}
 			} else {
-				$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR</span>");
+				$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR - update-resource "+type+"</span>");
 			}
 		},
 		error : function(data) {
-			$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR</span>");
+				$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR - update-resource "+type+"</span>");
 		}
 	});
 	return (ok!=0 && ok == nodes.length);
@@ -1406,6 +1485,11 @@ g_actions['update-node-resource'] = function updateResource(node)
 {
 	var ok = 0;
 	var type = $(node).attr("type");
+	var test = $(node).attr("test");
+	if (test!=undefined) {
+		test = r_replaceVariable(test);
+		test=getTest(test);
+	}
 	//------------ Target --------------------
 	var url = getTargetUrl(node);
 	//--------------------------------
@@ -1422,6 +1506,7 @@ g_actions['update-node-resource'] = function updateResource(node)
 			} else {							// get by code and semtag
 				nodes = $("node",data);
 			}
+			nodes = eval("$(nodes)"+test);
 			if (nodes.length>0){
 				for (var i=0; i<nodes.length; i++){
 					//-------------------
@@ -1443,25 +1528,288 @@ g_actions['update-node-resource'] = function updateResource(node)
 						url : serverBCK_API+"/nodes/node/" + nodeid + "/noderesource",
 						success : function(data) {
 							ok++;
-							$("#batch-log").append("<br>- resource updated ("+nodeid+")");
+							$("#batch-log").append("<br>- resource updated ("+nodeid+") type : "+type);
 						},
 						error : function(data) {
-							$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in update resource("+nodeid+")");
+							$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in update resource("+nodeid+" type : "+type);
 						}
 					});
 					//-------------------
 				}
 			} else {
-				$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR</span>");
+				$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR - update-node-resource - type: "+type+"</span>");
 			}
 		},
 		error : function(data) {
-			$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR</span>");
+				$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR - update-node-resource - type: "+type+"</span>");
 		}
 	});
 	return (ok!=0 && ok == nodes.length);
 }
 
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//------------- Update Node - Metadata ----------------------------------
+//-----------------------------------------------------------------------
+
+//=================================================
+g_actions['update-node'] = function updateNode(node)
+//=================================================
+{
+	var select = $(node).attr("select");
+	var type = $(node).attr("type");
+	var idx = select.indexOf(".");
+	var test = $(node).attr("test");
+	if (test!=undefined) {
+		test = r_replaceVariable(test);
+		test=getTest(test);
+	}
+	//----------------------------------------------------
+	if (select=='#current_node') {
+		$.ajax({
+			async : false,
+			type : "GET",
+			dataType : "xml",
+			url : serverBCK_API+"/nodes/node/"+g_current_node_uuid,
+			success : function(data) {
+				var results = $('*',data);
+				var nodes = new Array();
+				nodes[0] = results[0];
+				var text = getTxtvalsWithoutReplacement($("text",node));
+				if ($("source",node).length>0){
+					var source_select = $("source",node).attr("select");
+					var source_idx = source_select.indexOf(".");
+					var source_treeref = source_select.substring(0,source_idx);
+					var source_semtag = source_select.substring(source_idx+1);
+					if (source_semtag=="UUID")
+						text = g_trees[source_treeref][0];
+				}
+				//---------------------------
+				if (type=='Metadata'){
+					var attribute = $(node).attr("attribute");
+					updateMetada(nodes,node,type,semtag,text,attribute)
+				}
+				if (type=='Metadatawad'){
+					var attribute = $(node).attr("attribute");
+					updateMetadawad(nodes,node,type,semtag,text,attribute)
+				}
+				if (type=='Metadataepm'){
+					var attribute = $(node).attr("attribute");
+					updateMetadaepm(nodes,node,type,semtag,text,attribute)
+				}
+				if (type=='Field') {//---------------------- for backward compatibility ---------------------
+					updateField(nodes,node,type,semtag,r_replaceVariable(text));
+				}
+				if (type=='Proxy') {//---------------------- for backward compatibility ---------------------
+					updateProxy(nodes,node,type,semtag);
+				}
+				if (type=='Dashboard') {//---------------------- for backward compatibility ---------------------
+					updateDashboard(nodes,node,type,semtag,text);
+				}
+				if (type=='MetadataInline'){//---------------------- for backward compatibility ---------------------
+					var attribute = 'inline';
+					updateMetada(nodes,node,type,semtag,text,attribute)
+				}
+				if (type=='MetadatawadQuery') {//---------------------- for backward compatibility ---------------------
+					var attribute = 'query';
+					updateMetadawad(nodes,node,type,semtag,text,attribute);
+				}
+				if (type=='MetadatawadMenu') {//---------------------- for backward compatibility ---------------------
+					var attribute = 'menuroles';
+					updateMetadawad(nodes,node,type,semtag,text,attribute);
+				}
+				if (type=='NodeResource') {//---------------------- for backward compatibility ---------------------
+					updateNodeResource(nodes,node);
+				}
+				if (type=='Calendar') {//---------------------- for backward compatibility ---------------------
+					updateCalendar(nodes,node,text,semtag);
+				}
+				if (type=='Document') {//---------------------- for backward compatibility ---------------------
+					updateDocument(nodes,node,text,semtag);
+				}
+				if (type=='Rights'){//---------------------- for backward compatibility ---------------------
+					var rd = $(node).attr("rd");
+					var wr = $(node).attr("wr");
+					var dl = $(node).attr("dl");
+					var sb = $(node).attr("sb");
+					updateRights(nodes,node,role,rd,wr,dl,sb);
+				}
+			},
+			error : function(data) {
+				$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR</span> in update-resource - uuid="+g_current_node_uuid+" semtag="+semtag);
+			}
+		});
+	} else {
+		var treeref = select.substring(0,idx);
+		var semtag = select.substring(idx+1);
+		$.ajax({
+			async : false,
+			type : "GET",
+			dataType : "xml",
+			url : serverBCK_API+"/nodes?portfoliocode=" + g_trees[treeref][1] + "&semtag="+semtag,
+			success : function(data) {
+				var nodes = $("node",data);
+				nodes = eval("$(nodes)"+test);
+				var text = getTxtvalsWithoutReplacement($("text",node));
+				$("#batch-log").append("<br>- " + nodes.length + " nodes");
+				if (nodes.length>0) {
+					if ($("source",node).length>0){
+						var source_select = $("source",node).attr("select");
+						var source_idx = source_select.indexOf(".");
+						var source_treeref = source_select.substring(0,source_idx);
+						var source_semtag = source_select.substring(source_idx+1);
+						if (source_semtag=="UUID")
+							text = g_trees[source_treeref][0];
+					}
+					//---------------------------
+					if (type=='Metadata'){
+						var attribute = $(node).attr("attribute");
+						updateMetada(nodes,node,type,semtag,text,attribute)
+					}
+					if (type=='Metadatawad'){
+						var attribute = $(node).attr("attribute");
+						updateMetadawad(nodes,node,type,semtag,text,attribute)
+					}
+					if (type=='Metadataepm'){
+						var attribute = $(node).attr("attribute");
+						updateMetadaepm(nodes,node,type,semtag,text,attribute)
+					}
+					if (type=='Field') {//---------------------- for backward compatibility ---------------------
+						updateField(nodes,node,type,semtag,r_replaceVariable(text));
+					}
+					if (type=='Proxy') {//---------------------- for backward compatibility ---------------------
+						updateProxy(nodes,node,type,semtag);
+					}
+					if (type=='Dashboard') {//---------------------- for backward compatibility ---------------------
+						updateDashboard(nodes,node,type,semtag,text);
+					}
+					if (type=='MetadataInline'){//---------------------- for backward compatibility ---------------------
+						var attribute = 'inline';
+						updateMetada(nodes,node,type,semtag,text,attribute)
+					}
+					if (type=='MetadatawadQuery') {//---------------------- for backward compatibility ---------------------
+						var attribute = 'query';
+						updateMetadawad(nodes,node,type,semtag,text,attribute);
+					}
+					if (type=='MetadatawadMenu') {//---------------------- for backward compatibility ---------------------
+						var attribute = 'menuroles';
+						updateMetadawad(nodes,node,type,semtag,text,attribute);
+					}
+					if (type=='NodeResource') {//---------------------- for backward compatibility ---------------------
+						updateNodeResource(nodes,node);
+					}
+					if (type=='Calendar') {//---------------------- for backward compatibility ---------------------
+						updateCalendar(nodes,node,text,semtag);
+					}
+					if (type=='Document') {//---------------------- for backward compatibility ---------------------
+						updateDocument(nodes,node,text,semtag);
+					}
+					if (type=='Rights'){//---------------------- for backward compatibility ---------------------
+						var rd = $(node).attr("rd");
+						var wr = $(node).attr("wr");
+						var dl = $(node).attr("dl");
+						var sb = $(node).attr("sb");
+						updateRights(nodes,node,role,rd,wr,dl,sb);
+					}
+				} else {
+					$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR</span> in update-resource - tree="+g_trees[treeref][1]+" semtag="+semtag+" type="+type+" value="+text);
+				}
+			},
+			error : function(data) {
+				$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR</span> in update-resource - tree="+g_trees[treeref][1]+" semtag="+semtag+" type="+type+" value="+text);
+			}
+		});
+	}
+}
+
+
+//=================================================
+function updateMetada(nodes,node,type,semtag,text,attribute)
+//=================================================
+{
+	for (var inode=0;inode<nodes.length;inode++) {
+		var nodeid = $(nodes[inode]).attr('id');
+		var metadata = $("metadata",nodes[inode]);
+		$(metadata).attr(attribute,text);
+		var xml = xml2string(metadata[0]);
+		$.ajax({
+			async : false,
+			type : "PUT",
+			contentType: "application/xml",
+			dataType : "text",
+			data : xml,
+			nodeid : nodeid,
+			semtag : semtag,
+			url : serverBCK_API+"/nodes/node/" + nodeid+"/metadata",
+			success : function(data) {
+				$("#batch-log").append("<br>- resource metadata updated ("+this.nodeid+") - semtag="+this.semtag+" attribute="+attribute+" value="+text);
+				updateMetada(nodes,node,type,semtag,text,attribute)
+			},
+			error : function(data,nodeid,semtag) {
+				$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in update metadata("+this.nodeid+") - semtag="+this.semantictag+" attribute="+attribute+" value="+text);
+				updateMetada(nodes,node,type,semtag,text,attribute);
+			}
+		});
+	}
+}
+
+//=================================================
+function updateMetadawad(nodes,node,type,semtag,text,attribute)
+//=================================================
+{
+	for (var inode=0;inode<nodes.length;inode++) {
+		var nodeid = $(nodes[inode]).attr('id');
+		var metadatawad = $("metadata-wad",nodes[inode]);
+		$(metadatawad).attr(attribute,text);
+		var xml = xml2string(metadatawad[0]);
+		$.ajax({
+			async : false,
+			type : "PUT",
+			contentType: "application/xml",
+			dataType : "text",
+			data : xml,
+			nodeid : nodeid,
+			semtag : semtag,
+			url : serverBCK_API+"/nodes/node/" + nodeid+"/metadatawad",
+			success : function(data) {
+				$("#batch-log").append("<br>- resource metadatawad updated ("+this.nodeid+") - semtag="+this.semtag+" attribute="+attribute+" value="+text);
+			},
+			error : function(data) {
+				$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in update metadatawad("+this.nodeid+") - semtag="+this.semantictag+" attribute="+attribute+" value="+text);
+			}
+		});
+	}
+}
+
+//=================================================
+function updateMetadaepm(nodes,node,type,semtag,text,attribute)
+//=================================================
+{
+	for (var inode=0;inode<nodes.length;inode++) {
+		var nodeid = $(nodes[inode]).attr('id');
+		var metadatawad = $("metadata-epm",nodes[inode]);
+		$(metadatawad).attr(attribute,text);
+		var xml = xml2string(metadatawad[0]);
+		$.ajax({
+			async : false,
+			type : "PUT",
+			contentType: "application/xml",
+			dataType : "text",
+			data : xml,
+			nodeid : nodeid,
+			semtag : semtag,
+			url : serverBCK_API+"/nodes/node/" + nodeid+"/metadataepm",
+			success : function(data) {
+				$("#batch-log").append("<br>- resource metadataepm updated ("+this.nodeid+") - semtag="+this.semtag+" attribute="+attribute+" value="+text);
+				updateMetadaepm(nodes,node,type,semtag,text,attribute)
+			},
+			error : function(data,nodeid,semtag) {
+				$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in update metadataepm("+this.nodeid+") - semtag="+this.semantictag+" attribute="+attribute+" value="+text);
+				updateMetadaepm(nodes,node,type,semtag,text,attribute);
+			}
+		});
+	}
+}
 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1524,7 +1872,7 @@ g_actions['update-rights'] = function updateRights(node)
 					});
 				}
 			} else {
-				$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR</span>");
+				$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR</span> in update rights("+nodeid+") - semtag="+semtag);
 			}
 		},
 		error : function(data) {
@@ -1627,7 +1975,6 @@ g_actions['delete-node-byid'] = function deleteNodeById(node)
 }
 
 
-
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //--------------------------- Portfolio Group ---------------------------
@@ -1689,6 +2036,7 @@ g_actions['join-portfoliogroup'] = function JoinPortfolioGroup(node)
 					var treeref = select;
 					//---- join group --------------
 					$.ajax({
+						async : false,
 						type : 'PUT',
 						dataType : "text",
 						url : serverBCK_API+"/portfoliogroups?group="+groupid+"&uuid=" + g_trees[treeref][0],
@@ -1714,6 +2062,7 @@ g_actions['join-portfoliogroup'] = function JoinPortfolioGroup(node)
 								var portfolioid = $(trees[i]).attr("id");
 								//---- join group --------------
 								$.ajax({
+									async : false,
 									type : 'PUT',
 									dataType : "text",
 									url : serverBCK_API+"/portfoliogroups?group="+groupid+"&uuid=" + portfolioid,
@@ -1885,8 +2234,8 @@ g_actions['unshare-portfoliogroup'] = function unsharePortfolioGroup(node)
 		url : url,
 		success : function(data) {
 			var user_id = data;
-			async : false,
 			$.ajax({
+				async : false,
 				type : "GET",
 				dataType : "xml",
 				url : serverBCK_API+"/portfoliogroups?group="+portfoliogroupid,
@@ -2201,7 +2550,7 @@ g_actions['import-node'] = function importNode(node)
 		if (select.indexOf('#current_node')>-1)
 			destid = g_current_node_uuid;
 		else
-			destid = treeref; // select = porfolio_uuid.#uuid
+			destid = r_replaceVariable(b_replaceVariable(treeref)); // select = porfolio_uuid.#uuid
 		var urlS = serverBCK_API+"/nodes/node/import/"+destid+"?srcetag="+srcetag+"&srcecode="+srcecode;
 		$.ajax({
 			async:false,
@@ -2300,6 +2649,7 @@ g_actions['delete-node'] = function deleteNode(node)
 			for (i=0; i<nodes.length; i++){
 				var nodeid = $(nodes[i]).attr('id');
 				$.ajax({
+					async : false,
 					type : "DELETE",
 					dataType : "text",
 					url : serverBCK_API+"/nodes/node/" + nodeid,
@@ -2334,6 +2684,7 @@ g_actions['moveup-node'] = function moveupNode(node)
 	var ok = 0;
 	//------------ Target --------------------
 	var url = getTargetUrl(node);
+	var semtag = getSemtag(node);
 	//--------------------------------
 	var nodes = new Array();
 	$.ajax({
@@ -2351,22 +2702,23 @@ g_actions['moveup-node'] = function moveupNode(node)
 			for (i=0; i<nodes.length; i++){
 				var nodeid = $(nodes[i]).attr('id');
 				$.ajax({
+					async : false,
 					type : "POST",
 					dataType : "text",
-					current:nodeid,
+					semtag:semtag,
 					url : serverBCK_API+"/nodes/node/" + nodeid + "/moveup",
 					success : function(data) {
 						ok++;
-						$("#batch-log").append("<br>- node moved up - nodeid("+this.current+")");
+						$("#batch-log").append("<br>- node moved up - nodeid("+this.semtag+")");
 					},
 					error : function(jqxhr,textStatus) {
-						$("#batch-log").append("<br>- <span class='danger'>ERROR</span> in moveup node - nodeid("+this.current+")");
+						$("#batch-log").append("<br>- <span class='danger'>ERROR</span> in moveup node - nodeid("+this.semtag+")");
 					}
 				});
 			}
 		},
 		error : function(data) {
-			$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR</span> in update-moveup ");
+			$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR</span> in update-moveup "+this.semtag);
 		}
 	});
 	return (ok!=0 && ok == nodes.length);
@@ -2423,12 +2775,15 @@ g_actions['update-proxy'] = function update_proxy(node)
 			for (i=0; i<nodes.length; i++){
 				ok++;
 				var targetid = $(nodes[i]).attr('id');
-				var xml = "<asmResource xsi_type='Proxy'>";
-				xml += "<code>"+sourceid+"</code>";
-				xml += "<value>"+sourceid+"</value>";
-				xml += "</asmResource>";
+				//----- get target ----------------
+				var resource = $("asmResource[xsi_type='Proxy']",nodes[i]);
+				$("code",resource).text(sourceid);
+				$("value",resource).text(sourceid);
+				var xml = "<asmResource xsi_type='Proxy'>" + $(resource).html() + "</asmResource>";
+				var strippeddata = xml.replace(/xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g,"");  // remove xmlns attribute
 				//----- update target ----------------
 				$.ajax({
+					async : false,
 					type : "PUT",
 					contentType: "application/xml",
 					dataType : "text",
@@ -2512,6 +2867,7 @@ g_actions['update-url2unit'] = function update_url2unit(node)
 				var strippeddata = xml.replace(/xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g,"");  // remove xmlns attribute
 				//----- update target ----------------
 				$.ajax({
+					async : false,
 					type : "PUT",
 					contentType: "application/xml",
 					dataType : "text",
@@ -2585,6 +2941,7 @@ g_actions['update-url2portfolio'] = function update_url2portfolio(node)
 				var strippeddata = xml.replace(/xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g,"");  // remove xmlns attribute
 				//----- update target ----------------
 				$.ajax({
+					async : false,
 					type : "PUT",
 					contentType: "application/xml",
 					dataType : "text",
@@ -2634,10 +2991,12 @@ function getModelAndProcess(model_code)
 //=================================================
 {
 	$.ajax({
+		async : false,
 		type : "GET",
 		dataType : "xml",
 		url : serverBCK_API+"/portfolios/portfolio/code/"+model_code + "?resources=true",
 		success : function(data) {
+			setVariables(data);
 			var portfoliologcode = "";
 			if ($("asmContext:has(metadata[semantictag='portfoliologcode'])",data).length>0)
 				portfoliologcode = r_replaceVariable($("text[lang='"+LANG+"']",$("asmResource[xsi_type='Field']",$("asmContext:has(metadata[semantictag='portfoliologcode'])",data))).text());
@@ -2645,6 +3004,7 @@ function getModelAndProcess(model_code)
 			// ---- transform karuta portfolio to batch model
 			var urlS = serverBCK_API+"/nodes/"+nodeid+"?xsl-file="+appliname+"/karuta/xsl/karuta2batch.xsl&lang="+LANG;
 			$.ajax({
+				async : false,
 				type : "GET",
 				dataType : "xml",
 				url : urlS,
@@ -2778,9 +3138,11 @@ function display_execBatch()
 };
 
 //==================================================
-function execReport_BatchCSV(parentid,title,codeReport)
+function execReport_BatchCSV(parentid,targetid,title,codeReport,display)
 //==================================================
 {
+	if (display==null)
+		display = true;
 	csvreport = [];
 	$.ajaxSetup({async: false});
 	var root_node = g_portfolio_current;
@@ -2792,17 +3154,20 @@ function execReport_BatchCSV(parentid,title,codeReport)
 	report_getModelAndPortfolio(codeReport,root_node,null,g_dashboard_models);
 	$.ajaxSetup({async: true});
 	initBatchVars();
-	if (csvreport.length>3) {
+	if (csvreport.length>1) {
 		var codesLine = csvreport[0].substring(0,csvreport[0].length-1).split(csvseparator);
 		g_json = convertCSVLine2json(codesLine,csvreport[1]);
 //		g_json['model_code'] = codeBatch;
-		g_json['lines'] = [];
-		codesLine = csvreport[2].substring(0,csvreport[2].length-1).split(csvseparator);
-		for (var i=3; i<csvreport.length;i++){
-			g_json.lines[g_json.lines.length] = convertCSVLine2json(codesLine,csvreport[i]);
+		if (csvreport.length>3) {
+			g_json['lines'] = [];
+			codesLine = csvreport[2].substring(0,csvreport[2].length-1).split(csvseparator);
+			for (var i=3; i<csvreport.length;i++){
+				g_json.lines[g_json.lines.length] = convertCSVLine2json(codesLine,csvreport[i]);
+			}
 		}
 		//------------------------------
-		display_execBatch()
+		if (display)
+			display_execBatch()
 		//------------------------------
 		getModelAndProcess(g_json.model_code);		
 		UIFactory.Node.reloadUnit();
@@ -2823,164 +3188,90 @@ function convertCSVLine2json(codes,csvline)
 	return g_json_line;
 };
 
-
-
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//------------------------ Update Node ----------------------------------
-//-----------------------------------------------------------------------
-//---------------------- for backward compatibility ---------------------
-
 //=================================================
-g_actions['update-node'] = function updateNode(node)
+function saveLog(model_code,portfoliologcode,logtext)
 //=================================================
 {
-	var select = $(node).attr("select");
-	var type = $(node).attr("type");
-	var idx = select.indexOf(".");
-	//----------------------------------------------------
-	if (select=='#current_node') {
-		$.ajax({
-			async : false,
-			type : "GET",
-			dataType : "xml",
-			url : serverBCK_API+"/nodes/node/"+g_current_node_uuid,
-			success : function(data) {
-				var results = $('*',data);
-				var nodes = new Array();
-				nodes[0] = results[0];
-				var text = getTxtvals($("text",node));
-				if ($("source",node).length>0){
-					var source_select = $("source",node).attr("select");
-					var source_idx = source_select.indexOf(".");
-					var source_treeref = source_select.substring(0,source_idx);
-					var source_semtag = source_select.substring(source_idx+1);
-					if (source_semtag=="UUID")
-						text = g_trees[source_treeref][0];
+	var text ="<h3>"+model_code+"</h3>"+"<h4>"+new Date().toLocaleString()+"</h4>"+logtext;
+	$.ajax({
+		type : "GET",
+		dataType : "xml",
+		url : serverBCK_API+"/portfolios/portfolio/code/"+portfoliologcode,
+		success : function(data) {
+			var nodeid = $("asmRoot",data).attr("id");
+			// ---- import textfield ---------
+			var urlS = serverBCK_API+"/nodes/node/import/"+nodeid+"?srcetag=TextField&srcecode=karuta.karuta-resources";
+			$.ajax({
+				async:false,
+				type : "POST",
+				dataType : "text",
+				url : urlS,
+				data : "",
+				success : function(data) {
+					// ---- update textfield ---------
+					var uuid = data;
+					$.ajax({
+						type : "GET",
+						dataType : "xml",
+						url : serverBCK_API+"/nodes/node/" + uuid,
+						success : function(data) {
+						var resource = $("asmResource[xsi_type='TextField']",data);
+						$("text[lang='"+LANG+"']",resource).text(text);
+						var data = "<asmResource xsi_type='TextField'>" + $(resource).html() + "</asmResource>";
+						var strippeddata = data.replace(/xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g,"");  // remove xmlns attribute
+						//-------------------
+						$.ajax({
+							async : false,
+							type : "PUT",
+							contentType: "application/xml",
+							dataType : "text",
+							data : strippeddata,
+							url : serverBCK_API+"/resources/resource/" + uuid,
+							success : function(data) {
+								$("#batch-log").append("<br>--- log saved in "+portfoliologcode+" ---");
+							},
+							error : function(data) {
+								$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in saveLog");
+							}
+						});
+						},
+						error : function(data) {
+							$("#batch-log").append("<br>- <span class='danger'>ERROR</span> in saveLog");
+						}
+					});
+				},
+				error : function(data) {
+					$("#batch-log").append("<br>- <span class='danger'>ERROR</span> in saveLog");
 				}
-				//---------------------------
-				if (type=='Field') {//---------------------- for backward compatibility ---------------------
-					updateField(nodes,node,type,semtag,text);
-				}
-				if (type=='Proxy') {//---------------------- for backward compatibility ---------------------
-					updateProxy(nodes,node,type,semtag);
-				}
-				if (type=='Dashboard') {//---------------------- for backward compatibility ---------------------
-					updateDashboard(nodes,node,type,semtag,text);
-				}
-				if (type=='Metadata'){
-					var attribute = $(node).attr("attribute");
-					updateMetada(nodes,node,type,semtag,text,attribute)
-				}
-				if (type=='MetadataInline'){//---------------------- for backward compatibility ---------------------
-					var attribute = 'inline';
-					updateMetada(nodes,node,type,semtag,text,attribute)
-				}
-				if (type=='Metadatawad'){
-					var attribute = $(node).attr("attribute");
-					updateMetadawad(nodes,node,type,semtag,text,attribute)
-				}
-				if (type=='MetadatawadQuery') {//---------------------- for backward compatibility ---------------------
-					var attribute = 'query';
-					updateMetadawad(nodes,node,type,semtag,text,attribute);
-				}
-				if (type=='MetadatawadMenu') {//---------------------- for backward compatibility ---------------------
-					var attribute = 'menuroles';
-					updateMetadawad(nodes,node,type,semtag,text,attribute);
-				}
-				if (type=='NodeResource') {//---------------------- for backward compatibility ---------------------
-					updateNodeResource(nodes,node);
-				}
-				if (type=='Calendar') {//---------------------- for backward compatibility ---------------------
-					updateCalendar(nodes,node,text,semtag);
-				}
-				if (type=='Document') {//---------------------- for backward compatibility ---------------------
-					updateDocument(nodes,node,text,semtag);
-				}
-				if (type=='Rights'){//---------------------- for backward compatibility ---------------------
-					var rd = $(node).attr("rd");
-					var wr = $(node).attr("wr");
-					var dl = $(node).attr("dl");
-					var sb = $(node).attr("sb");
-					updateRights(nodes,node,role,rd,wr,dl,sb);
-				}
-			},
-			error : function(data) {
-				$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR</span> in update-resource - uuid="+g_current_node_uuid+" semtag="+semtag);
-			}
-		});
-	} else {
-		var treeref = select.substring(0,idx);
-		var semtag = select.substring(idx+1);
-		$.ajax({
-			async : false,
-			type : "GET",
-			dataType : "xml",
-			url : serverBCK_API+"/nodes?portfoliocode=" + g_trees[treeref][1] + "&semtag="+semtag,
-			success : function(data) {
-				var nodes = $("node",data);
-				var text = getTxtvals($("text",node));
-				if ($("source",node).length>0){
-					var source_select = $("source",node).attr("select");
-					var source_idx = source_select.indexOf(".");
-					var source_treeref = source_select.substring(0,source_idx);
-					var source_semtag = source_select.substring(source_idx+1);
-					if (source_semtag=="UUID")
-						text = g_trees[source_treeref][0];
-				}
-				//---------------------------
-				if (type=='Field') {
-					updateField(nodes,node,type,semtag,text);
-				}
-				if (type=='Proxy') {
-					updateProxy(nodes,node,type,semtag);
-				}
-				if (type=='Dashboard') {
-					updateDashboard(nodes,node,type,semtag,text);
-				}
-				if (type=='Metadata'){
-					var attribute = $(node).attr("attribute");
-					updateMetada(nodes,node,type,semtag,text,attribute)
-				}
-				if (type=='MetadataInline'){
-					var attribute = 'inline';
-					updateMetada(nodes,node,type,semtag,text,attribute)
-				}
-				if (type=='Metadatawad'){
-					var attribute = $(node).attr("attribute");
-					updateMetadawad(nodes,node,type,semtag,text,attribute)
-				}
-				if (type=='MetadatawadQuery') {
-					var attribute = 'query';
-					updateMetadawad(nodes,node,type,semtag,text,attribute);
-				}
-				if (type=='MetadatawadMenu') {
-					var attribute = 'menuroles';
-					updateMetadawad(nodes,node,type,semtag,text,attribute);
-				}
-				if (type=='NodeResource') {
-					updateNodeResource(nodes,node);
-				}
-				if (type=='Calendar') {
-					updateCalendar(nodes,node,text,semtag);
-				}
-				if (type=='Document') {
-					updateDocument(nodes,node,semtag);
-				}
-				if (type=='Rights'){
-					var rd = $(node).attr("rd");
-					var wr = $(node).attr("wr");
-					var dl = $(node).attr("dl");
-					var sb = $(node).attr("sb");
-					updateRights(nodes,node,role,rd,wr,dl,sb);
-				}
-			},
-			error : function(data) {
-				$("#batch-log").append("<br>- ***NOT FOUND <span class='danger'>ERROR</span> in update-resource - tree="+g_trees[treeref][1]+" semtag="+semtag);
-			}
-		});
-	}
+			});
+		},
+		error : function(data) {
+			$("#batch-log").append("<br>- <span class='danger'>ERROR</span> Portfolio log does not exist");
+		}
+	});
+
 }
+
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//------------------------ EXEC BATCH AT USER CREATION ------------------
+//-----------------------------------------------------------------------
+
+//=================================================
+function displayExecBatchButton()
+//=================================================
+{
+	var html = "<div id='create-portfolio'>"+g_execbatchbuttonlabel1[LANG]+"</div>";
+	$("#main-list").html(html);
+	initBatchVars();
+	prepareBatch();
+	getModelAndProcess(g_json.model_code);
+}
+
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//------------------------ for backward compatibility ------------------
+//-----------------------------------------------------------------------
 
 //=================================================
 function updateDocument(nodes,node,semtag)
@@ -3121,6 +3412,7 @@ function updateProxy(nodes,node,type,semtag)
 				xml += "</asmResource>";
 				//----- update target ----------------
 				$.ajax({
+					async : false,
 					type : "PUT",
 					contentType: "application/xml",
 					dataType : "text",
@@ -3224,147 +3516,5 @@ function updateNodeResource(nodes,node)
 			}
 		});
 	}
-}
-
-//=================================================
-function updateMetada(nodes,node,type,semtag,text,attribute)
-//=================================================
-{
-	if (nodes.length>0) {
-		var nodeid = $(nodes[0]).attr('id');
-		var metadata = $("metadata",nodes[0]);
-		$(metadata).attr(attribute,text);
-		var xml = xml2string(metadata[0]);
-		nodes = nodes.slice(1,nodes.length);
-		$.ajax({
-			async : false,
-			type : "PUT",
-			contentType: "application/xml",
-			dataType : "text",
-			data : xml,
-			nodeid : nodeid,
-			semtag : semtag,
-			url : serverBCK_API+"/nodes/node/" + nodeid+"/metadata",
-			success : function(data) {
-				$("#batch-log").append("<br>- resource metadata updated ("+this.nodeid+") - semtag="+this.semantictag);
-				updateMetada(nodes,node,type,semtag,text,attribute)
-			},
-			error : function(data,nodeid,semtag) {
-				$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in update metadata("+this.nodeid+") - semtag="+this.semantictag);
-				updateMetada(nodes,node,type,semtag,text,attribute);
-			}
-		});
-	}
-}
-
-//=================================================
-function updateMetadawad(nodes,node,type,semtag,text,attribute)
-//=================================================
-{
-	if (nodes.length>0) {
-		var nodeid = $(nodes[0]).attr('id');
-		var metadatawad = $("metadata-wad",nodes[0]);
-		$(metadatawad).attr(attribute,text);
-		var xml = xml2string(metadatawad[0]);
-		nodes = nodes.slice(1,nodes.length);
-		$.ajax({
-			async : false,
-			type : "PUT",
-			contentType: "application/xml",
-			dataType : "text",
-			data : xml,
-			nodeid : nodeid,
-			semtag : semtag,
-			url : serverBCK_API+"/nodes/node/" + nodeid+"/metadatawad",
-			success : function(data) {
-				$("#batch-log").append("<br>- resource metadatawad updated ("+this.nodeid+") - semtag="+this.semantictag);
-				updateMetadawad(nodes,node,type,semtag,text,attribute)
-			},
-			error : function(data,nodeid,semtag) {
-				$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in update metadatawad("+this.nodeid+") - semtag="+this.semantictag);
-				updateMetadawad(nodes,node,type,semtag,text,attribute);
-			}
-		});
-	}
-}
-
-//=================================================
-function saveLog(model_code,portfoliologcode,logtext)
-//=================================================
-{
-	var text ="<h3>"+model_code+"</h3>"+"<h4>"+new Date().toLocaleString()+"</h4>"+logtext;
-	$.ajax({
-		type : "GET",
-		dataType : "xml",
-		url : serverBCK_API+"/portfolios/portfolio/code/"+portfoliologcode,
-		success : function(data) {
-			var nodeid = $("asmRoot",data).attr("id");
-			// ---- import textfield ---------
-			var urlS = serverBCK_API+"/nodes/node/import/"+nodeid+"?srcetag=TextField&srcecode=karuta.karuta-resources";
-			$.ajax({
-				async:false,
-				type : "POST",
-				dataType : "text",
-				url : urlS,
-				data : "",
-				success : function(data) {
-					// ---- update textfield ---------
-					var uuid = data;
-					$.ajax({
-						type : "GET",
-						dataType : "xml",
-						url : serverBCK_API+"/nodes/node/" + uuid,
-						success : function(data) {
-						var resource = $("asmResource[xsi_type='TextField']",data);
-						$("text[lang='"+LANG+"']",resource).text(text);
-						var data = "<asmResource xsi_type='TextField'>" + $(resource).html() + "</asmResource>";
-						var strippeddata = data.replace(/xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g,"");  // remove xmlns attribute
-						//-------------------
-						$.ajax({
-							async : false,
-							type : "PUT",
-							contentType: "application/xml",
-							dataType : "text",
-							data : strippeddata,
-							url : serverBCK_API+"/resources/resource/" + uuid,
-							success : function(data) {
-								$("#batch-log").append("<br>--- log saved in "+portfoliologcode+" ---");
-							},
-							error : function(data) {
-								$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in saveLog");
-							}
-						});
-						},
-						error : function(data) {
-							$("#batch-log").append("<br>- <span class='danger'>ERROR</span> in saveLog");
-						}
-					});
-				},
-				error : function(data) {
-					$("#batch-log").append("<br>- <span class='danger'>ERROR</span> in saveLog");
-				}
-			});
-		},
-		error : function(data) {
-			$("#batch-log").append("<br>- <span class='danger'>ERROR</span> Portfolio log does not exist");
-		}
-	});
-
-}
-
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//------------------------ EXEC BATCH AT USER CREATION ------------------
-//-----------------------------------------------------------------------
-
-//=================================================
-function displayExecBatchButton()
-//=================================================
-{
-	var html = "<div id='create-portfolio'>"+g_execbatchbuttonlabel1[LANG]+"</div>";
-	$("#main-list").html(html);
-	initBatchVars();
-	prepareBatch();
-	getModelAndProcess(g_json.model_code);
 }
 

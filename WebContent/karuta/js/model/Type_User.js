@@ -231,29 +231,6 @@ UIFactory["User"].parse_add = function(data)
 //--------------------------------------------------------------
 
 
-
-//==================================
-UIFactory["User"].displayXXXActive = function(destid,type,lang)
-//==================================
-{
-	$("#"+destid).html("<h3>"+karutaStr[LANG]["active_users"]+"</h3>");
-	$("#"+destid).append("<table id='table_users' class='tablesorter'><thead><th>"+karutaStr[LANG]["firstname"]+"</th><th>"+karutaStr[LANG]["lastname"]+"</th><th>C/A/S</th><th>"+karutaStr[LANG]["username"]+"</th><th></th></thead><tbody id='list_users'></tbody></table>");
-	$("#temporary").html("<table id='temp_users'></table>");
-	$("#list_users").append($("<tr><td></td><td></td><td></td><td></td><td></td></tr>")); // to avoid js error: table.config.parsers[c] is undefined
-	for ( var i = 0; i < UsersActive_list.length; i++) {
-		var itemid = destid+"_"+UsersActive_list[i].id;
-		var login = UsersActive_list[i].username_node.text();
-		if (login.length<80){ //not a temporary user
-			$("#list_users").append($("<tr class='item' id='"+itemid+"'></tr>"));
-			$("#"+itemid).html(UsersActive_list[i].getView(destid,type,lang));
-		} else {
-			$('#temporary-users').show();
-			$("#temp_users").append($("<tr id='"+itemid+"'></tr>"));
-			$("#"+itemid).html(UsersActive_list[i].getView(destid,'temporary',lang));
-		}
-	}
-};
-
 //==================================
 UIFactory["User"].displayInactive = function(dest,type,lang)
 //==================================
@@ -379,8 +356,8 @@ UIFactory["User"].prototype.getRadio = function(attr,value,name,checked,disabled
 	var html = "<input type='radio' name='"+name+"' username='"+username+"' value='"+userid+"'";
 	if (attr!=null && value!=null)
 		html += " "+attr+"='"+value+"'";
-	if ((userid==1)||disabled)
-		html+= " disabled='disabled' ";			
+//	if ((userid==1)||disabled)
+//		html+= " disabled='disabled' ";			
 	if (checked)
 		html += " checked='true' ";
 	html += "> "+firstname+" "+lastname+" ("+username+") </input>";
@@ -474,7 +451,7 @@ UIFactory["User"].prototype.getView = function(dest,type,lang,gid)
 			html += "<i class='fa fa-users fa-lg' ></i>";
 			html += "</button>";
 			//----------------------------------
-			if (this.username_node.text()!='root' && this.username_node.text()!='public') {
+			if (this.username_node.text()!='root') {
 				html += "<button class='btn ' onclick=\"UIFactory.Portfolio.getListPortfolios('"+this.id+"','"+this.firstname+"','"+this.lastname+"')\">";
 				html += "<i class='fa fa-file' ></i>";
 				html += "</button>";
@@ -508,6 +485,12 @@ UIFactory["User"].prototype.getView = function(dest,type,lang,gid)
 	}
 	if (type=='firstname-lastname') {
 		html = this.firstname_node.text() + " " + this.lastname_node.text();
+	}
+	if (type=='(firstname-lastname)') {
+		html = "(" + this.firstname_node.text();
+		if (this.lastname_node.text()!="")
+			html += " " + this.lastname_node.text();
+		html += ")";
 	}
 	if (type=='firstname-lastname-username') {
 		html = this.firstname_node.text() + " " + this.lastname_node.text()+ " (" + this.username_node.text()+")";
@@ -860,7 +843,7 @@ UIFactory["User"].confirmRemove = function(userid,from_page)
 	var js_remove = "UIFactory.User.remove('"+userid+"')";
 	if (from_page!=null)
 		js_remove = "UIFactory.User.remove('"+userid+"','"+from_page+"')";	
-	document.getElementById('delete-window-body').innerHTML = karutaStr[LANG]["confirm-delete"];
+	document.getElementById('delete-window-body').innerHTML = karutaStr[LANG]["confirm-delete"] + " " + Users_byid[userid].firstname + " " + Users_byid[userid].lastname + " ("+ Users_byid[userid].username + ")";
 	var buttons = "<button class='btn' onclick=\"javascript:$('#delete-window').modal('hide');\">" + karutaStr[LANG]["Cancel"] + "</button>";
 	buttons += "<button class='btn btn-danger' onclick=\"javascript:"+js_remove+";$('#delete-window').modal('hide');\">" + karutaStr[LANG]["button-delete"] + "</button>";
 	document.getElementById('delete-window-footer').innerHTML = buttons;
@@ -1346,7 +1329,7 @@ UIFactory["User"].prototype.getAdminUserMenu = function(type,gid)
 		html += "<span class='fa fa-users fa-lg'/>";
 		html += "</span>";
 		//----------------------------------
-		if (this.username_node.text()!='root' && this.username_node.text()!='public') {
+		if (this.username_node.text()!='root') {
 			html += "<span class='button btn' onclick=\"UIFactory.Portfolio.getListPortfolios('"+this.id+"','"+this.firstname+"','"+this.lastname+"')\">";
 			html += "<span class='fa fa-file'/>";
 			html += "</span>";

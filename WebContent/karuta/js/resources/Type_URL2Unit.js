@@ -108,10 +108,6 @@ UIFactory["URL2Unit"].prototype.getView = function(dest,type,langcode)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
 	if (dest!=null) {
 		this.display[dest] = langcode;
 	}
@@ -127,7 +123,7 @@ UIFactory["URL2Unit"].prototype.getView = function(dest,type,langcode)
 	if (this.query.indexOf('self.')>-1) {
 		html = "<div  class='URL2Unit-link'><span onclick=\"javascript:$('#sidebar_"+this.uuid_node.text()+"').click()\">"+label+"</span>";
 		if (this.preview)
-			html+= "&nbsp;<span class='button fas fa-binoculars' onclick=\"previewPage('"+this.uuid_node.text()+"',100,'standard') \" data-title='"+karutaStr[LANG]["button-preview"]+"' data-toggle='tooltip' data-placement='bottom'></span>";
+			html+= "&nbsp;<span class='button fas fa-binoculars' onclick=\"previewPage('"+this.uuid_node.text()+"',100,'standard') \" data-title='"+karutaStr[LANG]["preview"]+"' data-toggle='tooltip' data-placement='bottom'></span>";
 		html += "</div>"
 	}
 	else
@@ -174,13 +170,38 @@ UIFactory["URL2Unit"].update = function(selected_item,itself,langcode,type)
 };
 
 //==================================
+UIFactory["URL2Unit"].prototype.updateLabel = function(langcode)
+//==================================
+{
+	//---------------------
+	if (langcode==null)
+		langcode = LANGCODE;
+	var label = $.trim($("#local_label_"+this.id+"_"+langcode).val());
+	$(this.local_label_node[langcode]).text(label);
+	//---------------------
+	if (!this.multilingual) {
+		for (var i=0; i<languages.length; i++) {
+			$(this.local_label_node[i]).text(label);
+		}
+	}
+	//---------------------
+	this.save();
+	writeSaved(this.id);
+};
+//==================================
 UIFactory["URL2Unit"].prototype.displayEditor = function(destid,type,langcode,disabled,cachable,resettable)
 //==================================
 {
+	//---------------------
+	if (langcode==null)
+		langcode = LANGCODE;
 	if (cachable==undefined || cachable==null)
 		cachable = true;
 	if (type==undefined || type==null)
 		type = $("metadata-wad",this.node).attr('seltype');
+	//---------------------
+	var self = this;
+	//---------------------------------------------------------
 	var queryattr_value = this.query;
 	if (queryattr_value!=undefined && queryattr_value!='') {
 		//------------
@@ -200,7 +221,6 @@ UIFactory["URL2Unit"].prototype.displayEditor = function(destid,type,langcode,di
 				cachable = false;
 		}
 		//------------
-		var self = this;
 		if (cachable && g_URL2Unit_caches[queryattr_value]!=undefined && g_URL2Unit_caches[queryattr_value]!="")
 			UIFactory["URL2Unit"].parse(destid,type,langcode,g_URL2Unit_caches[queryattr_value],self,disabled,srce,resettable,target,semtag);
 		else
@@ -216,6 +236,20 @@ UIFactory["URL2Unit"].prototype.displayEditor = function(destid,type,langcode,di
 				}
 			});
 	}
+	//---------------------------------------------------------
+	if (g_userroles[0]=='designer' || USER.admin || editnoderoles.containsArrayElt(g_userroles) || editnoderoles.indexOf(this.userrole)>-1 || editnoderoles.indexOf($(USER.username_node).text())>-1) {
+		var htmlLabelGroupObj = $("<div class='form-group'></div>")
+		var htmlLabelLabelObj = $("<label for='label_"+this.id+"' class='col-sm-3 control-label'>"+karutaStr[LANG]['local-label']+"</label>");
+		var htmlLabelDivObj = $("<div class='col-sm-9'></div>");
+		var htmlLabelInputObj = $("<input id='local_label_"+this.id+"_"+langcode+"' type='text' class='form-control' value=\""+this.local_label_node[langcode].text()+"\">");
+		$(htmlLabelInputObj).change(function (){
+			self.updateLabel(langcode);
+		});
+		$(htmlLabelDivObj).append($(htmlLabelInputObj));
+		$(htmlLabelGroupObj).append($(htmlLabelLabelObj));
+		$(htmlLabelGroupObj).append($(htmlLabelDivObj));
+		$("#"+destid).append($(htmlLabelGroupObj));
+	}
 };
 
 
@@ -225,10 +259,10 @@ UIFactory["URL2Unit"].parse = function(destid,type,langcode,data,self,disabled,s
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	if (!self.multilingual)
-		langcode = NONMULTILANGCODE;
+	//---------------------
 	if (disabled==null)
 		disabled = false;
+	//---------------------
 	if (resettable==null)
 		resettable = true;
 	//---------------------
@@ -259,11 +293,7 @@ UIFactory["URL2Unit"].parse = function(destid,type,langcode,data,self,disabled,s
 	//------------------------------------------------------------
 	if (type=='select') {
 		var html = "";
-//		var html = "<div class='btn-group'>";
-//		html += "	<button type='button' class='btn select selected-label' id='button_"+langcode+self.id+"'>&nbsp;</button>";
-//		html += "	<button type='button'  class='btn dropdown-toggle dropdown-toggle-split ' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'></button>";
-//		html += "</div>";
-		html += "<div class='auto-complete btn-group roles-choice select-"+semtag+"'>";
+		html += "<div class='auto-complete btn-group resource-choice select-"+semtag+"'>";
 		html += "<input id='button_"+langcode+self.id+"' onfocus=\"this.value=''\" type='text' class='form-control select' code= '' value='' />";
 		html += "<button type='button' class='btn btn-default dropdown-toggle select' data-toggle='dropdown' aria-expanded='false'><span class='caret'></span><span class='sr-only'>&nbsp;</span></button>";
 		html += "</div>";
@@ -359,7 +389,10 @@ UIFactory["URL2Unit"].prototype.save = function()
 //==================================
 {
 	UICom.UpdateResource(this.id,writeSaved);
-	this.refresh();
+	if (this.blockparent!=null)
+		this.blockparent.refresh();
+	else
+		this.refresh();
 };
 
 //==================================

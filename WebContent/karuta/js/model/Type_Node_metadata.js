@@ -94,6 +94,7 @@ UIFactory["Node"].prototype.setMetadata = function(dest,depth,langcode,edit,inli
 	this.menuroles = ($(node.metadatawad).attr('menuroles')==undefined)?'none':$(node.metadatawad).attr('menuroles');
 	this.menulabels = r_replaceVariable(($(node.metadatawad).attr('menulabels')==undefined)?'none':$(node.metadatawad).attr('menulabels'));
 	this.js = ($(node.metadatawad).attr('js')==undefined)?"":$(node.metadatawad).attr('js');
+	this.langnotvisible = ($(node.metadatawad).attr('langnotvisible')==undefined)?"":$(node.metadatawad).attr('langnotvisible');
 	if (this.resource!=undefined || this.resource!=null)
 		this.editable_in_line = this.resource.type!='Proxy' && this.resource.type!='Audio' && this.resource.type!='Video' && this.resource.type!='Document' && this.resource.type!='Image' && this.resource.type!='URL';
 }
@@ -115,25 +116,6 @@ UIFactory["Node"].prototype.getNodeStyle = function()
 	return style;
 }
 
-
-//==================================================
-UIFactory["Node"].getLabelStyle = function(uuid)
-//==================================================
-{
-	var node = UICom.structure["ui"][uuid];
-	metadataepm = node.metadataepm;
-	var style = "";
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'padding-top',true);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'font-size',true);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'font-weight',false);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'font-style',false);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'color',false);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'text-align',false);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'background-color',false);
-	style += UIFactory.Node.getOtherMetadataEpm(metadataepm,'othercss');
-	return style;
-}
-
 //==================================================
 UIFactory["Node"].prototype.getLabelStyle = function()
 //==================================================
@@ -152,12 +134,47 @@ UIFactory["Node"].prototype.getLabelStyle = function()
 }
 
 //==================================================
-UIFactory["Node"].getContentStyle = function(uuid)
+UIFactory["Node"].getLabelStyle = function(uuid)
+//==================================================
+{	var style ="";
+	if (UICom.structure.ui[uuid]!=undefined)
+		style = UICom.structure.ui[uuid].getLabelStyle();
+	return style;
+}
+
+//==================================================
+UIFactory["Node"].prototype.getInParentLabelStyle = function()
 //==================================================
 {
-	var node = UICom.structure["ui"][uuid];
-	metadataepm = node.metadataepm;
+	metadataepm = this.metadataepm;
 	var style = "";
+	style += UIFactory.Node.getMetadataEpm(metadataepm,'inparent-padding-top',true);
+	style += UIFactory.Node.getMetadataEpm(metadataepm,'inparent-font-size',true);
+	style += UIFactory.Node.getMetadataEpm(metadataepm,'inparent-font-weight',false);
+	style += UIFactory.Node.getMetadataEpm(metadataepm,'inparent-font-style',false);
+	style += UIFactory.Node.getMetadataEpm(metadataepm,'inparent-color',false);
+	style += UIFactory.Node.getMetadataEpm(metadataepm,'inparent-text-align',false);
+	style += UIFactory.Node.getMetadataEpm(metadataepm,'inparent-background-color',false);
+	style += UIFactory.Node.getOtherMetadataEpm(metadataepm,'inparent-othercss',false);
+	return style;
+}
+
+//==================================================
+UIFactory["Node"].getInParentLabelStyle = function(uuid)
+//==================================================
+{	var style ="";
+	if (UICom.structure.ui[uuid]!=undefined)
+		style = UICom.structure.ui[uuid].getInParentLabelStyle();
+	return style;
+}
+
+
+//==================================================
+UIFactory["Node"].prototype.getContentStyle = function()
+//==================================================
+{
+	var style = "";
+	metadataepm = this.metadataepm;
 	style += UIFactory.Node.getMetadataEpm(metadataepm,'node-padding-top',true);
 	style += UIFactory.Node.getMetadataEpm(metadataepm,'node-font-size',true);
 	style += UIFactory.Node.getMetadataEpm(metadataepm,'node-font-weight',false);
@@ -168,6 +185,38 @@ UIFactory["Node"].getContentStyle = function(uuid)
 	style += UIFactory.Node.getMetadataEpm(metadataepm,'node-width',true);
 	style += UIFactory.Node.getMetadataEpm(metadataepm,'node-height',true);
 	style += UIFactory.Node.getOtherMetadataEpm(metadataepm,'node-othercss');
+	return style;
+}
+
+//==================================================
+UIFactory["Node"].getContentStyle = function(uuid)
+//==================================================
+{	var style ="";
+	if (UICom.structure["ui"][uuid]!=undefined)
+		style = UICom.structure["ui"][uuid].getContentStyle();
+	return style;
+}
+
+//==================================================
+UIFactory["Node"].prototype.getCommentStyle = function()
+//==================================================
+{
+	metadataepm = this.metadataepm;
+	var style = "";
+	style += UIFactory.Node.getMetadataEpm(metadataepm,'comment-font-size',true);
+	style += UIFactory.Node.getMetadataEpm(metadataepm,'comment-font-weight',false);
+	style += UIFactory.Node.getMetadataEpm(metadataepm,'comment-font-style',false);
+	style += UIFactory.Node.getMetadataEpm(metadataepm,'comment-color',false);
+	style += UIFactory.Node.getMetadataEpm(metadataepm,'comment-othercss',false);
+	return style;
+}
+
+//==================================================
+UIFactory["Node"].getCommentStyle = function(uuid)
+//==================================================
+{	var style ="";
+	if (UICom.structure["ui"][uuid]!=undefined)
+		style = UICom.structure["ui"][uuid].getCommentStyle();
 	return style;
 }
 
@@ -189,50 +238,13 @@ UIFactory["Node"].getDataContentStyle = function(data)
 	return style;
 }
 
-
 //==================================================
-UIFactory["Node"].prototype.getContentStyle = function()
-//==================================================
-{
-	metadataepm = this.metadataepm;
-	var style = "";
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'node-padding-top',true);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'node-font-size',true);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'node-font-weight',false);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'node-font-style',false);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'node-color',false);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'node-text-align',false);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'node-background-color',false);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'node-width',true);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'node-height',true);
-	style += UIFactory.Node.getOtherMetadataEpm(metadataepm,'node-othercss');
-	return style;
-}
-
-//==================================================
-UIFactory["Node"].getCommentStyle = function(uuid)
-//==================================================
-{
-	var node = UICom.structure["ui"][uuid];
-	metadataepm = node.metadataepm;
-	var style = "";
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'comment-font-size',true);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'comment-font-weight',false);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'comment-font-style',false);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'comment-color',false);
-	return style;
-}
-
-//==================================================
-UIFactory["Node"].prototype.getCommentStyle = function()
+UIFactory["Node"].prototype.getMenuStyle = function()
 //==================================================
 {
 	metadataepm = this.metadataepm;
 	var style = "";
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'comment-font-size',true);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'comment-font-weight',false);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'comment-font-style',false);
-	style += UIFactory.Node.getMetadataEpm(metadataepm,'comment-color',false);
+	style += UIFactory.Node.getMetadataEpm(metadataepm,'nds-menus-color',false);
 	return style;
 }
 
@@ -421,10 +433,7 @@ UIFactory["Node"].prototype.displayMetadataAttributesEditor = function(destid)
 		this.displayMetadataWadAttributeEditor('metadata-root','defaultrole');
 		this.displayMetadataAttributeEditor('metadata-root','autoload',true);
 	}
-	if (name=='asmContext' && this.resource.type=='Proxy')
-		this.displayMetadataAttributeEditor('metadata-part1','semantictag',false,true);
-	else
-		this.displayMetadataAttributeEditor('metadata-part1','semantictag');
+	this.displayMetadataAttributeEditor('metadata-part1','semantictag');
 	if (languages.length>1) { // multilingual application
 		this.displayMetadataAttributeEditor('metadata-part1','multilingual-node',true);
 		if (name=='asmContext') {
@@ -434,8 +443,6 @@ UIFactory["Node"].prototype.displayMetadataAttributesEditor = function(destid)
 				this.displayMetadataAttributeEditor('metadata-part1','multilingual-resource',true,true);
 		}
 	}
-	if (name=='asmContext' && this.resource.type=='URL2Unit')
-		this.displayMetadataAttributeEditor('metadata-part1','preview',true);
 //	if (name=='asmContext') {
 //		if (this.resource.type=='Field' || this.resource.type=='TextField' || this.resource.type=='Get_Resource' || this.resource.type=='Get_Get_Resource' || this.resource.type=='Get_Double_Resource')
 //			this.displayMetadataAttributeEditor('metadata-part1','encrypted',true);
@@ -452,7 +459,8 @@ UIFactory["Node"].prototype.displayMetadataAttributesEditor = function(destid)
 		this.displayMetadataWadAttributeEditor('metadata-part2','delnoderoles',false,true);
 	else
 		this.displayMetadataWadAttributeEditor('metadata-part2','delnoderoles');
-	if ((!model || name=='asmRoot' || name=='asmStructure' || name=='asmUnit' || name=='asmUnitStructure') && semtag.indexOf('node_resource')<0 && this.structured_resource==null)	{
+//	if ((!model || name=='asmRoot' || name=='asmStructure' || name=='asmUnit' || name=='asmUnitStructure') && semtag.indexOf('node_resource')<0 && this.structured_resource==null)	{
+	if ((!model || name=='asmRoot' || name=='asmStructure' || name=='asmUnit' || name=='asmUnitStructure') && semtag.indexOf('node_resource')<0)	{
 		this.displayMetadataWadAttributeEditor('metadata-part2','editresroles',false,true);
 		this.displayMetadataWadAttributeEditor('metadata-part2','resnopencil',false,true);
 	}
@@ -465,7 +473,7 @@ UIFactory["Node"].prototype.displayMetadataAttributesEditor = function(destid)
 		this.displayMetadataWadAttributeEditor('metadata-part2','submitroles');
 	else
 		this.displayMetadataWadAttributeEditor('metadata-part2','submitroles',false,true);
-	if ((name=='asmRoot' || name=='asmStructure' || name=='asmUnit' || name=='asmUnitStructure') && model)
+	if (model)
 		this.displayMetadataWadAttributeEditor('metadata-part2','submitall',true);
 	//-----------------------------------------
 	if (model)
@@ -478,10 +486,10 @@ UIFactory["Node"].prototype.displayMetadataAttributesEditor = function(destid)
 	else
 		this.displayMetadataWadAttributeEditor('metadata-part2','editnoderoles',false,true);
 	//-----------------------------------------
-	if (model)
+//	if (model)
 		this.displayMetadataWadAttributeEditor('metadata-part2','nodenopencil',true);
-	else
-		this.displayMetadataWadAttributeEditor('metadata-part2','nodenopencil',false,true);
+//	else
+//		this.displayMetadataWadAttributeEditor('metadata-part2','nodenopencil',false,true);
 	//-----------------------------------------
 	if (name=='asmRoot' || !model)
 		this.displayMetadataWadAttributeEditor('metadata-part2','duplicateroles',false,true);
@@ -541,8 +549,11 @@ UIFactory["Node"].prototype.displayMetadataAttributesEditor = function(destid)
 	this.displayMetadataWadAttributeEditor('metadata-part2','logcode');
 	this.displayMetadataWadAttributeEditor('metadata-part2','js');
 	//--------------------------------------
+	if (name=='asmContext' && (this.resource.type=='URL2Unit' || this.resource.type=='Get_Resource'))
+		this.displayMetadataAttributeEditor('metadata-part2','preview',true);
 	if (name!='asmRoot')
 		this.displayMetadataWadAttributeEditor('metadata-part2','display',true);
+	this.displayMetadataWadAttributeEditor('metadata-part2','langnotvisible');
 	if (name=='asmUnitStructure')
 		this.displayMetadataWadAttributeEditor('metadata-part2','collapsible',true);
 	if (name=='asmContext' && this.resource.type!='Proxy' && this.resource.type!='Audio' && this.resource.type!='Video' && this.resource.type!='Document' && this.resource.type!='Image' && this.resource.type!='URL' && this.resource.type!='Oembed')
@@ -646,10 +657,14 @@ UIFactory["Node"].getMetadataEpm = function(data,attribute,number)
 			html += attribute.substring(17) + value;
 		else if (attribute.indexOf("node-othercss")>-1)
 			html += attribute.substring(13) + value;
+		else if (attribute.indexOf("comment-othercss")>-1)
+			html += attribute.substring(16) + value;
 		else if (attribute.indexOf("othercss")>-1)
 			html += attribute.substring(8) + value;
 		else if (attribute.indexOf("node-")>-1)
 			html += attribute.substring(5) + ":" + value;
+		else if (attribute.indexOf("nds-menus-")>-1)
+			html += attribute.substring(10) + ":" + value;
 		else if (attribute.indexOf("nds-")>-1)
 			html += attribute.substring(4) + ":" + value;
 		else if (attribute.indexOf("inparent-")>-1)
@@ -837,6 +852,7 @@ UIFactory["Node"].prototype.displayMetaEpmInfo = function(destid)
 	//------------------------------------
 	html += UIFactory.Node.getMetadataEpmInfo(data,'nds-margin-top');
 	html += UIFactory.Node.getMetadataEpmInfo(data,'nds-othercss');
+	html += UIFactory.Node.getMetadataEpmInfo(data,'nds-menus-color');
 	//------------------------------------
 	html += UIFactory.Node.getMetadataEpmInfo(data,'node-font-weight');
 	html += UIFactory.Node.getMetadataEpmInfo(data,'node-font-style');
@@ -962,7 +978,7 @@ UIFactory["Node"].prototype.displayMetadataAttributeEditor = function(destid,att
 		value = "";
 	var html = "";
 	if (yes_no!=null && yes_no) {
-		html += "<div class='input-group '>";
+		html += "<div class='input-group "+attribute+"'>";
 		html += "	<div class='input-group-prepend'>";
 		html += "		<div class='input-group-text' id='"+attribute+this.id+"'>"+karutaStr[languages[langcode]][attribute]+"</div>";
 		html += "	</div>";
@@ -974,7 +990,7 @@ UIFactory["Node"].prototype.displayMetadataAttributeEditor = function(destid,att
 		html+= "></div>";
 	}
 	else {
-		html += "<div class='input-group '>";
+		html += "<div class='input-group "+attribute+"'>";
 		html += "	<div class='input-group-prepend'>";
 		html += "		<span class='input-group-text' id='"+attribute+this.id+"'>"+karutaStr[languages[langcode]][attribute]+"</span>";
 		html += "	</div>";
@@ -1028,6 +1044,8 @@ UIFactory["Node"].prototype.displayMetadataWadAttributeEditor = function(destid,
 		html += "</div>";
 	} else if (attribute.indexOf('role')>-1){
 		this.displaySelectRole(destid,attribute,yes_no,disabled);
+	} else if (attribute.indexOf('lang')>-1){
+		this.displaySelectLanguage(destid,attribute,yes_no,disabled);
 	} else {
 		html += "<div class='input-group '>";
 		html += "	<div class='input-group-prepend'>";
@@ -1191,7 +1209,52 @@ UIFactory["Node"].prototype.displaySelectRole= function(destid,attribute,yes_no,
 		$("#"+destid).append($(html));
 	}
 	addautocomplete(document.getElementById(attribute+nodeid), rolesarray);
+}
 
+//==================================
+UIFactory["Node"].prototype.displaySelectLanguage= function(destid,attribute,yes_no,disabled) 
+//==================================
+{
+	var languagessarray = [];
+	var value = $(this.metadatawad).attr(attribute);
+	if (value==null || value==undefined || value=='undefined')
+		value = "";
+	var nodeid = this.id;
+	var langcode = LANGCODE;
+	var html = "";
+	html += "<div class='input-group '>";
+	html += "	<div class='input-group-prepend'>";
+	html += "		<div class='input-group-text'>";
+	html += karutaStr[languages[langcode]][attribute];
+	html += "</div>";
+	html += "	</div>";
+	html += "	<input id='"+attribute+nodeid+"' type='text' class='form-control'  onchange=\"javascript:UIFactory['Node'].updateMetadataWadAttribute('"+nodeid+"','"+attribute+"',this.value)\" value=\""+value+"\"";
+	if(disabled!=null && disabled)
+		html+= " disabled='disabled' ";			
+	html += ">";
+	if(disabled==null || !disabled) {
+		html += "<div class='input-group-append'>";
+		html += "	<button class='btn btn-select-role dropdown-toggle' type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'></button>";
+		html += "	<div class='dropdown-menu dropdown-menu-right button-role-caret'>";
+//		html += "		<div class='dropdown-menu'>";
+		html += "			<a class='dropdown-item' value='' onclick=\"$('#"+attribute+nodeid+"').val('');$('#"+attribute+nodeid+"').change();\")>&nbsp;</a>";
+		//---------------------
+	for (var i=0; i<languages.length;i++) {
+		languagessarray[languagessarray.length] = {'libelle':karutaStr[languages[i]]['language']};
+		html += "<a class='dropdown-item' id='lang-menu-"+languages[i]+"' onclick=\"var v=$('#"+attribute+nodeid+"').val();$('#"+attribute+nodeid+"').val(v+' "+karutaStr[languages[i]]['language']+"');$('#"+attribute+nodeid+"').change();\">";
+		html += "	<img width='20px;' src='../../karuta/img/flags/"+karutaStr[languages[i]]['flag-name']+".png'/>&nbsp;&nbsp;"+karutaStr[languages[i]]['language'];
+		html += "</a>"
+	}
+		html += "	</div>";
+		html += "</div>";
+	}
+	html += "</div>";
+	$("#"+destid).append($(html));
+	if (attribute=='seenoderoles'){
+		html = "<div id='see-calendar' class='collapse'></div>"
+		$("#"+destid).append($(html));
+	}
+	addautocomplete(document.getElementById(attribute+nodeid), languagessarray);
 }
 
 
@@ -1211,7 +1274,7 @@ UIFactory["Node"].prototype.displayMetadataEpmDisplayViewAttributeEditor = funct
 	if (value==null || value==undefined || value=='undefined')
 		value = "";
 	var html = "";
-	html += "<div class='input-group '>";
+	html += "<div class='input-group "+attribute+"'>";
 	html += "	<div class='input-group-prepend'>";
 	html += "		<div class='input-group-text'>";
 	html += karutaStr[languages[langcode]][attribute];
@@ -1257,15 +1320,15 @@ UIFactory["Node"].prototype.displayMetadataEpmDisplayOrgAttributeEditor = functi
 	if (attribute=='displaychildorg' && (displayOrg[this.asmtype]["children"]==undefined || displayOrg[this.asmtype]["children"].length==0))
 		return;
 	var html = "";
-	html += "<div class='input-group '>";
+	html += "<div class='input-group "+attribute+"'>";
 	html += "	<div class='input-group-prepend'>";
 	html += "		<div class='input-group-text'>";
 	html += karutaStr[languages[langcode]][attribute];
 	html += "</div>";
 	html += "	</div>";
-	html += "	<div id='"+attribute+nodeid+"' class='form-control'>"+value+"</div>";
+	html += "	<div id='"+attribute+nodeid+"' class='form-control "+attribute+"'>"+value+"</div>";
 	if(disabled==null || !disabled) {
-		html += "<div class='input-group-append'>";
+		html += "<div class='input-group-append "+attribute+"'>";
 		html += "	<button class='btn btn-select-role dropdown-toggle' type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'></button>";
 		html += "	<div class='dropdown-menu dropdown-menu-right button-role-caret'>";
 		//---------------------
@@ -1307,8 +1370,8 @@ UIFactory["Node"].prototype.displayMetadataEpmAttributeEditor = function(destid,
 	if (attribute.indexOf('comment-')>-1)
 		attribute_label = attribute.substring(8);
 	if (attribute.indexOf('font-weight')>-1){
-		var choices = [{code:'normal',label:'Normal'},{code:'bold',label:'Bold'}];
-		html += "<div class='input-group '>";
+		var choices = [{code:'normal',label:'Normal'},{code:'bold',label:'Bold'},{code:'nothing',label:'None'}];
+		html += "<div class='input-group "+attribute+"'>";
 		html += "	<div class='input-group-prepend' style='margin-right:5px'>";
 		html += "		<span class='input-group-text' id='"+attribute+nodeid+"'>"+karutaStr[languages[langcode]][attribute_label]+"</span>";
 		html += "	</div>";
@@ -1324,8 +1387,8 @@ UIFactory["Node"].prototype.displayMetadataEpmAttributeEditor = function(destid,
 		html += "</div>";
 	}
 	else if (attribute.indexOf('font-style')>-1){
-		var choices = [{code:'normal',label:'Normal'},{code:'italic',label:'Italic'}];
-		html += "<div class='input-group '>";
+		var choices = [{code:'normal',label:'Normal'},{code:'italic',label:'Italic'},{code:'nothing',label:'None'}];
+		html += "<div class='input-group "+attribute+"'>";
 		html += "	<div class='input-group-prepend' style='margin-right:5px'>";
 		html += "		<span class='input-group-text' id='"+attribute+nodeid+"'>"+karutaStr[languages[langcode]][attribute_label]+"</span>";
 		html += "	</div>";
@@ -1341,7 +1404,7 @@ UIFactory["Node"].prototype.displayMetadataEpmAttributeEditor = function(destid,
 		html += "</div>";
 	}
 	else if (attribute.indexOf('color')>-1){
-		html += "<div class='input-group '>";
+		html += "<div class='input-group "+attribute+"'>";
 		html += "	<div class='input-group-prepend'>";
 		html += "		<span class='input-group-text' id='"+attribute+nodeid+"'>"+karutaStr[languages[langcode]][attribute_label]+"</span>";
 		html += "	</div>";
@@ -1349,8 +1412,8 @@ UIFactory["Node"].prototype.displayMetadataEpmAttributeEditor = function(destid,
 		html += "</div>";
 	}
 	else if (attribute.indexOf('text-align')>-1){
-		var choices = [{code:'left',label:'Left'},{code:'right',label:'Right'},{code:'center',label:'Center'},{code:'justify',label:'Justify'}];
-		html += "<div class='input-group '>";
+		var choices = [{code:'left',label:'Left'},{code:'right',label:'Right'},{code:'center',label:'Center'},{code:'justify',label:'Justify'},{code:'nothing',label:'None'}];
+		html += "<div class='input-group "+attribute+"'>";
 		html += "	<div class='input-group-prepend' style='margin-right:5px'>";
 		html += "		<span class='input-group-text' id='"+attribute+nodeid+"'>"+karutaStr[languages[langcode]][attribute_label]+"</span>";
 		html += "	</div>";
@@ -1366,7 +1429,7 @@ UIFactory["Node"].prototype.displayMetadataEpmAttributeEditor = function(destid,
 		html += "</div>";
 	}
 	else {
-		html += "<div class='input-group '>";
+		html += "<div class='input-group "+attribute+"'>";
 		html += "	<div class='input-group-prepend'>";
 		html += "		<span class='input-group-text' id='"+attribute+nodeid+"'>"+karutaStr[languages[langcode]][attribute_label]+"</span>";
 		html += "	</div>";
@@ -1392,20 +1455,20 @@ UIFactory["Node"].prototype.displayMetadataEpmAttributesEditor = function(destid
 		if (name!='asmRoot')
 			html += "<h5 id='layout'>"+karutaStr[languages[langcode]]['layout']+"</h5>";
 		html += "	<div id='metadata-epm-part1'></div>"
-		html += "<h5>"+karutaStr[languages[langcode]]['node']+"</h5>";
+		html += "<h5 class='metadata-epm-node'>"+karutaStr[languages[langcode]]['node']+"</h5>";
 		html += "	<div id='metadata-epm-node'></div>";
-		html += "<h5>"+karutaStr[languages[langcode]]['node-label']+"</h5>";
+		html += "<h5 class='metadata-epm-label'>"+karutaStr[languages[langcode]]['node-label']+"</h5>";
 		html += "	<div id='metadata-epm-label'></div>";
 		if (name=='asmContext') 
-			html += "<hr><h5>"+karutaStr[languages[langcode]]['resource']+"</h5>";
+			html += "<hr><h5 class='metadata-node-resource'>"+karutaStr[languages[langcode]]['resource']+"</h5>";
 		else
-			html += "<h5>"+karutaStr[languages[langcode]]['node-content']+"</h5>";
+			html += "<h5 class='metadata-node-resource'>"+karutaStr[languages[langcode]]['node-content']+"</h5>";
 		html += "	<div id='metadata-node-resource'></div>";
 		if (name=='asmStructure' || name=='asmUnit') {
 			html += "<hr><h5>"+karutaStr[languages[langcode]]['inparent']+"</h5>";
 			html += "	<div id='metadata-inparent'></div>";
 		}
-		html += "<h5>"+karutaStr[languages[langcode]]['node-comment']+"</h5>";
+		html += "<h5 class='metadata-node-comment'>"+karutaStr[languages[langcode]]['node-comment']+"</h5>";
 		html += "	<div id='metadata-node-comment'></div>";
 		html += "</form>";
 		$("#"+destid).append($(html));
@@ -1432,6 +1495,7 @@ UIFactory["Node"].prototype.displayMetadataEpmAttributesEditor = function(destid
 		this.displayMetadataEpmAttributeEditor('metadata-epm-label','padding-top',$(this.metadataepm).attr('padding-top'));
 		this.displayMetadataEpmAttributeEditor('metadata-epm-label','color',$(this.metadataepm).attr('color'));
 		this.displayMetadataEpmAttributeEditor('metadata-epm-label','background-color',$(this.metadataepm).attr('background-color'));
+		this.displayMetadataEpmAttributeEditor('metadata-epm-label','nds-menus-color',$(this.metadataepm).attr('nds-menus-color'));
 		this.displayMetadataEpmAttributeEditor('metadata-epm-label','othercss',$(this.metadataepm).attr('othercss'));
 		//----------------------------------
 		this.displayMetadataEpmAttributeEditor('metadata-node-resource','node-font-weight',$(this.metadataepm).attr('node-font-weight'));
@@ -1454,8 +1518,9 @@ UIFactory["Node"].prototype.displayMetadataEpmAttributesEditor = function(destid
 		//----------------------------------
 		this.displayMetadataEpmAttributeEditor('metadata-node-comment','comment-font-weight',$(this.metadataepm).attr('comment-font-weight'));
 		this.displayMetadataEpmAttributeEditor('metadata-node-comment','comment-font-style',$(this.metadataepm).attr('comment-font-style'));
-		this.displayMetadataEpmAttributeEditor('metadata-node-comment','comment-color',$(this.metadataepm).attr('comment-color'));
 		this.displayMetadataEpmAttributeEditor('metadata-node-comment','comment-font-size',$(this.metadataepm).attr('comment-font-size'));
+		this.displayMetadataEpmAttributeEditor('metadata-node-comment','comment-color',$(this.metadataepm).attr('comment-color'));
+		this.displayMetadataEpmAttributeEditor('metadata-node-comment','comment-othercss',$(this.metadataepm).attr('comment-othercss'));
 		if ($("#metadata-epm-part1").html()=="")
 			$("#layout").hide();
 	}
@@ -1524,7 +1589,10 @@ UIFactory["Node"].updateMetadataEpmAttribute = function(nodeid,attribute,value,c
 	var node = UICom.structure["ui"][nodeid].node;
 	if (checked!=undefined && !checked)
 		value = "N";
-	$($("metadata-epm",node)[0]).attr(attribute,value);
+	if (value=='nothing')
+		$($("metadata-epm",node)[0]).removeAttr(attribute);
+	else
+		$($("metadata-epm",node)[0]).attr(attribute,value);
 	var refresh = true;
 	if (attribute=="top" || attribute=="left")
 		refresh = false;
@@ -1571,11 +1639,9 @@ UIFactory["Node"].updateMetadatawWadTextAttribute = function(nodeid,attribute)
 	var node = UICom.structure["ui"][nodeid].node;
 	var value = $.trim($("#"+nodeid+"_"+attribute).val());
 	if (attribute=='query' && UICom.structure["ui"][nodeid].resource!=undefined && UICom.structure["ui"][nodeid].resource.type=='Proxy' && value!=undefined && value!='') {
-		var srce_indx = value.lastIndexOf('.');
-		var srce = value.substring(srce_indx+1);
-		var semtag_indx = value.substring(0,srce_indx).lastIndexOf('.');
-		var semtag = value.substring(semtag_indx+1,srce_indx);
-		$($("metadata",node)[0]).attr('semantictag','proxy-'+semtag);
+		var semtag = $($("metadata",node)[0]).attr('semantictag');
+		if (semtag.indexOf ('proxy')<0)
+			$($("metadata",node)[0]).attr('semantictag','proxy-'+semtag);
 		UICom.UpdateMetadata(nodeid);
 	}
 	$($("metadata-wad",node)[0]).attr(attribute,value);

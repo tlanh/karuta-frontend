@@ -88,6 +88,9 @@ displayView["standard"]["asmUnit"] = [];
 displayView["standard"]["asmStructure"] = [];
 displayView["standard"]["asmRoot"] = [];
 
+displayView["raw"]["asmContext"] = ["default","xwide","card","simple"];
+displayView["raw"]["asmUnitStructure"] = ["default","xwide","card"];
+
 
 displayView["model"] = {};
 displayView["model"]["node"] = ["default","card","row"];
@@ -97,7 +100,7 @@ displayView["model"]["resource"] = ["default","1/12","2/12","3/12","4/12","5/12"
 
 displayHTML["raw-struct-default"] =	"<div id='node_#uuid#' class='#displayview# #displaytype# #nodetype# #semtag# #cssclass#  #resourcetype# #priv#'>" +
 								"	<div id='sub_node_#uuid#' name='lbl-div' class='row  #displayview#' >" +
-								"		<div id='collapsible_#uuid#' class='col-md-1'></div>" +
+								"		<div id='collapsible_#uuid#' class='collapsible col-md-1'></div>" +
 								"		<div id='std_node_#uuid#' class='node-label col-md-7  '>" +
 								"			<div><a id='label_node_#uuid#' class='label-libelle'></a><span id='help_#uuid#' class='ihelp'></span></div>" +
 								"			<div id='comments_#uuid#' class='comments'></div><!-- comments -->" +
@@ -174,8 +177,8 @@ displayHTML["standard-resource-default"] =	"<div id='node_#uuid#' class='#displa
 											"			<div><span id='label_node_#uuid#' class='label-libelle'></span><span id='help_#uuid#' class='ihelp'></span></div>" +
 											"		</div>" +
 											"			<table class='col-8' width='100%'><tr>" +
-										"					<td  width='80%' class='td-resource'>" +
-											"					<div id='resource_#uuid#' name='res-div' class='resource inside-full'></div>" +
+										"					<td  width='80%'  name='res-div' class='td-resource'>" +
+											"					<div id='resource_#uuid#' class='resource inside-full'></div>" +
 											"					<div id='comments_#uuid#' class='comments'></div>" +
 											"				</td>" +
 											"				<td class='td-buttons buttons'><span id='menus-#uuid#' class='menus'/><span id='buttons-#uuid#' /></td>" +
@@ -193,14 +196,14 @@ displayHTML["standard-resource-default"] =	"<div id='node_#uuid#' class='#displa
 displayHTML["standard-resource-simple"] =	"<div id='node_#uuid#' class='#displayview# #displaytype# #nodetype# #semtag# #cssclass#  #resourcetype# #priv# #node-orgclass#'>" +
 											"	<div id='sub_node_#uuid#' class='resource-node' >" +
 											"		<table width='100%'><tr>" +
-											"			<td class='td1'><span name='res-lbl-div' id='label_node_#uuid#' class='label-libelle'/><span id='help_#uuid#' class='ihelp'/></td>" +
-											"			<td class='td2'>" +
-											"				<div id='resource_#uuid#'  name='res-div' class='resource'></div>" +
+											"			<td class='td1' name='res-lbl-div'><span id='label_node_#uuid#' class='label-libelle'/><span id='help_#uuid#' class='ihelp'/></td>" +
+											"			<td class='td2' name='res-div'>" +
+											"				<div id='resource_#uuid#'  class='resource'></div>" +
+											"				<div id='comments_#uuid#' class='comments'></div>" +
 											"			</td>" +
 											"			<td class='td3'><span id='buttons-#uuid#' class='buttons edit-bar'/></td>" +
 											"		</tr></table>" +
 											"	</div>" +
-											"	<div id='comments_#uuid#' class='comments'></div>" +
 											"	<div id='metainfo_#uuid#' class='metainfo'></div>" +
 											"	<div id='cssinfo_#uuid#' class='cssinfo'></div>" +
 											"	<div id='content-#uuid#' name='cnt-div' class='content' ></div>" +
@@ -234,6 +237,7 @@ displayHTML["translate-resource-default"] =	"<div id='node_#uuid#' class='#displ
 											"		<div id='comments1_#uuid#' class='col-6'></div>" +
 											"	</div>" +
 											"</div>";
+
 
 
 //====================================================================
@@ -270,7 +274,26 @@ displayHTML["standard-resource-xwide"]=	"<div id='node_#uuid#' class='#displayvi
 										"<div id='cssinfo_#uuid#' class='cssinfo'></div>" +
 										"<div id='extra_#uuid#'  class='extra-xlarge'></div>" +
 										"</div>";
-//====================================================================
+
+displayHTML["standard-resource-xwide-block"]=	"<div id='node_#uuid#' class='#displayview# #displaytype# #nodetype# #semtag# #cssclass#  #resourcetype# #priv# #node-orgclass#'>" +
+										" <div class='edit-bar'><span id='buttons-#uuid#' class='buttons'/><span id='menus-#uuid#' class='menus'/></div>" +
+										" <div id='sub_node_#uuid#' class='resource-node #displayview#' >" +
+										"	<div id='std_node_#uuid#' name='res-lbl-div' class=''>" +
+										"		<div class='node-label'>" +
+										"			<div class='label-help'><span id='label_node_#uuid#' class='label-libelle'></span><span id='help_#uuid#' class='ihelp'></span></div>" +
+										"		</div>" +
+										"	</div>" +
+										"	<div name='res-div-block'>" +
+										"		<div id='resource_#uuid#' class='resource'></div>" +
+										"		<div id='comments_#uuid#' class='comments'></div>" +
+										"	</div>" +
+										"</div>" +
+										"<div id='metainfo_#uuid#' class='metainfo'></div>" +
+										"<div id='cssinfo_#uuid#' class='cssinfo'></div>" +
+										"<div id='extra_#uuid#'  class='extra-xlarge'></div>" +
+										"</div>";
+
+///====================================================================
 //========================== CARD ====================================
 //====================================================================
 //====================================================================

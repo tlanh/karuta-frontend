@@ -36,7 +36,15 @@
 		font-size: calc(var(--font-size-coeff) * 0.8rem);
 	}
 	
-	@media (min-width: 768px) {  
+		@media (max-width: 640px) {  
+		body,
+		.form-control,
+		.btn {
+			font-size: calc(var(--font-size-coeff) * 0.6rem);
+		}
+	}
+	
+		@media (min-width: 1024px) {  
 		body,
 		.form-control,
 		.btn {
@@ -105,12 +113,14 @@
 /*    LIST- WELCOME       */
 /* ====================== */
 
-	.portfolio-label {
+	.portfolio-label,
+	.folder-label {
 		cursor: pointer;
 	}
 
 	.list-page #main-body {
 		background-color: var(--list-background-color);
+		background-image: var(--list-background-image)
 	}
 	#welcome-bar {
 		padding-top:50px;
@@ -299,6 +309,10 @@
 			display:in-line;
 			opacity: 1;
 		}
+		.owner {
+			font-size:80%;
+			font-style: italic;
+		}
 		//----- CARD -------
 		.portfolio-card{
 			margin-top:15px;
@@ -315,8 +329,7 @@
 				padding:3px;
 				color:var(--list-button-text-color);
 				background-color: var(--list-element-background-color);
-				.portfolio-code,
-				.owner {
+				.portfolio-code {
 					font-size:80%;
 				}
 			.comments {
@@ -359,8 +372,6 @@
 //			padding:7px;
 			color : var(--list-element-text-color);
 //			margin-bottom : 10px;
-			.btn {
-			}
 		}
 	}
 
@@ -370,10 +381,6 @@
 
 	//=============================
 	#folder-portfolios {
-		.folder-label{
-			cursor:none;
-			font-weight:bold;
-		}
 		.row-label {
 			padding-bottom:5px;
 		}
@@ -798,23 +805,30 @@
 	}
 
 	.button{
-		font-size: calc(var(--font-size-coeff) * 0.9rem);
-		padding: 5px;
+		font-size: calc(var(--font-size-coeff) * 1rem);
+		padding: 6px;
 		cursor:pointer;
 		display: inline-block;
 		white-space:nowrap;
 	}
 
 	.menus {
-		 .dropdown {
+//		.dropdown {
 //			float:left;
-		}
+//		}
 		a.text-button {
 			font-size:calc(var(--font-size-coeff) * 1rem);
-			margin-top:2px;
+			//margin-top:2px;
+			font-weight:initial;
+			font-style:initial;
+			font-variant:initial;
 		}
 	}
 	
+	.resource-choice {
+		padding-left:15px;
+		padding-bottom:15px;
+	}
 
 /* ====================== */
 /*      NAVBAR            */
@@ -928,6 +942,7 @@
 				margin-right:5px;
 				margin-top: 1px;
 				color:var(--portfolio-buttons-color);
+				font-size:calc(var(--font-size-coeff) * 1rem);
 			}
 		
 			.createreport .button,
@@ -1115,6 +1130,7 @@
 		}
 		.dropdown-item {
 			color: var(--portfolio-sidebar-text-color);
+			padding:.25rem .75rem;
 		}
 		.dropdown-item:hover {
 			background-color: var(--portfolio-sidebar-text-color);
@@ -1130,8 +1146,7 @@
 		.dropdown-submenu {
 			position: relative;
 			&>.dropdown-menu {
-				top: 0;
-				left: 100%;
+				top: 2.5rem;
 				margin-top: -6px;
 				margin-left: -1px;
 				-webkit-border-radius: 0 6px 6px 6px;
@@ -1140,6 +1155,9 @@
 			}
 			&:hover>.dropdown-menu {
 				display: block;
+			}
+			&:hover>.dropdown-menu.nodisplay {
+				display: none;
 			}
 			&>a:after {
 				display: block;
@@ -1200,6 +1218,10 @@
 			cursor:pointer;
 		}
 	}
+	.Get_Resource .preview-button {
+		color: var(--portfolio-link-color);
+		cursor:pointer;
+	}
 
 /* ====================
 	Image
@@ -1241,6 +1263,24 @@
 	.email_SendEmail {
 	}
 
+/* ====================
+	Get_Resource - search in Node
+   ====================*/
+
+	#get-resource-node {
+		.btn-group.select-label {
+			width:100%;
+			.dropdown-menu {
+				width:90%;
+			}
+			button.select {
+				width:100%;
+			}
+			button.dropdown-toggle {
+				width:30px;
+			}
+		}
+	}
 
 /* ====================== */
 /*     FIRST NODE         */
@@ -1411,6 +1451,13 @@
 		}
 	}
 
+	.standard.asmStructure {
+		.asmStructure,
+		.asmUnit {
+			margin-top:10px;
+		}
+	}
+
 	.standard-struct-default {
 		cursor:pointer;
 	}
@@ -1487,7 +1534,6 @@
 
 	.standard-resource-simple {
 		padding-left:15px;
-		margin-top:5px;
 	}
 
 	.card-body .standard-resource-simple {
@@ -1706,7 +1752,8 @@
 	.row-cols-5,
 	.row-cols-6 {
 		.asmContext.standard-resource-xwide{
-			padding:0px;
+			padding-top:0px;
+			padding-right: 0px;
 		}
 	}
 
@@ -1762,7 +1809,7 @@
 		}
 	}
 	
-	/* ===========================
+/* ===========================
 	DASHBOARD CSV PDF BUTTONS
    ===========================*/
 
@@ -2229,7 +2276,7 @@ hr {
 			margin-top:3px;
 			border: 1px solid #ced4da;
 			border-radius: .2rem;
-			max-width:600px;
+			max-width:80%;
 			.form-control {
 				border: 0px solid var(--edit-window-border-color);
 			}
@@ -2333,9 +2380,9 @@ hr {
 		margin-bottom:2px;	
 	}
 
-	.radio-div{
+	input[type=radio].radio-div{
 		float:left;
-		padding:5px;
+		margin:5px;
 	}
 
 	.radio-label {
@@ -3247,8 +3294,8 @@ table.tablesorter th.restore {
 	BLOCK
    ====================*/
 	:root{
-		--block-height:220px;
-		--block-img-height:218px;
+		--block-height:240px;
+		--block-img-height:238px;
 	}
 
 	.standard {
@@ -3297,6 +3344,8 @@ table.tablesorter th.restore {
 		margin-top:0px;
 	}
 	
+	//----------------------
+	//----------------------
 	//----------------------
 	.block .ProxyBlock,
 	.block .ImageBlock,
@@ -3357,3 +3406,36 @@ table.tablesorter th.restore {
 		display:none;
 	}
 	
+	//----Hidden Attributes for Graphicer User-
+
+	#edit-window:not([role=designer]) { 
+		#metadata-epm-part0,
+		#layout, #metadata-epm-part1,
+		#metadata-epm-node, .metadata-epm-node,
+		#metadata-node-comment, .metadata-node-comment,
+		.padding-top,
+		.node-font-weight,
+		.node-font-style,
+		.node-text-align,
+		.node-font-size,
+		.node-padding-top,
+		.node-color
+		{
+			display:none;
+		}
+	}
+
+	#edit-window.TextFieldEditor { 
+		.node-font-weight,
+		.node-font-style,
+		.node-text-align,
+		.node-font-size,
+		.node-padding-top,
+		.node-color
+		{
+			display:flex;
+		}
+	}
+
+
+

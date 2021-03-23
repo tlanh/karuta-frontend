@@ -133,10 +133,6 @@ UIFactory["Item"].prototype.getLabel = function(dest,type,langcode)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
 	if (dest!=null) {
 		this.display[dest] = langcode;
 	}
@@ -157,34 +153,58 @@ UIFactory["Item"].prototype.getView = function(dest,type,langcode)
 //==================================
 {
 	//---------------------
+	if (type==null)
+		type = "default";
+	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
 	//---------------------
 	if (dest!=null) {
 		this.display[dest] = langcode;
 	}
+	var node = UICom.structure["ui"][this.id];
+	var editresroles = ($(node.metadatawad).attr('editresroles')==undefined)?'':$(node.metadatawad).attr('editresroles');
+	var resnopencil = ($(node.metadatawad).attr('resnopencil')==undefined)?'N':$(node.metadatawad).attr('resnopencil');
+	var displayCodeValue = (editresroles.containsArrayElt(g_userroles) || editresroles.indexOf(this.userrole)>-1 || editresroles.indexOf($(USER.username_node).text())>-1) && resnopencil=='N';
 	var label = this.label_node[langcode].text();
 	var code = $(this.code_node).text();
 	var value = $(this.value_node).text();
 	var html = "";
-	if (g_userroles[0]=='designer' || USER.admin) {
-		html += "<div class='"+ code +" view-div'>"+ code + " "+label;
-		if (value!='')
-			html += " ["+ value + "]";
-		html += "</div> ";
-	} else {
-		html += "<div class='"+ code +" view-div'>";
+	if (type=="default") {
+		if (g_userroles[0]=='designer' || USER.admin || displayCodeValue) {
+			html += "<div class='"+ code +" view-div'>"+ "<span name='code'>" +code + "</span> <span name='label'>"+label + "</span>";
+			if (value!='')
+				html += "<span name='value'> ["+ value + "] </span>";
+			html += "</div> ";
+		} else {
+			html += "<div class='"+ code +" view-div'>";
+			if (code.indexOf("#")>-1)
+				html += "<span name='code'>" +cleanCode(code) + "</span> ";
+			if (code.indexOf("%")<0)
+				html += " <span name='label'>"+label + "</span> ";
+			if (code.indexOf("&")>-1)
+				html += "<span name='value'> ["+ value + "] </span>";
+			html += "</div>";
+		}
+	}
+	if (type=="span") {
+		html += "<span class='"+ code +" view-div'>";
+		if (code.indexOf("#")>-1)
+			html += "<span name='code'>" +cleanCode(code) + "</span> ";
+		if (code.indexOf("%")<0)
+			html += " <span name='label'>"+label + "</span> ";
+		if (code.indexOf("&")>-1)
+			html += "<span name='value'> ["+ value + "] </span>";
+		html += "</span>";
+	}
+	if (type=="none") {
 		if (code.indexOf("#")>-1)
 			html += cleanCode(code) + " ";
 		if (code.indexOf("%")<0)
-			html += " "+label;
+			html += label;
 		if (code.indexOf("&")>-1)
-			html += " ["+$(this.value_node).text()+ "] ";
-		html += "</div>";
+			html += " ["+ value + "]";
+		html += "</span>";
 	}
 	return html;
 };
@@ -193,36 +213,7 @@ UIFactory["Item"].prototype.getView = function(dest,type,langcode)
 UIFactory["Item"].prototype.displayView = function(dest,type,langcode)
 //==================================
 {
-	//---------------------
-	if (langcode==null)
-		langcode = LANGCODE;
-	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
-	if (dest!=null) {
-		this.display[dest] = langcode;
-	}
-	var label = this.label_node[langcode].text();
-	var code = $(this.code_node).text();
-	var value = $(this.value_node).text();
-	var html = "";
-	if (g_userroles[0]=='designer' || USER.admin) {
-		html += "<div class='"+ code +" view-div'>"+ code + " "+label;
-		if (value!='')
-			html += " ["+ value + "]";
-		html += "</div> ";
-	} else {
-		html += "<div class='"+ code +" view-div'>";
-		if (code.indexOf("#")>-1)
-			html += cleanCode(code) + " ";
-		if (code.indexOf("%")<0)
-			html += " "+label;
-		if (code.indexOf("&")>-1)
-			html += " ["+$(this.value_node).text()+ "] ";
-		html += "</div>";
-	}
+	var html = this.getView(dest,type,langcode);
 	$("#"+dest).html(html);
 };
 
@@ -251,10 +242,6 @@ UIFactory["Item"].prototype.getEditor = function(type,langcode,disabled)
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
 	//---------------------
 	if (type==null)
 		type = 'default';

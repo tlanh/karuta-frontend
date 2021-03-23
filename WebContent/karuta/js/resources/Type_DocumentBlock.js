@@ -53,11 +53,12 @@ UIFactory["DocumentBlock"].prototype.getView = function(dest,type,langcode)
 	var image = UICom.structure["ui"][this.image_nodeid];
 	var cover = UICom.structure["ui"][this.cover_nodeid];
 	//---------------------
+	UICom.structure.ui[this.document_nodeid].resource.blockparent = UICom.structure.ui[this.id];
+	UICom.structure.ui[this.image_nodeid].resource.blockparent = UICom.structure.ui[this.id];
+	UICom.structure.ui[this.cover_nodeid].resource.blockparent = UICom.structure.ui[this.id];
+	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	//---------------------
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
 	//---------------------
 	if (dest!=null) {
 		this.display[dest] = {langcode: langcode, type : type};
@@ -68,14 +69,6 @@ UIFactory["DocumentBlock"].prototype.getView = function(dest,type,langcode)
 	//---------------------
 	var html = "";
 	if (type=='standard'){
-		//---------------------
-		var img_langcode = langcode;
-		if (!image.multilingual)
-			img_langcode = NONMULTILANGCODE;
-		//---------------------
-		var doc_langcode = langcode;
-		if (!document.multilingual)
-			doc_langcode = NONMULTILANGCODE;
 		//----------------------------------------
 		var img_width = ($(image.resource.width_node[langcode]).text()!=undefined && $(image.resource.width_node[langcode]).text()!='') ? $(image.resource.width_node[langcode]).text() : "";
 		var img_height = ($(image.resource.height_node[langcode]).text()!=undefined && $(image.resource.height_node[langcode]).text()!='') ? $(image.resource.height_node[langcode]).text() : "";
@@ -89,13 +82,13 @@ UIFactory["DocumentBlock"].prototype.getView = function(dest,type,langcode)
 		if (img_height!="")
 			image_size += " height:" + img_height + ";";
 		//----------------------------------------
-		var filename = $(document.resource.filename_node[doc_langcode]).text();
-		html =  "<a style='text-decoration:none;color:inherit' id='file_"+document.id+"' href='../../../"+serverBCK+"/resources/resource/file/"+document.id+"?lang="+languages[doc_langcode]+"'>";
-		var style = "background-repeat:no-repeat; background-image:url('../../../"+serverBCK+"/resources/resource/file/"+image.id+"?lang="+languages[img_langcode]+"&timestamp=" + new Date().getTime()+"'); " +image_size;
+		var filename = $(document.resource.filename_node[langcode]).text();
+		html =  "<a style='text-decoration:none;color:inherit' id='file_"+document.id+"' href='../../../"+serverBCK+"/resources/resource/file/"+document.id+"?lang="+languages[langcode]+"'>";
+		var style = "background-repeat:no-repeat; background-image:url('../../../"+serverBCK+"/resources/resource/file/"+image.id+"?lang="+languages[langcode]+"&timestamp=" + new Date().getTime()+"'); " +image_size;
 		if (cover!=undefined && cover.resource.getValue()=='1')
 			style += " background-size:cover;";
 		html += "<div class='DocBlock' style=\""+style+"\">";
-		style = UICom.structure["ui"][this.id].getLabelStyle(uuid);
+		style = UICom.structure["ui"][this.id].getLabelStyle();
 		if (filename!="") {
 			if (UICom.structure["ui"][this.id].getLabel(null,'none')!='')
 				html += "<div id='label_"+this.id+"' class='block-title' style=\""+style+"\">"+UICom.structure["ui"][this.id].getLabel('label_'+this.id,'none')+"</div>";
@@ -126,9 +119,6 @@ UIFactory["DocumentBlock"].prototype.getButtons = function(dest,type,langcode)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
 	var html = "";
 	if (this.document_editresroles.containsArrayElt(g_userroles) || this.image_editresroles.containsArrayElt(g_userroles)){
 		html += "<span data-toggle='modal' data-target='#edit-window' onclick=\"javascript:getEditBox('"+this.id+"')\"><span class='button fas fa-pencil-alt' data-toggle='tooltip' data-title='"+karutaStr[LANG]["button-edit"]+"' data-placement='bottom'></span></span>";
@@ -142,15 +132,15 @@ UIFactory["DocumentBlock"].prototype.getButtons = function(dest,type,langcode)
 UIFactory["DocumentBlock"].prototype.displayEditor = function(destid,type,langcode)
 //==================================
 {
+	if (!USER.admin && g_userroles[0]!='designer')
+		$("#edit-window").addClass("Block");
+	//---------------------
 	var document = UICom.structure["ui"][this.document_nodeid];
 	var image = UICom.structure["ui"][this.image_nodeid];
 	var cover = UICom.structure["ui"][this.cover_nodeid];
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	//---------------------
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
 	//---------------------
 	if (this.document_editresroles.containsArrayElt(g_userroles) || USER.admin || g_userroles[0]=='designer'){
 		$("#"+destid).append($("<h4>"+karutaStr[LANG]['Document']+"</h4>"));
@@ -166,6 +156,12 @@ UIFactory["DocumentBlock"].prototype.displayEditor = function(destid,type,langco
 	if (cover!=undefined && this.cover_editresroles.containsArrayElt(g_userroles) || USER.admin || g_userroles[0]=='designer'){
 		$("#"+destid).append($("<h4>"+karutaStr[LANG]['coverage']+"</h4>"));
 		cover.resource.displayEditor(destid,type,langcode,this);
+	}
+	//---------------------
+	var graphicerroles = ($(UICom.structure.ui[this.id].metadatawad).attr('graphicerroles')==undefined)?'none':$(UICom.structure.ui[this.id].metadatawad).attr('graphicerroles');
+	var editnoderoles = ($(UICom.structure.ui[this.id].metadatawad).attr('editnoderoles')==undefined)?'none':$(UICom.structure.ui[this.id].metadatawad).attr('editnoderoles');
+	if (USER.admin || g_userroles[0]=='designer' || (graphicerroles.containsArrayElt(g_userroles) && editnoderoles.containsArrayElt(g_userroles)) || (graphicerroles.indexOf($UICom.structure.ui[this.id].userrole)>-1 && editnoderoles.indexOf($UICom.structure.ui[this.id])>-1)) {
+		$("#"+destid).append($("<h4 style='margin-top:10px'>"+karutaStr[LANG]['css-styles']+"</h4>"));
 	}
 }
 

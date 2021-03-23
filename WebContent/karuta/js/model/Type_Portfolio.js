@@ -141,9 +141,9 @@ UIFactory["Portfolio"].prototype.displayOwner = function(dest)
 //==================================
 {
 	if (Users_byid[this.ownerid]==null)
-		UIFactory.User.loadUserAndDisplay(this.ownerid,dest,'firstname-lastname');
+		UIFactory.User.loadUserAndDisplay(this.ownerid,dest,'(firstname-lastname)');
 	else {
-		var owner = Users_byid[this.ownerid].getView(null,'firstname-lastname',null);
+		var owner = Users_byid[this.ownerid].getView(null,'(firstname-lastname)',null);
 		$("#"+dest).html(owner);
 	}
 }
@@ -153,6 +153,12 @@ UIFactory["Portfolio"].prototype.getPortfolioView = function(dest,type,langcode,
 {
 	if (dest!=null) {
 		this.display[dest] = type;
+	}
+	//---------------------
+	if (this.date_modified!=null) {
+		var msec = Date.parse(this.date_modified);
+		var d = new Date(msec);
+		var dmodified = d.toLocaleDateString();
 	}
 	//---------------------
 	if (langcode==null)
@@ -193,10 +199,9 @@ UIFactory["Portfolio"].prototype.getPortfolioView = function(dest,type,langcode,
 	var html = "";
 	//--------------------------------------------------------------------------------------------
 	if (type=='list' || type=='portfolio') {
-		html += "<div class='portfolio-label col-10 col-md-4' onclick=\"display_main_page('"+this.rootid+"')\" ><a class='portfolio-label' >"+portfolio_label+"</a> "+tree_type+"</div>";
+		html += "<div class='portfolio-label col-10 col-md-5' onclick=\"display_main_page('"+this.id+"')\" ><a class='portfolio-label' >"+portfolio_label+"</a> "+tree_type+" <span id='owner_"+this.id+"' class='owner'/> </div>";
 		if (USER.creator && !USER.limited) {
-			html += "<div id='owner_"+this.id+"' class='col-2 d-none d-md-block'></div>";
-			html += "<div class='col-3 d-none d-md-block'>";
+			html += "<div class='col-4 d-none d-md-block'>";
 			html += "<span id='pcode_"+this.id+"' class='portfolio-code'>"+this.code_node.text()+"</span>";
 			html += " <span class='copy-button fas fa-clipboard' ";
 			html += "   onclick=\"copyInclipboad('"+this.id+"')\" ";
@@ -205,8 +210,9 @@ UIFactory["Portfolio"].prototype.getPortfolioView = function(dest,type,langcode,
 			html += "</span>";
 			html += "</div>";
 		}
-		if (this.date_modified!=null)
-			html += "<div class='col-2 d-none d-md-block' onclick=\"display_main_page('"+this.rootid+"')\">"+this.date_modified.substring(0,10)+"</div>";
+		if (this.date_modified!=null) {
+			html += "<div class='col-2 d-none d-md-block' onclick=\"display_main_page('"+this.id+"')\">"+dmodified+"</div>";
+		}
 		//------------ buttons ---------------
 		html += "<div class='col-1'>";
 		if (USER.admin || (this.owner=='Y' && !USER.xlimited) || (USER.creator && !USER.limited)) {
@@ -232,13 +238,15 @@ UIFactory["Portfolio"].prototype.getPortfolioView = function(dest,type,langcode,
 		html += this.context_text_node[langcode].text();
 		html += "	</div>";
 		html += "	<div class='card-footer' >";
-		html += this.date_modified.substring(0,10);
+		if (this.date_modified!=null) {
+			html += dmodified;
+		}
 		html += "	</div>";
 	}
 	//--------------------------------------------------------------------------------------------
 	if (type=='card-admin') {
 		html += "<div class='card-header' >";
-		html += tree_type + " <a class='portfolio-label' onclick=\"display_main_page('"+this.rootid+"')\" >"+portfolio_label+"</a></div>"
+		html += tree_type + " <a class='portfolio-label' onclick=\"display_main_page('"+this.id+"')\" >"+portfolio_label+"</a></div>"
 		html += "	</div>";
 		html += "<div class='card-body' >";
 		if (this.context_text_node[langcode].text()!="")
@@ -252,7 +260,9 @@ UIFactory["Portfolio"].prototype.getPortfolioView = function(dest,type,langcode,
 		html += "	<div id='owner_"+this.id+"' class='owner'></div>";
 		html += "</div>";
 		html += "<div class='card-footer' >";
-		html += this.date_modified.substring(0,10);
+		if (this.date_modified!=null) {
+			html += dmodified;
+		}
 		//------------ buttons ---------------
 		html += "<div class='card-button'>";
 		if (USER.admin || (this.owner=='Y' && !USER.xlimited) || (USER.creator && !USER.limited)) {
@@ -392,7 +402,10 @@ UIFactory["Portfolio"].displayPortfolio = function(destid,type,langcode,edit)
 		$("#"+destid).html($(html));
 		UIFactory["Portfolio"].displaySidebar(UICom.root,'sidebar',type,LANGCODE,edit,UICom.rootid);
 	}
-
+	//---------------------------------------
+	if (typeof checkIfSpecialApp == 'function') { 
+		checkIfSpecialApp(UICom.structure["ui"][rootid].getCode());
+	}
 	//---------------------------------------
 	$('[data-toggle=tooltip]').tooltip({html: true, trigger: 'hover'}); 
 
@@ -593,6 +606,7 @@ UIFactory["Portfolio"].reload = function(portfolioid)
 		url : serverBCK_API+"/portfolios/portfolio/" + portfolioid + "?resources=true",
 		success : function(data) {
 			UICom.parseStructure(data,true);
+			setVariables(data);
 		}
 	});
 };
@@ -607,6 +621,7 @@ UIFactory["Portfolio"].reloadparse = function(portfolioid)
 		url : serverBCK_API+"/portfolios/portfolio/" + portfolioid + "?resources=true",
 		success : function(data) {
 			UICom.parseStructure(data,true);
+			setVariables(data);
 			UIFactory["Portfolio"].parse_add(data);
 			$("#sidebar").html("");
 			UIFactory["Portfolio"].displaySidebar(UICom.root,'sidebar',null,null,g_edit,UICom.root);
@@ -2339,9 +2354,6 @@ UIFactory["Portfolio"].displayComments = function(destid,node,type,langcode)
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	var multilingual = $(node.multilingual)
-	if (!multilingual)
-		langcode = NONMULTILANGCODE;
 	//---------------------
 	var text = $(node.context_text_node[langcode]).text();
 	html += "<div>"+text+"</div>";
@@ -2742,11 +2754,8 @@ function setCSSportfolio(data,langcode)
 	setConfigColor(root,'svg-web9-color');
 	// --------CSS Text------------------
 	var csstextlangcode = LANGCODE;
-	var multilingual = ($("metadata[semantictag='config-portfolio-css']",data).attr('multilingual-resource')=='Y') ? true : false;
-	if (!multilingual)
-		csstextlangcode = NONMULTILANGCODE;
 	var csstext = $("text[lang='"+languages[csstextlangcode]+"']",$("asmResource[xsi_type='TextField']",$("asmContext:has(metadata[semantictag='config-portfolio-css'])",data))).text();
-	csstext = csstext.replace(/(<([^>]+)>)/ig, "").replace(/&nbsp;/g,"");
+	csstext = csstext.replace(/(<([^>]+)>)/ig, "").replace(/&nbsp;/g,"").replace(/&gt;/g,">");
 	$("#csstext").remove();
 	if (csstext!=undefined && csstext!=''){
 		console.log("Portfolio CSS added")

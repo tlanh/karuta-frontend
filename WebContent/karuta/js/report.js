@@ -17,7 +17,7 @@ var userid = null; // current user
 var report_refresh = true;
 var csvline = "";
 
-var csvreport = null;
+var csvreport = [];
 var report_not_in_a_portfolio = false;
 
 var dashboard_infos = {};
@@ -29,42 +29,49 @@ var g_report_users = {};
 var g_unique_functions = {};
 var current_nodes = null;
 
-var jquerySpecificFunctions = {};
-jquerySpecificFunctions['.sortUTC()'] = ".sort(function(a, b){ return $(\"utc\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"utc\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? 1 : -1; })";
-jquerySpecificFunctions['.invsortUTC()'] = ".sort(function(a, b){ return $(\"utc\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"utc\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? -1 : 1; })";
-jquerySpecificFunctions['.sortResource()'] = ".sort(function(a, b){ return $(\"text[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"text[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? 1 : -1; })";
-jquerySpecificFunctions['.sortResourceText(#'] = ".sort(function(a, b){ return $(\"#1[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"#1[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? 1 : -1; })";
-jquerySpecificFunctions['.sortResource(#'] = ".sort(function(a, b){ return $(\"#1[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"#1[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? 1 : -1; })";
-jquerySpecificFunctions['.sortResourceValue()'] = ".sort(function(a, b){ return $(\"value\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"value\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? 1 : -1; })";
-jquerySpecificFunctions['.sortResourceCode()'] = ".sort(function(a, b){ return $(\"code\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"code\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? 1 : -1; })";
-jquerySpecificFunctions['.invsortResourceText()'] = ".sort(function(a, b){ return $(\"text[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"text[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? -1 : 1; })";
-jquerySpecificFunctions['.invsortResourceValue()'] = ".sort(function(a, b){ return $(\"value\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"value\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? -1 : 1; })";
-jquerySpecificFunctions['.invsortResourceCode()'] = ".sort(function(a, b){ return $(\"value\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"value\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? -1 : 1; })";
-jquerySpecificFunctions['.sortNodeLabel()'] = ".sort(function(a, b){ return $(\"label[lang='#lang#']\",$(\"asmResource[xsi_type='nodeRes']\",$(a))).text() > $(\"label[lang='#lang#']\",$(\"asmResource[xsi_type='nodeRes']\",$(b))).text() ? 1 : -1; })";
-jquerySpecificFunctions['.sortNodeCode()'] = ".sort(function(a, b){ return $(\"code\",$(\"asmResource[xsi_type='nodeRes']\",$(a))).text() > $(\"code\",$(\"asmResource[xsi_type='nodeRes']\",$(b))).text() ? 1 : -1; })";
-jquerySpecificFunctions['.invsortNodeLabel()'] = ".sort(function(a, b){ return $(\"label[lang='#lang#']\",$(\"asmResource[xsi_type='nodeRes']\",$(a))).text() > $(\"label[lang='#lang#']\",$(\"asmResource[xsi_type='nodeRes']\",$(b))).text() ? -1 : 1; })";
-jquerySpecificFunctions['.invsortNodeCode()'] = ".sort(function(a, b){ return $(\"code\",$(\"asmResource[xsi_type='nodeRes']\",$(a))).text() > $(\"code\",$(\"asmResource[xsi_type='nodeRes']\",$(b))).text() ? -1 : 1; })";
-jquerySpecificFunctions['.sort()'] = ".sort(function(a, b){ return $(a).text() < $(b).text() ? 1 : -1; })";
-jquerySpecificFunctions['.invsort()'] = ".sort(function(a, b){ return $(a).text() < $(b).text() ? -1 : 1; })";
-jquerySpecificFunctions['.filename_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > filename[lang='#lang#']:not(:empty)\")";
-jquerySpecificFunctions['.filename_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > filename[lang='#lang#']:empty\")";
-jquerySpecificFunctions['.url_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']  > url[lang='#lang#']:not(:empty)\")";
-jquerySpecificFunctions['.url_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']  > url[lang='#lang#']:empty\")";
-jquerySpecificFunctions['.text_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > text[lang='#lang#']:not(:empty)\")";
-jquerySpecificFunctions['.text_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > text[lang='#lang#']:empty\")";
-jquerySpecificFunctions['.submitted()'] = ".has(\"metadata-wad[submitted='Y']\")";
-jquerySpecificFunctions['.code_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > code:empty\")";
-jquerySpecificFunctions['.code_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > code:not(:empty)\")";
-jquerySpecificFunctions['.filename_or_url_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > filename[lang='#lang#']:not(:empty),asmResource[xsi_type!='context'][xsi_type!='nodeRes']  > url[lang='#lang#']:not(:empty)\")";
-jquerySpecificFunctions['.filename_or_text_or_url_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > filename[lang='#lang#']:not(:empty),asmResource[xsi_type!='context'][xsi_type!='nodeRes']  > text[lang='#lang#']:not(:empty),asmResource[xsi_type!='context'][xsi_type!='nodeRes']  > url[lang='#lang#']:empty\")";
-jquerySpecificFunctions['.filename_or_text_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > filename[lang='#lang#']:not(:empty),asmResource[xsi_type!='context'][xsi_type!='nodeRes']  > text[lang='#lang#']:not(:empty)\")";
-jquerySpecificFunctions['.url_or_text_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > url[lang='#lang#']:not(:empty),asmResource[xsi_type!='context'][xsi_type!='nodeRes']  > text[lang='#lang#']:not(:empty)\")";
+var jqueryReportSpecificFunctions = {};
+jqueryReportSpecificFunctions['.sortUTC()'] = ".sort(function(a, b){ return $(\"utc\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"utc\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? 1 : -1; })";
+jqueryReportSpecificFunctions['.invsortUTC()'] = ".sort(function(a, b){ return $(\"utc\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"utc\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? -1 : 1; })";
+jqueryReportSpecificFunctions['.sortResource()'] = ".sort(function(a, b){ return $(\"text[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"text[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? 1 : -1; })";
+jqueryReportSpecificFunctions['.sortResourceText(#'] = ".sort(function(a, b){ return $(\"#1[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"#1[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? 1 : -1; })";
+jqueryReportSpecificFunctions['.sortResource(#'] = ".sort(function(a, b){ return $(\"#1[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"#1[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? 1 : -1; })";
+jqueryReportSpecificFunctions['.sortResourceValue()'] = ".sort(function(a, b){ return $(\"value\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"value\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? 1 : -1; })";
+jqueryReportSpecificFunctions['.sortResourceCode()'] = ".sort(function(a, b){ return $(\"code\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"code\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? 1 : -1; })";
+jqueryReportSpecificFunctions['.invsortResourceText()'] = ".sort(function(a, b){ return $(\"text[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"text[lang='#lang#']\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? -1 : 1; })";
+jqueryReportSpecificFunctions['.invsortResourceValue()'] = ".sort(function(a, b){ return $(\"value\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"value\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? -1 : 1; })";
+jqueryReportSpecificFunctions['.invsortResourceCode()'] = ".sort(function(a, b){ return $(\"value\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(a))).text() > $(\"value\",$(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']\",$(b))).text() ? -1 : 1; })";
+jqueryReportSpecificFunctions['.sortNodeLabel()'] = ".sort(function(a, b){ return $(\"label[lang='#lang#']\",$(\"asmResource[xsi_type='nodeRes']\",$(a))).text() > $(\"label[lang='#lang#']\",$(\"asmResource[xsi_type='nodeRes']\",$(b))).text() ? 1 : -1; })";
+jqueryReportSpecificFunctions['.sortNodeCode()'] = ".sort(function(a, b){ return $(\"code\",$(\"asmResource[xsi_type='nodeRes']\",$(a))).text() > $(\"code\",$(\"asmResource[xsi_type='nodeRes']\",$(b))).text() ? 1 : -1; })";
+jqueryReportSpecificFunctions['.invsortNodeLabel()'] = ".sort(function(a, b){ return $(\"label[lang='#lang#']\",$(\"asmResource[xsi_type='nodeRes']\",$(a))).text() > $(\"label[lang='#lang#']\",$(\"asmResource[xsi_type='nodeRes']\",$(b))).text() ? -1 : 1; })";
+jqueryReportSpecificFunctions['.invsortNodeCode()'] = ".sort(function(a, b){ return $(\"code\",$(\"asmResource[xsi_type='nodeRes']\",$(a))).text() > $(\"code\",$(\"asmResource[xsi_type='nodeRes']\",$(b))).text() ? -1 : 1; })";
+jqueryReportSpecificFunctions['.sort()'] = ".sort(function(a, b){ return $(a).text() < $(b).text() ? 1 : -1; })";
+jqueryReportSpecificFunctions['.invsort()'] = ".sort(function(a, b){ return $(a).text() < $(b).text() ? -1 : 1; })";
+jqueryReportSpecificFunctions['.filename_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > filename[lang='#lang#']:not(:empty)\")";
+jqueryReportSpecificFunctions['.filename_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > filename[lang='#lang#']:empty\")";
+jqueryReportSpecificFunctions['.url_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']  > url[lang='#lang#']:not(:empty)\")";
+jqueryReportSpecificFunctions['.url_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes']  > url[lang='#lang#']:empty\")";
+jqueryReportSpecificFunctions['.text_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > text[lang='#lang#']:not(:empty)\")";
+jqueryReportSpecificFunctions['.text_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > text[lang='#lang#']:empty\")";
+jqueryReportSpecificFunctions['.submitted()'] = ".has(\"metadata-wad[submitted='Y']\")";
+jqueryReportSpecificFunctions['.code_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > code:empty\")";
+jqueryReportSpecificFunctions['.code_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > code:not(:empty)\")";
+jqueryReportSpecificFunctions['.filename_or_url_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > filename[lang='#lang#']:not(:empty),asmResource[xsi_type!='context'][xsi_type!='nodeRes']  > url[lang='#lang#']:not(:empty)\")";
+jqueryReportSpecificFunctions['.filename_or_text_or_url_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > filename[lang='#lang#']:not(:empty),asmResource[xsi_type!='context'][xsi_type!='nodeRes']  > text[lang='#lang#']:not(:empty),asmResource[xsi_type!='context'][xsi_type!='nodeRes']  > url[lang='#lang#']:empty\")";
+jqueryReportSpecificFunctions['.filename_or_text_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > filename[lang='#lang#']:not(:empty),asmResource[xsi_type!='context'][xsi_type!='nodeRes']  > text[lang='#lang#']:not(:empty)\")";
+jqueryReportSpecificFunctions['.url_or_text_not_empty()'] = ".has(\"asmResource[xsi_type!='context'][xsi_type!='nodeRes'] > url[lang='#lang#']:not(:empty),asmResource[xsi_type!='context'][xsi_type!='nodeRes']  > text[lang='#lang#']:not(:empty)\")";
 //---------------
-jquerySpecificFunctions['.uniqueNodeLabel()'] = "";
-jquerySpecificFunctions['.uniqueNodeCode()'] = "";
-jquerySpecificFunctions['.uniqueResourceCode()'] = "";
-jquerySpecificFunctions['.uniqueResourceValue()'] = "";
-jquerySpecificFunctions['.uniqueResourceText()'] = "";
+jqueryReportSpecificFunctions['.uniqueNodeLabel()'] = "";
+jqueryReportSpecificFunctions['.uniqueNodeCode()'] = "";
+jqueryReportSpecificFunctions['.uniqueResourceCode()'] = "";
+jqueryReportSpecificFunctions['.uniqueResourceValue()'] = "";
+jqueryReportSpecificFunctions['.uniqueResourceText()'] = "";
+//---------------
+jqueryReportSpecificFunctions['.resourceTextContains('] = "asmResource[xsi_type!='context'][xsi_type!='nodeRes']>text[lang='#lang#']:contains(";
+jqueryReportSpecificFunctions['.resourceCodeContains('] = "asmResource[xsi_type!='context'][xsi_type!='nodeRes']>code:contains(";
+jqueryReportSpecificFunctions['.resourceValueContains('] = "asmResource[xsi_type!='context'][xsi_type!='nodeRes']>value:contains(";
+jqueryReportSpecificFunctions['.nodeLabelContains('] = "asmResource[xsi_type='nodeRes']>label[lang='#lang#']:contains(";
+jqueryReportSpecificFunctions['.nodeCodeContains('] = "asmResource[xsi_type='nodeRes']>code:contains(";
+jqueryReportSpecificFunctions['.resourceFilenameContains('] = "asmResource[xsi_type!='context'][xsi_type!='nodeRes']>filename[lang='#lang#']:contains(";
 //---------------
 
 Selector = function(jquery,type,filter1,filter2,unique)
@@ -108,6 +115,20 @@ function r_replaceVariable(text)
 }
 
 //==================================
+function r_getTest(test)
+//==================================
+{
+	for (fct in jqueryReportSpecificFunctions) {
+		if (test.indexOf(fct)>-1) {
+			test = ".has(\"" + test.replace(fct,jqueryReportSpecificFunctions[fct]) + "\")";
+			if (test.indexOf("#lang#")>-1)
+				test = test.replace(/#lang#/g,languages[LANGCODE]);
+		}
+	}
+	return test;
+}
+
+//==================================
 function r_getSelector(select,test)
 //==================================
 {
@@ -140,9 +161,9 @@ function r_getSelector(select,test)
 		filter1 = function(){return $(this).children("metadata").length>0};
 	}
 	var filter2 = test; // test = .has("metadata-wad[submitted='Y']").last()
-	for (fct in jquerySpecificFunctions) {
+	for (fct in jqueryReportSpecificFunctions) {
 		if (test.indexOf(fct)>-1) {
-			filter2 = filter2.replace(fct,jquerySpecificFunctions[fct]);
+			filter2 = filter2.replace(fct,jqueryReportSpecificFunctions[fct]);
 			if (filter2.indexOf("#lang#")>-1)
 				filter2 = filter2.replace(/#lang#/g,languages[LANGCODE]);
 			if (test.indexOf("sortResource(#")>-1){
@@ -820,7 +841,7 @@ g_report_actions['for-each-portfolio'] = function (destid,action,no,data)
 				if (select.length==0) {
 					condition = true;;
 				}
-				if (select.startsWith("{")) {
+				if (select.substring(0,1) == "{") {
 					var toeval = select.substring(1,select.length-1);
 					condition = eval(toeval);
 				}
@@ -1194,16 +1215,25 @@ g_report_actions['node_resource'] = function (destid,action,no,data)
 	if ($("#report_display_editor_"+nodeid).length>0) {
 		UICom.structure["ui"][nodeid].resource.displayEditor("report_display_editor_"+nodeid);
 	}
-	if (report_refresh && $("#dashboard_"+prefix_id+nodeid).length>0) {
-		$("#dashboard_"+prefix_id+nodeid).on('DOMSubtreeModified',function (){
-			refresh_report(dashboard_current);
+	if (report_refresh && $("#dashboard_"+prefix_id+nodeid).length>0 && editresroles.length>0) {
+		$("#dashboard_"+prefix_id+nodeid).attr('dashboard',dashboard_current);
+
+		var config = { attributes: true, childList: true, characterData: true, subtree:true }
+		var observer = new MutationObserver(function(mutations) {
+			for (var mutation of mutations) {
+				if (mutation.target.attributes['dashboard']!=undefined)
+					refresh_report(mutation.target.attributes['dashboard'].value);
+			};
 		});
+		var target = document.querySelector("#dashboard_"+prefix_id+nodeid);
+		observer.observe(target, config);
 	}
 	if (report_refresh && $("#report_get_editor_"+nodeid).length>0) {
 		$("#report_get_editor_"+nodeid).append(UICom.structure["ui"][nodeid].resource.getEditor());
 		var input = $('input',$("#report_get_editor_"+nodeid));
+		$(input).attr('dashboard',dashboard_current);
 		$(input).change(function (){
-			refresh_report(dashboard_current);
+			refresh_report(this.attributes['dashboard'].value);
 		});
 	}
 }
@@ -1360,6 +1390,7 @@ g_report_actions['csv-value'] = function (destid,action,no,data)
 	var attr_help = "";
 	var prefix_id = "";
 	try {
+		//----------selector---------------------
 		var select = $(action).attr("select");
 		while (select.indexOf("##")>-1) {
 			var test_string = select.substring(select.indexOf("##")+2); // test_string = abcd##variable##efgh.....
@@ -1372,6 +1403,14 @@ g_report_actions['csv-value'] = function (destid,action,no,data)
 			node = $(selector.jquery,data).addBack();
 		if (select.substring(0,2)=="..") // node itself
 			node = data;
+		//---------------test-----------------
+		var test = $(action).attr("test");
+		if (test!=undefined) {
+			test = r_replaceVariable(test);
+			test = getTest(test);
+			node = eval("$(node)"+test);
+		}
+		//------------------------------
 		if (node.length>0 || select.substring(0,1)=="."){
 			var nodeid = $(node).attr("id");
 			//----------------------------
@@ -1414,6 +1453,9 @@ g_report_actions['csv-value'] = function (destid,action,no,data)
 		csvseparator = ";";
 	text = r_replaceVariable(text);
 	csvline += text + csvseparator;
+	// to display for testing
+	$("#"+destid).append(text);
+
 }
 
 //=============================================================================
@@ -1521,6 +1563,40 @@ g_report_actions['jsfunction'] = function (destid,action,no,data)
 	var jsfunction = $(action).attr("function");
 	eval (jsfunction);
 	// ???????
+}
+
+//=============================================================================
+//=============================================================================
+//======================== PREVIEW2UNIT =======================================
+//=============================================================================
+//=============================================================================
+
+//==================================
+g_report_actions['preview2unit'] = function (destid,action,no,data)
+//==================================
+{
+	var nodeid = $(data).attr("id");
+	var targetid = "";
+	var text = "";
+	var style = r_replaceVariable($(action).attr("style"));
+	var cssclass = r_replaceVariable($(action).attr("class"));
+	var select = $(action).attr("select");
+	select = r_replaceVariable(select);
+	var selector = r_getSelector(select);
+	var node = $(selector.jquery,data);
+	if (node.length==0) // try the node itself
+		node = $(selector.jquery,data).addBack();
+	if (select.substring(0,2)=="..") // node itself
+		node = data;
+	if (node.length>0 || select.substring(0,1)=="."){
+		var nodeid = $(node).attr("id");
+		targetid = UICom.structure["ui"][nodeid].getUuid();
+		label = UICom.structure["ui"][nodeid].getLabel(null,'none');
+	}
+	text = "<span id='"+nodeid+"' style='"+style+"' class='report-preview2unit "+cssclass+"'>"+label+"</span>&nbsp;";
+	text += "<span class='button fas fa-binoculars' onclick=\"previewPage('"+targetid+"',100,'standard') \" data-title='"+karutaStr[LANG]["preview"]+"' data-toggle='tooltip' data-placement='bottom'></span>";
+	$("#"+destid).append($(text));
+	$("#"+nodeid).attr("style",style);
 }
 
 //=============================================================================
@@ -1700,7 +1776,7 @@ function refresh_report(dashboard_current)
 //==================================
 {
 	$("#"+dashboard_current).html("");
-	r_processPortfolio(0,dashboard_infos[dashboard_current].xmlReport,dashboard_current,dashboard_infos[dashboard_current].data,0);
+	r_processPortfolio(99,dashboard_infos[dashboard_current].xmlReport,dashboard_current,dashboard_infos[dashboard_current].data,0);
 	$('[data-tooltip="true"]').tooltip({html: true, trigger: 'hover'});
 }
 
@@ -1723,6 +1799,7 @@ function report_getModelAndPortfolio(model_code,node,destid,g_dashboard_models)
 		dataType : "xml",
 		url : serverBCK_API+"/portfolios/portfolio/code/"+model_code,
 		success : function(data) {
+			setVariables(data);
 			var nodeid = $("asmRoot",data).attr("id");
 			// ---- transform karuta portfolio to report model
 			var urlS = serverBCK_API+"/nodes/"+nodeid+"?xsl-file="+appliname+"/karuta/xsl/karuta2report.xsl&lang="+LANG;
@@ -2226,7 +2303,7 @@ g_report_actions['draw-web-line'] = function (destid,action,no,data)
 		for (var i=0; i<nodes.length;i++){
 			if (points[i].value!=null)
 				drawValue(destid,points[i].value,points[i].angle,svgcenter,'svg-web-value'+pos);
-			if (no==0 && pos==0){
+			if (pos==0){ // draw gaduations
 				for (var j=0;j<=Math.abs(max-min);j++) {
 					if (j>0)
 						drawGraduationLine(destid,j,min,max,angle*i,svgcenter,'svg-web-line'+no);

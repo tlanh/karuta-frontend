@@ -103,10 +103,6 @@ UIFactory["Proxy"].prototype.getView = function(dest,type,langcode)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
 	if (dest!=null) {
 		this.display[dest] = langcode;
 	}
@@ -117,18 +113,8 @@ UIFactory["Proxy"].prototype.getView = function(dest,type,langcode)
 UIFactory["Proxy"].prototype.displayView = function(dest,type,langcode)
 //==================================
 {
-	//---------------------
-	if (langcode==null)
-		langcode = LANGCODE;
-	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
-	if (dest!=null) {
-		this.display[dest] = langcode;
-	}
-	$("#"+dest).html($(this.label_node[langcode]).text());
+	var html = this.getView(dest,type,langcode);
+	$("#"+dest).html(html);
 };
 
 
@@ -159,7 +145,7 @@ UIFactory["Proxy"].prototype.displayEditor = function(destid,type,langcode)
 	}
 	if (queryattr_value!=undefined && queryattr_value!='') {
 		//------------
-		queryattr_value = replaceVariable(queryattr_value);
+		queryattr_value = cleanCode(replaceVariable(queryattr_value));
 		//------------
 		var srce_indx = queryattr_value.lastIndexOf('.');
 		var srce = queryattr_value.substring(srce_indx+1);
@@ -238,8 +224,7 @@ UIFactory["Proxy"].parse = function(destid,type,langcode,data,self,portfolio_lab
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	if (!self.multilingual)
-		langcode = NONMULTILANGCODE;
+	//---------------------
 	var self_value = $(self.value_node).text();
 	//---------------------
 	if (type==undefined || type==null)
@@ -396,11 +381,15 @@ UIFactory["Proxy"].prototype.refresh = function()
 };
 
 //==================================
-function proxy_multiple(parentid,title,query,partcode,get_resource_semtag)
+function proxy_multiple(parentid,targetid,title,query,partcode,get_resource_semtag)
 //==================================
 {
-	var langcode = LANGCODE;
-	//---------------------
+	//------------------------------
+	if (UICom.structure.ui[targetid]==undefined && targetid!="")
+		targetid = getNodeIdBySemtag(targetid);
+	if (targetid!="" && targetid!=parentid)
+		parentid = targetid;
+	//------------------------------
 	var js1 = "javascript:$('#edit-window').modal('hide')";
 	var js2 = "UIFactory.Proxy.addMultiple('"+parentid+"','"+partcode+","+get_resource_semtag+"')";
 	var footer = "<button class='btn' onclick=\""+js2+";\">"+karutaStr[LANG]['Add']+"</button> <button class='btn' onclick=\""+js1+";\">"+karutaStr[LANG]['Close']+"</button>";

@@ -74,6 +74,8 @@ UIFactory["TextField"] = function( node )
 		UICom.UpdateResource(this.id,writeSaved);
 	}
 	//--------------------
+	this.blockparent = null;
+	//--------------------
 };
 
 UIFactory["TextField"].prototype.getAttributes = function(type,langcode)
@@ -109,10 +111,6 @@ UIFactory["TextField"].prototype.getView = function(dest,type,langcode)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
 	if (dest!=null) {
 		this.display[dest] = langcode;
 	}
@@ -121,7 +119,7 @@ UIFactory["TextField"].prototype.getView = function(dest,type,langcode)
 		type = "standard";
 	var html = $(this.text_node[langcode]).text();
 	//---------------------
-	if(type=='standard') {
+	if(type=='standard' || type=='none') {
 		if (this.encrypted)
 			html = decrypt(html.substring(3),g_rc4key);
 	}
@@ -132,26 +130,7 @@ UIFactory["TextField"].prototype.getView = function(dest,type,langcode)
 UIFactory["TextField"].prototype.displayView = function(dest,type,langcode)
 //==================================
 {
-	//---------------------
-	if (langcode==null)
-		langcode = LANGCODE;
-	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
-	if (dest!=null) {
-		this.display[dest] = langcode;
-	}
-	//---------------------
-	if (type==null)
-		type = "standard";
-	var html = $(this.text_node[langcode]).text();
-	//---------------------
-	if(type=='standard') {
-		if (this.encrypted)
-			html = decrypt(html.substring(3),g_rc4key);
-	}
+	var html = this.getView(dest,type,langcode);
 	$("#"+dest).html(html);
 };
 
@@ -214,16 +193,14 @@ var currentTexfieldInterval = "";
 UIFactory["TextField"].prototype.displayEditor = function(destid,type,langcode,disabled,inline)
 //==================================
 {
+	if (!USER.admin && g_userroles[0]!='designer')
+		$("#edit-window").addClass("TextFieldEditor");
 	//---------------------
 	if (inline==null)
 		inline = false;
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
 	if (disabled==null)
 		disabled = false;
 	//---------------------
@@ -320,7 +297,10 @@ UIFactory["TextField"].prototype.save = function()
 	if (log)
 		UICom.structure.ui[this.id].log();
 	//---------------------------
-	this.refresh();
+	if (this.blockparent!=null)
+		this.blockparent.refresh();
+	else
+		this.refresh();
 };
 
 //==================================

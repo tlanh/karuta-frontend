@@ -49,15 +49,12 @@ UIFactory["TextFieldBlock"] = function( node )
 UIFactory["TextFieldBlock"].prototype.getView = function(dest,type,langcode)
 //==================================
 {
-	var text = UICom.structure["ui"][this.text_nodeid];
-	var image = UICom.structure["ui"][this.image_nodeid];
-	var cover = UICom.structure["ui"][this.cover_nodeid];
+	var text = UICom.structure.ui[this.text_nodeid];
+	var image = UICom.structure.ui[this.image_nodeid];
+	var cover = UICom.structure.ui[this.cover_nodeid];
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	//---------------------
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
 	//---------------------
 	if (dest!=null) {
 		this.display[dest] = {langcode: langcode, type : type};
@@ -67,15 +64,7 @@ UIFactory["TextFieldBlock"].prototype.getView = function(dest,type,langcode)
 		type = "standard";
 	//---------------------
 	var html = "";
-	if (type=='standard'){
-		//---------------------
-		var img_langcode = langcode;
-		if (!image.multilingual)
-			img_langcode = NONMULTILANGCODE;
-		//---------------------
-		var txt_langcode = langcode;
-		if (!text.multilingual)
-			txt_langcode = NONMULTILANGCODE;
+	if (type=='standard') {
 		//----------------------------------------
 		var img_width = ($(image.resource.width_node[langcode]).text()!=undefined && $(image.resource.width_node[langcode]).text()!='') ? $(image.resource.width_node[langcode]).text() : "";
 		var img_height = ($(image.resource.height_node[langcode]).text()!=undefined && $(image.resource.height_node[langcode]).text()!='') ? $(image.resource.height_node[langcode]).text() : "";
@@ -89,17 +78,19 @@ UIFactory["TextFieldBlock"].prototype.getView = function(dest,type,langcode)
 		if (img_height!="")
 			image_size += " height:" + img_height + ";";
 		//----------------------------------------
-		var style = "background-image:url('../../../"+serverBCK+"/resources/resource/file/"+image.id+"?lang="+languages[img_langcode]+"&timestamp=" + new Date().getTime()+"'); " +image_size;
+		var style = "background-image:url('../../../"+serverBCK+"/resources/resource/file/"+image.id+"?lang="+languages[langcode]+"&timestamp=" + new Date().getTime()+"'); " +image_size;
 		if (cover!=undefined && cover.resource.getValue()=='1')
 			style += " background-size:cover;";
 		html += "<div class='TxtBlock' style=\""+style+"\">";
 		//---------------------------------
-		var title = UICom.structure.ui[this.id].getLabel(uuid);
-		var title_style = UICom.structure.ui[this.id].getLabelStyle(uuid);
-		if (title!="")
+		var title = UICom.structure.ui[this.id].getLabel();
+		var title_style = UICom.structure.ui[this.id].getLabelStyle();
+		if (title!="<span></span>")
 			html += "<div id='title_"+this.id+"' class='block-title' style=\""+title_style+"\">"+title+"</div>";
+		else
+			html += "<div id='title_"+this.id+"' class='block-title' style=\"visibility:hidden;"+title_style+"\">no title</div>";
 		//---------------------------------
-		var text_style = text.getContentStyle(uuid);
+		var text_style = UICom.structure.ui[this.id].getContentStyle();
 		var text_content = text.resource.getView(dest,type,langcode);
 		html += "<div id='text_"+this.id+"' class='block-text' style=\""+text_style+"\">"+text_content+"</div>";
 		//---------------------------------
@@ -125,9 +116,6 @@ UIFactory["TextFieldBlock"].prototype.getButtons = function(dest,type,langcode)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
 	var html = "";
 	if (this.text_editresroles.containsArrayElt(g_userroles) || this.image_editresroles.containsArrayElt(g_userroles)){
 		html += "<span data-toggle='modal' data-target='#edit-window' onclick=\"javascript:getEditBox('"+this.id+"')\"><span class='button fas fa-pencil-alt' data-toggle='tooltip' data-title='"+karutaStr[LANG]["button-edit"]+"' data-placement='bottom'></span></span>";
@@ -141,29 +129,23 @@ UIFactory["TextFieldBlock"].prototype.getButtons = function(dest,type,langcode)
 UIFactory["TextFieldBlock"].prototype.displayEditor = function(destid,type,langcode)
 //==================================
 {
-	var text = UICom.structure["ui"][this.text_nodeid];
-	var image = UICom.structure["ui"][this.image_nodeid];
-	var cover = UICom.structure["ui"][this.cover_nodeid];
+	if (!USER.admin && g_userroles[0]!='designer')
+		$("#edit-window").addClass("TextFieldEditor");
+	//---------------------
+	var text = UICom.structure.ui[this.text_nodeid];
+	var image = UICom.structure.ui[this.image_nodeid];
+	var cover = UICom.structure.ui[this.cover_nodeid];
+	//---------------------
+	UICom.structure.ui[this.text_nodeid].resource.blockparent = UICom.structure.ui[this.id];
+	UICom.structure.ui[this.image_nodeid].resource.blockparent = UICom.structure.ui[this.id];
+	UICom.structure.ui[this.cover_nodeid].resource.blockparent = UICom.structure.ui[this.id];
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
 	if (this.text_editresroles.containsArrayElt(g_userroles) || USER.admin || g_userroles[0]=='designer'){
 		$("#"+destid).append($("<h4>"+karutaStr[LANG]['TextField']+"</h4>"));
 		text.resource.displayEditor(destid,type,langcode);
-		$("#"+destid).append($("<div id='text-metadata' class='metadata'></div>"));
-		text.displayMetadataEpmAttributeEditor('text-metadata','node-font-weight',$(text.metadataepm).attr('node-font-weight'));
-		text.displayMetadataEpmAttributeEditor('text-metadata','node-font-style',$(text.metadataepm).attr('node-font-style'));
-		text.displayMetadataEpmAttributeEditor('text-metadata','node-text-align',$(text.metadataepm).attr('node-text-align'));
-		text.displayMetadataEpmAttributeEditor('text-metadata','node-font-size',$(text.metadataepm).attr('node-font-size'));
-		text.displayMetadataEpmAttributeEditor('text-metadata','node-padding-top',$(text.metadataepm).attr('node-padding-top'));
-		text.displayMetadataEpmAttributeEditor('text-metadata','node-color',$(text.metadataepm).attr('node-color'));
-		text.displayMetadataEpmAttributeEditor('text-metadata','node-background-color',$(text.metadataepm).attr('node-background-color'));
-		text.displayMetadataEpmAttributeEditor('text-metadata','node-othercss',$(text.metadataepm).attr('node-othercss'));
-
 	}
 	//---------------------
 	if (this.image_editresroles.containsArrayElt(g_userroles) || USER.admin || g_userroles[0]=='designer'){
@@ -175,6 +157,12 @@ UIFactory["TextFieldBlock"].prototype.displayEditor = function(destid,type,langc
 	if (cover!=undefined && this.cover_editresroles.containsArrayElt(g_userroles) || USER.admin || g_userroles[0]=='designer'){
 		$("#"+destid).append($("<h4>"+karutaStr[LANG]['coverage']+"</h4>"));
 		cover.resource.displayEditor(destid,type,langcode,this);
+	}
+	//---------------------
+	var graphicerroles = ($(UICom.structure.ui[this.id].metadatawad).attr('graphicerroles')==undefined)?'none':$(UICom.structure.ui[this.id].metadatawad).attr('graphicerroles');
+	var editnoderoles = ($(UICom.structure.ui[this.id].metadatawad).attr('editnoderoles')==undefined)?'none':$(UICom.structure.ui[this.id].metadatawad).attr('editnoderoles');
+	if (USER.admin || g_userroles[0]=='designer' || (graphicerroles.containsArrayElt(g_userroles) && editnoderoles.containsArrayElt(g_userroles)) || (graphicerroles.indexOf($UICom.structure.ui[this.id].userrole)>-1 && editnoderoles.indexOf($UICom.structure.ui[this.id])>-1)) {
+		$("#"+destid).append($("<h4 style='margin-top:10px'>"+karutaStr[LANG]['css-styles']+"</h4>"));
 	}
 }
 

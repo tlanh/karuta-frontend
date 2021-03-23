@@ -31,7 +31,14 @@ body,
   font-size: calc(var(--font-size-coeff) * 0.8rem);
 }
 
-@media (min-width: 768px) {
+@media (max-width: 640px) {
+  body,
+.form-control,
+.btn {
+    font-size: calc(var(--font-size-coeff) * 0.6rem);
+  }
+}
+@media (min-width: 1024px) {
   body,
 .form-control,
 .btn {
@@ -92,12 +99,14 @@ body,
 /* ====================== */
 /*    LIST- WELCOME       */
 /* ====================== */
-.portfolio-label {
+.portfolio-label,
+.folder-label {
   cursor: pointer;
 }
 
 .list-page #main-body {
   background-color: var(--list-background-color);
+  background-image: var(--list-background-image);
 }
 
 #welcome-bar {
@@ -272,6 +281,10 @@ body,
   display: in-line;
   opacity: 1;
 }
+#main-list .owner {
+  font-size: 80%;
+  font-style: italic;
+}
 #main-list .portfolio-card {
   margin-top: 15px;
   border: none;
@@ -289,8 +302,7 @@ body,
   color: var(--list-button-text-color);
   background-color: var(--list-element-background-color);
 }
-#main-list .portfolio-card .card-body .portfolio-code,
-#main-list .portfolio-card .card-body .owner {
+#main-list .portfolio-card .card-body .portfolio-code {
   font-size: 80%;
 }
 #main-list .portfolio-card .card-body .comments {
@@ -325,14 +337,11 @@ body,
 #project-portfolios .project {
   color: var(--list-element-text-color);
 }
+
 .project-label {
   cursor: pointer;
 }
 
-#folder-portfolios .folder-label {
-  cursor: none;
-  font-weight: bold;
-}
 #folder-portfolios .row-label {
   padding-bottom: 5px;
 }
@@ -729,8 +738,8 @@ body,
 }
 
 .button {
-  font-size: calc(var(--font-size-coeff) * 0.9rem);
-  padding: 5px;
+  font-size: calc(var(--font-size-coeff) * 1rem);
+  padding: 6px;
   cursor: pointer;
   display: inline-block;
   white-space: nowrap;
@@ -738,7 +747,14 @@ body,
 
 .menus a.text-button {
   font-size: calc(var(--font-size-coeff) * 1rem);
-  margin-top: 2px;
+  font-weight: initial;
+  font-style: initial;
+  font-variant: initial;
+}
+
+.resource-choice {
+  padding-left: 15px;
+  padding-bottom: 15px;
 }
 
 /* ====================== */
@@ -849,6 +865,7 @@ body,
   margin-right: 5px;
   margin-top: 1px;
   color: var(--portfolio-buttons-color);
+  font-size: calc(var(--font-size-coeff) * 1rem);
 }
 #main-portfolio #portfolio-container .createreport .button,
 #main-portfolio #portfolio-container .btn-group .button,
@@ -1014,6 +1031,7 @@ body,
 }
 #menu_bar .dropdown-item {
   color: var(--portfolio-sidebar-text-color);
+  padding: 0.25rem 0.75rem;
 }
 #menu_bar .dropdown-item:hover {
   background-color: var(--portfolio-sidebar-text-color);
@@ -1030,8 +1048,7 @@ body,
   position: relative;
 }
 #menu_bar .dropdown-submenu > .dropdown-menu {
-  top: 0;
-  left: 100%;
+  top: 2.5rem;
   margin-top: -6px;
   margin-left: -1px;
   -webkit-border-radius: 0 6px 6px 6px;
@@ -1040,6 +1057,9 @@ body,
 }
 #menu_bar .dropdown-submenu:hover > .dropdown-menu {
   display: block;
+}
+#menu_bar .dropdown-submenu:hover > .dropdown-menu.nodisplay {
+  display: none;
 }
 #menu_bar .dropdown-submenu > a:after {
   display: block;
@@ -1094,6 +1114,11 @@ body,
   cursor: pointer;
 }
 
+.Get_Resource .preview-button {
+  color: var(--portfolio-link-color);
+  cursor: pointer;
+}
+
 /* ====================
 	Image
    ====================*/
@@ -1128,6 +1153,22 @@ body,
 
 .name_SendEmail {
   font-weight: bold;
+}
+
+/* ====================
+	Get_Resource - search in Node
+   ====================*/
+#get-resource-node .btn-group.select-label {
+  width: 100%;
+}
+#get-resource-node .btn-group.select-label .dropdown-menu {
+  width: 90%;
+}
+#get-resource-node .btn-group.select-label button.select {
+  width: 100%;
+}
+#get-resource-node .btn-group.select-label button.dropdown-toggle {
+  width: 30px;
 }
 
 /* ====================== */
@@ -1276,6 +1317,11 @@ body,
   margin-top: 10px;
 }
 
+.standard.asmStructure .asmStructure,
+.standard.asmStructure .asmUnit {
+  margin-top: 10px;
+}
+
 .standard-struct-default {
   cursor: pointer;
 }
@@ -1345,7 +1391,6 @@ table[name=res-div] {
 
 .standard-resource-simple {
   padding-left: 15px;
-  margin-top: 5px;
 }
 
 .card-body .standard-resource-simple {
@@ -1582,7 +1627,8 @@ table[name=res-div] {
 .row-cols-4 .asmContext.standard-resource-xwide,
 .row-cols-5 .asmContext.standard-resource-xwide,
 .row-cols-6 .asmContext.standard-resource-xwide {
-  padding: 0px;
+  padding-top: 0px;
+  padding-right: 0px;
 }
 
 /* ========================= */
@@ -1636,8 +1682,8 @@ table[name=res-div] {
 }
 
 /* ===========================
-DASHBOARD CSV PDF BUTTONS
-  ===========================*/
+	DASHBOARD CSV PDF BUTTONS
+   ===========================*/
 .csv-button,
 .pdf-button,
 .rtf-button,
@@ -2058,7 +2104,7 @@ hr {
   margin-top: 3px;
   border: 1px solid #ced4da;
   border-radius: 0.2rem;
-  max-width: 600px;
+  max-width: 80%;
 }
 .metadata .input-group .form-control {
   border: 0px solid var(--edit-window-border-color);
@@ -2158,9 +2204,9 @@ hr {
   margin-bottom: 2px;
 }
 
-.radio-div {
+input[type=radio].radio-div {
   float: left;
-  padding: 5px;
+  margin: 5px;
 }
 
 .radio-label {
@@ -3062,8 +3108,8 @@ td {
 	BLOCK
    ====================*/
 :root {
-  --block-height:220px;
-  --block-img-height:218px;
+  --block-height:240px;
+  --block-img-height:238px;
 }
 
 .standard .DocumentBlock .content,
@@ -3167,6 +3213,29 @@ td {
 
 .block .oembedall-container div:last-child {
   display: none;
+}
+
+#edit-window:not([role=designer]) #metadata-epm-part0,
+#edit-window:not([role=designer]) #layout, #edit-window:not([role=designer]) #metadata-epm-part1,
+#edit-window:not([role=designer]) #metadata-epm-node, #edit-window:not([role=designer]) .metadata-epm-node,
+#edit-window:not([role=designer]) #metadata-node-comment, #edit-window:not([role=designer]) .metadata-node-comment,
+#edit-window:not([role=designer]) .padding-top,
+#edit-window:not([role=designer]) .node-font-weight,
+#edit-window:not([role=designer]) .node-font-style,
+#edit-window:not([role=designer]) .node-text-align,
+#edit-window:not([role=designer]) .node-font-size,
+#edit-window:not([role=designer]) .node-padding-top,
+#edit-window:not([role=designer]) .node-color {
+  display: none;
+}
+
+#edit-window.TextFieldEditor .node-font-weight,
+#edit-window.TextFieldEditor .node-font-style,
+#edit-window.TextFieldEditor .node-text-align,
+#edit-window.TextFieldEditor .node-font-size,
+#edit-window.TextFieldEditor .node-padding-top,
+#edit-window.TextFieldEditor .node-color {
+  display: flex;
 }
 
 /*# sourceMappingURL=karuta.css.map */

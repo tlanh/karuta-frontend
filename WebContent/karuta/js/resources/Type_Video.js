@@ -138,8 +138,6 @@ UIFactory["Video"].prototype.getView = function(dest,type,langcode)
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	if (this.multilingual!=undefined && !this.multilingual)
-		langcode = NONMULTILANGCODE;
 	//---------------------
 	if (dest!=null) {
 		this.display[dest] = langcode;
@@ -149,7 +147,7 @@ UIFactory["Video"].prototype.getView = function(dest,type,langcode)
 		type = "html5";
 	//---------------------
 	var html ="";
-	if (type=='html5') {
+	if (type=='html5' || type=='none') {
 		html += "<video width='100%' controls>";
 		var srce = serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&type=.mp4";
 		html += "<source src='"+srce+"' type=\"video/mp4\"></source>";
@@ -165,8 +163,6 @@ UIFactory["Video"].prototype.displayView = function(dest,type,langcode)
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	if (this.multilingual!=undefined && !this.multilingual)
-		langcode = NONMULTILANGCODE;
 	//---------------------
 	if (dest!=null) {
 		this.display[dest] = langcode;
@@ -192,8 +188,6 @@ UIFactory["Video"].prototype.setParameter = function(langcode)
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	if (this.multilingual!=undefined && !this.multilingual)
-		langcode = NONMULTILANGCODE;
 	//---------------------
 	var destid = "jquery_jplayer_"+this.id;
 	var cssSelectorAncestor = "#jp_container_"+this.id;
@@ -226,9 +220,6 @@ UIFactory["Video"].update = function(data,uuid,langcode)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	if (itself.resource.multilingual!=undefined && !itself.resource.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
 	var filename = data.files[0].name;
 	var size = data.files[0].size;
 	var type = data.files[0].type;
@@ -259,9 +250,6 @@ UIFactory["Video"].remove = function(uuid,langcode)
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	//---------------------
-	if (itself.resource.multilingual!=undefined && !itself.resource.multilingual)
-		langcode = NONMULTILANGCODE;
 	//---------------------
 	var filename = "";
 	var size = "";

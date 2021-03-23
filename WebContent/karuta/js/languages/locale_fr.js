@@ -46,7 +46,7 @@ karutaStr["fr"]["button-change-password"] = "Changement de mot de passe";
 karutaStr["fr"]["button-change-name"] = "Changement votre nom";
 karutaStr["fr"]["button-new-window"] = "Ouvrir un nouvel onglet";
 karutaStr["fr"]["button-support"] = "Support technique";
-karutaStr["fr"]["button-preview"] = "Aperçu";
+karutaStr["fr"]["preview"] = "Aperçu";
 karutaStr['fr']['Add']="Ajouter";
 karutaStr['fr']['AddGroup']="Ajouter un groupe";
 karutaStr['fr']['confirm-delete']="Voulez-vous vraiment supprimer ? Cette action est irréversible.";
@@ -90,7 +90,7 @@ karutaStr['fr']['choose']="Choisir";
 karutaStr['fr']['quit']="Quitter";
 karutaStr['fr']['menu']="Menu";
 karutaStr['fr']['block-image-size']="Taille recommandée en pixels<br>&nbsp; - Hauteur : 220<br>&nbsp; - Largeur : 800 divisé par le nombre de colonnes<br>&nbsp;";
-karutaStr['fr']['list-novisible']="Non visible";
+karutaStr['fr']['list-novisible']="Portfolio non visible";
 karutaStr['fr']['empty-bin']="Vider la poubelle";
 karutaStr['fr']['see-bin']="Voir la poubelle";
 karutaStr['fr']['complex']="Chargement partiel";
@@ -107,6 +107,8 @@ karutaStr["fr"]["copied"] = "Copié";
 
 karutaStr['fr']['error-existing-code']="ERREUR - Le code existe déjà. Veuillez en choisir un autre.";
 karutaStr['fr']['error-existing-login']="ERREUR - Le login existe déjà ou une entrée est invalide. Veuillez choisir un autre login ou vérifiez les champs.";
+karutaStr['fr']['error-empty-code']="ERREUR - Le code ne peut être vide.";
+karutaStr['fr']['error-notfound']="ERREUR - non trouvé";
 
 //=========================================
 //========== NODE =========================
@@ -179,12 +181,13 @@ karutaStr['fr']['top']="Position - Haut";
 karutaStr['fr']['left']="Position - Gauche";
 karutaStr['fr']['width']="Largeur (px)";
 karutaStr['fr']['height']="Hauteur (px)";
-karutaStr['fr']['public']="Public";
+karutaStr['fr']['public']="Portfolio Public";
 karutaStr['fr']['text-align']="Alignement";
 karutaStr['fr']['displayview']="Type de vue";
 karutaStr['fr']['displayitselforg']="Largeur d'affichage";
 karutaStr['fr']['displaychildorg']="Type d'affichage du contenu";
 karutaStr['fr']['margin-top']="Marge supérieure (px)";
+karutaStr['fr']['menus-color']="Couleur des menus, boutons et +/-";
 karutaStr['fr']['sharedResource']="Ressource partagée";
 karutaStr['fr']['sharedNodeResource']="Ress. du noeud partagée";
 karutaStr['fr']['resizeroles']="Modifier taille image";
@@ -246,11 +249,12 @@ karutaStr['fr']['duration']="Durée de vie du lien (en heures)";
 karutaStr['fr']['seestart']="Voir - Date début";
 karutaStr['fr']['seeend']="Voir - Date fin";
 karutaStr['fr']['logcode']="Code Log";
-karutaStr['fr']['js']="Function js";
+karutaStr['fr']['js']="Fonction js";
 karutaStr['fr']['alt']="Texte alternatif";
 karutaStr['fr']['node-comment']="Commentaires du noeud";
 karutaStr['fr']['autoload']="Autoload";
 karutaStr['fr']['defaultrole']="Rôle par défaut";
+karutaStr['fr']['langnotvisible']="Non visible en";
 
 //=========================================
 //========== ADMIN ========================
@@ -431,6 +435,7 @@ karutaStr['fr']['rtf']="Rôles - Bouton RTF";
 karutaStr['fr']['img']="Rôles - Bouton PNG";
 karutaStr['fr']['document-required']="Vous devez spécifier un document avant de le soumettre !";
 karutaStr['fr']['size-upload']="Votre fichier est trop volumineux : seuls les fichiers de moins de " + g_configVar['maxfilesizeupload'] + " Mo sont autorisés !";
+karutaStr['fr']['local-label']="Libellé local";
 
 //=========================================
 //========== EUROPASS =====================

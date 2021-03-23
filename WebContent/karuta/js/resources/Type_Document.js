@@ -19,23 +19,8 @@ if( UIFactory === undefined )
   var UIFactory = {};
 }
 
-var documentIcon = {};
-documentIcon['.doc'] = "../../karuta/img/word.png";
-documentIcon['.docx'] = "../../karuta/img/word.png'";
-documentIcon['.xls'] = "../../karuta/img/excel.png";
-documentIcon['.xlsx'] = "../../karuta/img/excel.png";
-documentIcon['.ppt'] = "../../karuta/img/powerpoint.png";
-documentIcon['.pptx'] = "../../karuta/img/powerpoint.png";
-documentIcon['.pdf'] = "../../karuta/img/pdf.png";
-documentIcon['.js'] = "../../karuta/img/js.png";
-documentIcon['.txt'] = "../../karuta/img/text.png";
-documentIcon['.jpg'] = "../../karuta/img/jpeg.png";
-documentIcon['.gif'] = "../../karuta/img/gif.png";
-documentIcon['.png'] = "../../karuta/img/png.png";
-documentIcon['.xml'] = "../../karuta/img/xml.png";
-documentIcon['.htm'] = "../../karuta/img/html.png";
-documentIcon['.html'] = "../../karuta/img/html.png";
-documentIcon['.png'] = "../../karuta/img/png.png";
+var documentIcon = [];
+documentIcon = ['3gp','7z','ae','ai','apk','asf','avi','bak','bmp','cdr','css','csv','divx','dll','doc','docx','dw','dwg','eps','exe','flv','fw','gif','gz','htm','html','ico','iso','jar','jpg','js','mov','mp3','mp4','mpeg','pdf','php','png','ppt','ps','psd','rar','sh','sql','svg','swf','sys','tar','tiff','txt','war','wav','xls','xlsx','xml','zip'];
 
  
 /// Define our type
@@ -122,8 +107,6 @@ UIFactory["Document"].prototype.getAttributes = function(type,langcode)
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	if (this.multilingual!=undefined && !this.multilingual)
-		langcode = 0;
 	//---------------------
 	if (dest!=null) {
 		this.display[dest]=langcode;
@@ -152,10 +135,6 @@ UIFactory["Document"].prototype.getView = function(dest,type,langcode)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
 	if (dest!=null) {
 		this.display[dest] = {langcode: langcode, type : type};
 	}
@@ -166,35 +145,18 @@ UIFactory["Document"].prototype.getView = function(dest,type,langcode)
 	var html = "";
 	if ($(this.filename_node[langcode]).text()!="") {
 		var filename = $(this.filename_node[langcode]).text();
-		var extension = filename.substring(filename.lastIndexOf(".")).toLowerCase();
-		switch (extension) {
-			case ".doc" :
-			case ".docx" :
-			case ".doc" :
-			case ".xls" :
-			case ".xlsx" :
-			case ".ppt" :
-			case ".pptx" :
-			case ".pdf" :
-			case ".js" :
-			case ".xml" :
-			case ".jpg" :
-			case ".htm" :
-			case ".html" :
-			case ".png" :
-			case ".gif" :
-				break;
-			default :
-				extension = ".txt";
-		}
-		if (type=='standard'){
-				html =  "<a id='file_"+this.id+"' href='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&timestamp=" + new Date().getTime()+"'><img style='width:24px' src='"+documentIcon[extension]+"'/> "+filename+"</a>";
+		var extension = filename.substring(filename.lastIndexOf(".")+1).toLowerCase();
+		if (!documentIcon.includes(extension))
+			extension = "none";
+		var iconfile = "../../karuta/img/files-png/" + extension + ".png";
+		if (type=='standard' || type=='none'){
+				html =  "<a id='file_"+this.id+"' href='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&timestamp=" + new Date().getTime()+"'><img style='width:24px' src='"+iconfile+"'/> "+filename+"</a>";
 		}
 		if (type=='icon-url-label'){
-				html =  "<a id='file_"+this.id+"' href='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&timestamp=" + new Date().getTime()+"'>"+$(this.filename_node[langcode]).text()+" <img style='width:24px' src='"+documentIcon[extension]+"'/></a>"; 
+				html =  "<a id='file_"+this.id+"' href='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&timestamp=" + new Date().getTime()+"'>"+$(this.filename_node[langcode]).text()+" <img style='width:24px' src='"+iconfile+"'/></a>"; 
 		}
 		if (type=='icon-url'){
-				html =  "<a id='file_"+this.id+"' href='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&timestamp=" + new Date().getTime()+"'><img style='width:24px' src='"+documentIcon[extension]+"'/></a>"; 
+				html =  "<a id='file_"+this.id+"' href='../../../"+serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode]+"&timestamp=" + new Date().getTime()+"'><img style='width:24px' src='"+iconfile+"'/></a>"; 
 		}
 		if (type=='icon'){
 				html =  documentIcon[extension]; 
@@ -256,10 +218,6 @@ UIFactory["Document"].remove = function(uuid,langcode)
 	if (langcode==null)
 		langcode = LANGCODE;
 	//---------------------
-	itself.resource.multilingual = ($("metadata",itself.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (itself.resource.multilingual!=undefined && !itself.resource.multilingual)
-		langcode = NONMULTILANGCODE;
-	//---------------------
 	var filename = "";
 	var size = "";
 	var type = "";
@@ -283,10 +241,6 @@ UIFactory["Document"].prototype.displayEditor = function(destid,type,langcode,pa
 	//---------------------
 	if (langcode==null)
 		langcode = LANGCODE;
-	//---------------------
-	this.multilingual = ($("metadata",this.node).attr('multilingual-resource')=='Y') ? true : false;
-	if (!this.multilingual)
-		langcode = NONMULTILANGCODE;
 	//---------------------
 	var html ="";
 	var url = serverBCK+"/resources/resource/file/"+this.id+"?lang="+languages[langcode];
@@ -337,6 +291,8 @@ UIFactory["Document"].prototype.save = function(parent,delfile)
 	this.refresh();
 	if (parent!=null) // --- structured resource
 		parent.refresh();
+	if (this.blockparent!=null)
+		this.blockparent.refresh();
 };
 
 

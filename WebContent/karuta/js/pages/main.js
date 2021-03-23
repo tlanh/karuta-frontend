@@ -1,7 +1,7 @@
 
 
 //==============================
-function show_main_page(rootid,role)
+function show_main_page()
 //==============================
 {
 	hideAllPages();
@@ -17,7 +17,7 @@ function show_main_page(rootid,role)
 }
 
 //==============================
-function fill_main_page(rootid,role)
+function fill_main_page(portfolioid)
 //==============================
 {
 	setLanguageMenu("fill_main_page()");
@@ -29,58 +29,14 @@ function fill_main_page(rootid,role)
 	$("#portfolio-container").html(html);
 	g_welcome_add = false;
 	//-------------------------------------------
-	if (rootid!=null){
-		var parentid = $($(UICom.structure.ui[rootid].node).parent()).attr('id');
-		if ($($(UICom.structure.ui[rootid].node).parent())) {
-			g_portfolioid = parentid;
-		} else {
-			rootid = g_portfolio_rootid;
-		}
-	} else {
-		rootid = g_portfolio_rootid;
-	}
+	if (portfolioid!=null)
+		g_portfolioid = portfolioid;
 	//-------------------------------------------
-	userrole = role;
+	userrole = g_userroles[0];
 	if (userrole=='undefined')
 		userrole = "";
 	//-------------------------------------------
 	USER.admin = USER.admin_original; // reset if role playing when reload
-/*	if (!USER.admin) {
-		$.ajax({ // get group-role for the user
-			Accept: "application/xml",
-			type : "GET",
-			dataType : "xml",
-			url : serverBCK_API+"/groups/" + g_portfolioid,
-			success : function(data) {
-				var usergroups = $("group",data);
-				for (var i=0;i<usergroups.length;i++) {
-//					g_userroles[i+1] = $("role",usergroups[i]).text();
-					// -------------
-					g_userroles[i+1] = $("rolename",usergroups[i]).text();
-					if ($("rolename",usergroups[i]).text()=='designer') {
-						g_designerrole = true;
-						g_userroles[1] = 'designer';
-					}
-					// -------------
-				}
-				g_userroles[0] = g_userroles[1]; // g_userroles[0] played role by designer
-				if (g_userroles[1]=='designer')
-					g_designerrole = true;
-				if (g_designerrole) {
-					g_visible = localStorage.getItem('metadata');
-					toggleMetadata(g_visible);
-				}
-			},
-			error : function(jqxhr,textStatus) {
-				alertHTML("Error in fill_main_page : "+jqxhr.responseText+"/"+textStatus);
-			}
-		});
-	} else {
-		g_userroles[0] = g_userroles[1] ='designer';
-		g_designerrole = true;
-		g_visible = localStorage.getItem('metadata');
-		toggleMetadata(g_visible);
-	}*/
 	//-------------------------------------------
 	var url = serverBCK_API+"/portfolios/portfolio/" + g_portfolioid + "?resources=true";
 	$.ajax({
@@ -91,6 +47,11 @@ function fill_main_page(rootid,role)
 			UICom.roles = {};
 			g_portfolio_current = data;
 			g_portfolio_rootid = $("asmRoot",data).attr("id");
+			//-------------------------
+			var portfoliocode = portfolios_byid[g_portfolioid].code_node.text();
+			if (typeof(rewriteURL) == 'function')
+				rewriteURL(portfoliocode);
+			//-------------------------
 			UICom.structure['ui'][g_portfolio_rootid].loaded = true;
 			var root_semantictag = $("metadata",$("asmRoot",data)).attr('semantictag');
 			var default_role = "";
@@ -152,11 +113,12 @@ function fill_main_page(rootid,role)
 			}
 			$("#sub-bar").html(UIFactory.Portfolio.getNavBar(g_display_type,LANGCODE,g_edit,g_portfolioid));
 			// -----how to edit message---------------------
-			if (!g_edit && !USER.creator && (localStorage.getItem('display-edition-'+g_portfolioid)==undefined || localStorage.getItem('display-edition-'+g_portfolioid)!='no')) {
+			if (!g_edit && !USER.creator && (localStorage.getItem('display-edition-'+g_portfolioid)==undefined || localStorage.getItem('display-edition-'+g_portfolioid)!='no') && USER.username.indexOf("karuser")<0) {
 				var message = karutaStr[LANG]["button-edition"];
 				alertHTML(message);
 			}
 			//-------------- DEFAULT_ROLE -------------
+			$("#portfolio-container").attr('role',g_userroles[0]);
 			if (default_role!="" && g_userroles[1]=="designer"){
 				g_userroles[0] = default_role;
 				USER.admin = false;
@@ -187,18 +149,6 @@ function fill_main_page(rootid,role)
 				loadLanguages(function() {g_rc4key = window.prompt(karutaStr[LANG]['get_rc4key']);});
 			//---------------------------
 			$("#wait-window").modal('hide');
-
-/*			if (root_semantictag.indexOf('karuta-batch')>-1){
-				g_userroles[0] = 'batcher';
-				USER.admin = false;
-				$("#userrole").html('batcher');
-			}
-			if (root_semantictag.indexOf('karuta-report')>-1){
-				g_userroles[0] = 'reporter';
-				USER.admin = false;
-				$("#userrole").html('reporter');
-			}
-*/
 			//---------------------------
 			var welcomes = $("asmUnit:has(metadata[semantictag*='WELCOME'])",data);
 			if (welcomes.length==0) // for backward compatibility
@@ -223,12 +173,13 @@ function fill_main_page(rootid,role)
 			fillEditBoxBody();
 		},
 		error : function(jqxhr,textStatus) {
-			if (jqxhr.status=="403") {
+			if (jqxhr.status=="403")
 				alertHTML("Sorry. A problem occurs : no right to see this portfolio (" + g_portfolioid + ")");
-				$("#wait-window").modal('hide');
-			}
-			else
-				alertHTML("Error in fill_main_page : "+jqxhr.responseText+"/"+textStatus+"/"+jqxhr.status);
+			
+			else {
+				alertHTML("<h4>Error in fill_main_page</h4><h5>responseText</h5><p>"+jqxhr.responseText+"</p><h5>textStatus</h5><p>"+textStatus+"<h5>status</h5><p>"+jqxhr.status);
+				}
+		$("#wait-window").modal('hide');
 		}
 	});
 	$.ajaxSetup({async: false});
@@ -243,12 +194,12 @@ function fill_main_page(rootid,role)
 }
 
 //==============================
-function display_main_page(rootid,role)
+function display_main_page(portfolioid)
 //==============================
 {
 	$("#sub-bar").show();
 	$("#welcome-bar").hide();
-	fill_main_page(rootid,role);
-	show_main_page(rootid,role);		
+	fill_main_page(portfolioid);
+	show_main_page();		
 }
 

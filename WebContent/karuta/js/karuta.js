@@ -38,7 +38,7 @@ var g_bar_type = "vertical"; // default value
 var g_edit = false;
 var g_visible = 'hidden';
 var g_display_sidebar = true;
-
+var g_execbatch = false;
 //---- caches -----
 var g_dashboard_models = {}; // cache for dashboard_models
 var g_report_models = {}; // cache for report_models
@@ -90,6 +90,7 @@ function setDesignerRole(role)
 			html += "	</div>";
 			$("#portfolio-container").html(html);
 			$("#portfolio-container").attr('role',role);
+			$("#edit-window").attr('role',role);
 			UIFactory["Portfolio"].displaySidebar(UICom.root,'sidebar',g_display_type,LANGCODE,g_edit,g_portfolio_rootid);
 		}
 		$("#sidebar_"+uuid).click();
@@ -341,6 +342,8 @@ function hideMessageBox()
 //==================================
 function getEditBox(uuid,js2) {
 //==================================
+	$("#edit-window").removeClass("Block");
+	$("#edit-window").attr("role",g_userroles[0]);
 	fillEditBoxBody();
 	var js1 = "javascript:$('#edit-window').modal('hide')";
 	if (js2!=null)
@@ -377,7 +380,7 @@ function getEditBox(uuid,js2) {
 			$("#edit-window-body-node").html($(html));
 			if ($("#get-resource-node").length && g_display_type!='raw'){
 				var getResource = new UIFactory["Get_Resource"](UICom.structure["ui"][uuid].node,"xsi_type='nodeRes'");
-				getResource.displayEditor("get-resource-node");
+				getResource.displayEditor("get-resource-node","completion");
 			}
 			if ($("#get-get-resource-node").length && g_display_type!='raw'){
 				var getgetResource = new UIFactory["Get_Get_Resource"](UICom.structure["ui"][uuid].node,"xsi_type='nodeRes'");
@@ -414,9 +417,10 @@ function getEditBoxOnCallback(data,param2,param3,param4) {
 function deleteButton(uuid,type,parentid,destid,callback,param1,param2)
 //==============================
 {
+	var menus_style = UICom.structure.ui[uuid].getMenuStyle();
 	var html = "";
 	html += "\n<!-- ==================== Delete Button ==================== -->";
-	html += "<i id='del-"+uuid+"' class='button fas fa-trash-alt' onclick=\"confirmDel('"+uuid+"','"+type+"','"+parentid+"','"+destid+"','"+callback+"','"+param1+"','"+param2+"')\" data-title='"+karutaStr[LANG]["button-delete"]+"' data-toggle='tooltip' data-placement='bottom'></i>";
+	html += "<i id='del-"+uuid+"' style='"+menus_style+"' class='button fas fa-trash-alt' onclick=\"confirmDel('"+uuid+"','"+type+"','"+parentid+"','"+destid+"','"+callback+"','"+param1+"','"+param2+"')\" data-title='"+karutaStr[LANG]["button-delete"]+"' data-toggle='tooltip' data-placement='bottom'></i>";
 	return html;
 }
 
@@ -635,6 +639,7 @@ function displayPage(uuid,depth,type,langcode) {
 		scrollLeft = 0;
 		g_current_page = uuid;
 	}
+	localStorage.setItem('currentDisplayedPage',uuid);
 	//---------------------
 	$("#contenu").html("<div id='page' uuid='"+uuid+"'></div>");
 	$('.selected').removeClass('selected');
@@ -652,6 +657,11 @@ function displayPage(uuid,depth,type,langcode) {
 		}
 	} else {
 		$("#sidebar_"+uuid).parent().addClass('selected');
+		var nodeid = uuid;
+		while($(UICom.structure.ui[nodeid].node)!=undefined && $(UICom.structure.ui[nodeid].node).parent().parent().parent().length!=0) {
+			nodeid = $(UICom.structure.ui[nodeid].node).parent().attr("id");
+			toggleSidebarPlus(nodeid);
+		}
 	}
 	var name = $(UICom.structure['ui'][uuid].node).prop("nodeName");
 	if (depth==null)
@@ -723,6 +733,11 @@ function previewPage(uuid,depth,type,langcode)
 			UICom.structure["ui"][uuid].displayNode('standard',UICom.structure['tree'][uuid],"preview-window-body",depth,langcode,false);
 		}
 		$("#preview-window").modal('show');
+	} else {
+		var html = "";
+		html += "<div>" + karutaStr[languages[langcode]]['error-notfound'] + "</div>";
+		$("#preview-window-body").html(html);
+		$("#preview-window").modal('show');
 	}
 }
 
@@ -772,7 +787,7 @@ function importBranch(destid,srcecode,srcetag,databack,callback,param2,param3,pa
 {
 	$("#wait-window").modal('show');
 	//------------
-	srcecode = replaceVariable(srcecode);
+	srcecode = cleanCode(replaceVariable(srcecode));
 	var selfcode = $("code",$("asmRoot>asmResource[xsi_type='nodeRes']",UICom.root.node)).text();
 	if (srcecode.indexOf('.')<0 && srcecode!='self')  // There is no project, we add the project of the current portfolio
 		srcecode = selfcode.substring(0,selfcode.indexOf('.')) + "." + srcecode;
@@ -1640,9 +1655,31 @@ function setVariables(data)
 {
 	var variable_nodes = $("asmContext:has(metadata[semantictag*='g-variable'])",data);
 	for (var i=0;i<variable_nodes.length;i++) {
-		g_variables[UICom.structure["ui"][$(variable_nodes[i]).attr("id")].resource.getAttributes().name] = UICom.structure["ui"][$(variable_nodes[i]).attr("id")].resource.getAttributes().value;
+		var var_name = $("name",$("asmResource[xsi_type='Variable']",variable_nodes[i])).text()
+		var var_value = $("value",$("asmResource[xsi_type='Variable']",variable_nodes[i])).text()
+		g_variables[var_name] = var_value;
 	}
+	try {
+		var select_variable_nodes = $("asmContext:has(metadata[semantictag*='g-select-variable'])",data);
+		for (var i=0;i<select_variable_nodes.length;i++) {
+			var value = UICom.structure.ui[$(select_variable_nodes[i]).attr("id")].resource.getAttributes().value;
+			var code = UICom.structure.ui[$(select_variable_nodes[i]).attr("id")].resource.getAttributes().code;
+			var variable_value = (value=="") ? code : value;
+			g_variables[UICom.structure.ui[$(select_variable_nodes[i]).attr("id")].getCode()] = cleanCode(variable_value,true);
+		}
+	} catch(e){}
 }
+
+//==================================
+function updateVariable(node)
+//==================================
+{
+	var value = UICom.structure.ui[$(node).attr("id")].resource.getAttributes().value;
+	var code = UICom.structure.ui[$(node).attr("id")].resource.getAttributes().code;
+	var variable_value = (value=="") ? code : value;
+	g_variables[UICom.structure.ui[$(node).attr("id")].getCode()] = cleanCode(variable_value,true);
+}
+
 
 //==============================
 function logout()
@@ -1684,11 +1721,12 @@ function removeStr(str1,str2)
 }
 
 //==============================
-function cleanCode(code)
+function cleanCode(code,variable)
 //==============================
 {
 	code = removeStr(code,"@");
-	code = removeStr(code,"#");
+	if (!variable)
+		code = removeStr(code,"#");
 	code = removeStr(code,"%");
 	code = removeStr(code,"$");
 	code = removeStr(code,"&");
@@ -1835,9 +1873,9 @@ String.prototype.toNoAccents = function()
 function applyNavbarConfiguration()
 //==============================
 {
-	if (g_configVar['navbar-brand-logo']!="")
+//	if (g_configVar['navbar-brand-logo']!="")
 		$('#navbar-brand-logo').html(g_configVar['navbar-brand-logo']);
-	if (g_configVar['navbar-brand-logo-style']!="")
+//	if (g_configVar['navbar-brand-logo-style']!="")
 		$("#navbar-brand-logo").attr("style",g_configVar['navbar-brand-logo-style']);
 	if (g_configVar['navbar-display-mailto']=='0')
 		$("#navbar-mailto").hide();
@@ -1888,14 +1926,12 @@ function getImg(semtag,data,langcode,fluid)
 //==============================
 {
 	var result = "";
-	if ($("metadata[semantictag='"+semtag+"']",data).length>0) {
+	if ($("filename[lang='"+languages[langcode]+"']",$("asmResource[xsi_type='Image']",$("metadata[semantictag='"+semtag+"']",data).parent())).text()!="") {
+//	if ($("metadata[semantictag='"+semtag+"']",data).length>0) {
 		if (langcode==null)
 			langcode = LANGCODE;
 		if (fluid==null)
 			fluid = true;
-		var multilingual = ($("metadata[semantictag='"+semtag+"']",data).attr('multilingual-resource')=='Y') ? true : false;
-		if (!multilingual)
-			langcode = NONMULTILANGCODE;
 		var width = getText(semtag,'Image','width',data,langcode);
 		var height =  getText(semtag,'Image','height',data,langcode);
 		var result = "";
@@ -1916,9 +1952,6 @@ function getBackgroundURL(semtag,data,langcode)
 	if ($("metadata[semantictag='"+semtag+"']",data).length>0) {
 		if (langcode==null)
 			langcode = LANGCODE;
-		var multilingual = ($("metadata[semantictag='"+semtag+"']",data).attr('multilingual-resource')=='Y') ? true : false;
-		if (!multilingual)
-			langcode = NONMULTILANGCODE;
 		result =  "url('../../../"+serverBCK+"/resources/resource/file/"+getNodeid(semtag,data)+"?lang="+languages[langcode]+"')";
 	}
 	return result;
@@ -1983,165 +2016,170 @@ function printSection(eltid)
 //==================================
 function autocomplete(input,arrayOfValues,onupdate,self,langcode) {
 //==================================
-	var currentFocus;
-	/*execute a function when someone writes in the text field:*/
-	input.addEventListener("input", function(e) {
-		var a, b, i, val = this.value;
-		closeAllLists();
-		if (!val) { return false;}
-	 	currentFocus = -1;
-		a = document.createElement("DIV");
-		a.setAttribute("id", this.id + "autocomplete-list");
-		a.setAttribute("class", "autocomplete-items");
-		this.parentNode.appendChild(a);
-		for (i = 0; i < arrayOfValues.length; i++) {
-			var indexval = arrayOfValues[i].libelle.toUpperCase().indexOf(val.toUpperCase());
-			if (indexval>-1) {
-				b = document.createElement("DIV");
-				b.innerHTML = arrayOfValues[i].libelle.substr(0, indexval);
-				b.innerHTML += "<strong>" + arrayOfValues[i].libelle.substr(indexval,val.length) + "</strong>";
-				b.innerHTML += arrayOfValues[i].libelle.substr(indexval+val.length);
-				var value = "";
-				if (arrayOfValues[i].value!==undefined)
-					value = arrayOfValues[i].value;
-				b.innerHTML += "<input type='hidden' code='"+arrayOfValues[i].code+"' label=\""+arrayOfValues[i].libelle+"\" value=\""+value+"\" >";
-				b.addEventListener("click", function(e) {
-					$(input).attr("label_"+languages[langcode],$("input",this).attr('label'));
-					$(input).attr('code',$("input",this).attr('code'));
-					$(input).attr('value',$("input",this).attr('value'));
-					input.value = $("input",this).attr('label');
-					eval(onupdate);
-					closeAllLists();
-				});
-				a.appendChild(b);
+	if (input!=null) {
+		var currentFocus;
+		/*execute a function when someone writes in the text field:*/
+		input.addEventListener("input", function(e) {
+			var a, b, i, val = this.value;
+			closeAllLists();
+			if (!val) { return false;}
+		 	currentFocus = -1;
+			a = document.createElement("DIV");
+			a.setAttribute("id", this.id + "autocomplete-list");
+			a.setAttribute("class", "autocomplete-items");
+			this.parentNode.appendChild(a);
+			for (i = 0; i < arrayOfValues.length; i++) {
+				var indexval = arrayOfValues[i].libelle.toUpperCase().indexOf(val.toUpperCase());
+				if (indexval>-1) {
+					b = document.createElement("DIV");
+					b.innerHTML = arrayOfValues[i].libelle.substr(0, indexval);
+					b.innerHTML += "<strong>" + arrayOfValues[i].libelle.substr(indexval,val.length) + "</strong>";
+					b.innerHTML += arrayOfValues[i].libelle.substr(indexval+val.length);
+					var value = "";
+					if (arrayOfValues[i].value!==undefined)
+						value = arrayOfValues[i].value;
+					b.innerHTML += "<input type='hidden' code='"+arrayOfValues[i].code+"' label=\""+arrayOfValues[i].libelle+"\" value=\""+value+"\" >";
+					b.addEventListener("click", function(e) {
+						$(input).attr("label_"+languages[langcode],$("input",this).attr('label'));
+						$(input).attr('code',$("input",this).attr('code'));
+						$(input).attr('value',$("input",this).attr('value'));
+						input.value = $("input",this).attr('label');
+						eval(onupdate);
+						closeAllLists();
+					});
+					a.appendChild(b);
+				}
 			}
-		}
-	});
-	/*execute a function presses a key on the keyboard:*/
-	input.addEventListener("keydown", function(e) {
-		var x = document.getElementById(this.id + "autocomplete-list");
-		if (x) x = x.getElementsByTagName("div");
-		if (e.keyCode == 40) {
-		/*If the arrow DOWN key is pressed, increase the currentFocus variable:*/
-			currentFocus++;
-			/*and and make the current item more visible:*/
-		addActive(x);
-		} else if (e.keyCode == 38) { //up
-			/*If the arrow UP key is pressed, decrease the currentFocus variable:*/
-			currentFocus--;
-			/*and and make the current item more visible:*/
+		});
+		/*execute a function presses a key on the keyboard:*/
+		input.addEventListener("keydown", function(e) {
+			var x = document.getElementById(this.id + "autocomplete-list");
+			if (x) x = x.getElementsByTagName("div");
+			if (e.keyCode == 40) {
+			/*If the arrow DOWN key is pressed, increase the currentFocus variable:*/
+				currentFocus++;
+				/*and and make the current item more visible:*/
 			addActive(x);
-		} else if (e.keyCode == 13) {
-			/*If the ENTER key is pressed, prevent the form from being submitted,*/
-			e.preventDefault();
-			if (currentFocus > -1) {
-				/*and simulate a click on the "active" item:*/
-				if (x) x[currentFocus].click();
+			} else if (e.keyCode == 38) { //up
+				/*If the arrow UP key is pressed, decrease the currentFocus variable:*/
+				currentFocus--;
+				/*and and make the current item more visible:*/
+				addActive(x);
+			} else if (e.keyCode == 13) {
+				/*If the ENTER key is pressed, prevent the form from being submitted,*/
+				e.preventDefault();
+				if (currentFocus > -1) {
+					/*and simulate a click on the "active" item:*/
+					if (x) x[currentFocus].click();
+				}
+			}
+		});
+		function addActive(x) {
+			/*a function to classify an item as "active":*/
+			if (!x) return false;
+			/*start by removing the "active" class on all items:*/
+			removeActive(x);
+			if (currentFocus >= x.length) currentFocus = 0;
+			if (currentFocus < 0) currentFocus = (x.length - 1);
+			/*add class "autocomplete-active":*/
+			x[currentFocus].classList.add("autocomplete-active");
+		}
+		function removeActive(x) {
+			/*a function to remove the "active" class from all autocomplete items:*/
+			for (var i = 0; i < x.length; i++) {
+				x[i].classList.remove("autocomplete-active");
 			}
 		}
-	});
-	function addActive(x) {
-		/*a function to classify an item as "active":*/
-		if (!x) return false;
-		/*start by removing the "active" class on all items:*/
-		removeActive(x);
-		if (currentFocus >= x.length) currentFocus = 0;
-		if (currentFocus < 0) currentFocus = (x.length - 1);
-		/*add class "autocomplete-active":*/
-		x[currentFocus].classList.add("autocomplete-active");
-	}
-	function removeActive(x) {
-		/*a function to remove the "active" class from all autocomplete items:*/
-		for (var i = 0; i < x.length; i++) {
-			x[i].classList.remove("autocomplete-active");
-		}
-	}
-	function closeAllLists(elmnt) {
-		/*close all autocomplete lists in the document, except the one passed as an argument:*/
-		var x = document.getElementsByClassName("autocomplete-items");
-		for (var i = 0; i < x.length; i++) {
-			if (elmnt != x[i] && elmnt != input) {
-				x[i].parentNode.removeChild(x[i]);
+		function closeAllLists(elmnt) {
+			/*close all autocomplete lists in the document, except the one passed as an argument:*/
+			var x = document.getElementsByClassName("autocomplete-items");
+			for (var i = 0; i < x.length; i++) {
+				if (elmnt != x[i] && elmnt != input) {
+					x[i].parentNode.removeChild(x[i]);
+				}
 			}
 		}
+		/*execute a function when someone clicks in the document:*/
+		document.addEventListener("click", function (e) {
+			closeAllLists(e.target);
+		});
 	}
-	/*execute a function when someone clicks in the document:*/
-	document.addEventListener("click", function (e) {
-		closeAllLists(e.target);
-	});
 }
 //==================================
-function addautocomplete(input,arrayOfValues) {
+function addautocomplete(input,arrayOfValues)
 //==================================
-	var currentFocus;
-	input.addEventListener("input", function(e) {
-		var a, b, i, val = this.value.substring(this.value.lastIndexOf(" ")+1);
-		closeAllLists();
-		if (!val) { return false;}
-	 	currentFocus = -1;
-		a = document.createElement("DIV");
-		a.setAttribute("id", this.id + "autocomplete-list");
-		a.setAttribute("class", "autocomplete-items");
-		this.parentNode.appendChild(a);
-		for (i = 0; i < arrayOfValues.length; i++) {
-			var indexval = arrayOfValues[i].libelle.toUpperCase().indexOf(val.toUpperCase());
-			if (indexval>-1) {
-				b = document.createElement("DIV");
-				b.innerHTML = arrayOfValues[i].libelle.substr(0, indexval);
-				b.innerHTML += "<strong>" + arrayOfValues[i].libelle.substr(indexval,val.length) + "</strong>";
-				b.innerHTML += arrayOfValues[i].libelle.substr(indexval+val.length);
-				b.innerHTML += "<input type='hidden' label=\""+arrayOfValues[i].libelle+"\" >";
-				b.addEventListener("click", function(e) {
-					if (input.value.lastIndexOf(" "))
-						input.value = input.value.substring(0,input.value.lastIndexOf(" ")+1) + $("input",this).attr('label');
-					else
-						input.value = $("input",this).attr('label');
-					$(input).change();
-					closeAllLists();
-				});
-				a.appendChild(b);
+{	
+	if (input!=null) {
+		var currentFocus;
+		input.addEventListener("input", function(e) {
+			var a, b, i, val = this.value.substring(this.value.lastIndexOf(" ")+1);
+			closeAllLists();
+			if (!val) { return false;}
+		 	currentFocus = -1;
+			a = document.createElement("DIV");
+			a.setAttribute("id", this.id + "autocomplete-list");
+			a.setAttribute("class", "autocomplete-items");
+			this.parentNode.appendChild(a);
+			for (i = 0; i < arrayOfValues.length; i++) {
+				var indexval = arrayOfValues[i].libelle.toUpperCase().indexOf(val.toUpperCase());
+				if (indexval>-1) {
+					b = document.createElement("DIV");
+					b.innerHTML = arrayOfValues[i].libelle.substr(0, indexval);
+					b.innerHTML += "<strong>" + arrayOfValues[i].libelle.substr(indexval,val.length) + "</strong>";
+					b.innerHTML += arrayOfValues[i].libelle.substr(indexval+val.length);
+					b.innerHTML += "<input type='hidden' label=\""+arrayOfValues[i].libelle+"\" >";
+					b.addEventListener("click", function(e) {
+						if (input.value.lastIndexOf(" "))
+							input.value = input.value.substring(0,input.value.lastIndexOf(" ")+1) + $("input",this).attr('label');
+						else
+							input.value = $("input",this).attr('label');
+						$(input).change();
+						closeAllLists();
+					});
+					a.appendChild(b);
+				}
 			}
-		}
-	});
-	input.addEventListener("keydown", function(e) {
-		var x = document.getElementById(this.id + "autocomplete-list");
-		if (x) x = x.getElementsByTagName("div");
-		if (e.keyCode == 40) {
-			currentFocus++;
-		addActive(x);
-		} else if (e.keyCode == 38) { //up
-			currentFocus--;
+		});
+		input.addEventListener("keydown", function(e) {
+			var x = document.getElementById(this.id + "autocomplete-list");
+			if (x) x = x.getElementsByTagName("div");
+			if (e.keyCode == 40) {
+				currentFocus++;
 			addActive(x);
-		} else if (e.keyCode == 13) {
-			e.preventDefault();
-			if (currentFocus > -1) {
-				if (x) x[currentFocus].click();
+			} else if (e.keyCode == 38) { //up
+				currentFocus--;
+				addActive(x);
+			} else if (e.keyCode == 13) {
+				e.preventDefault();
+				if (currentFocus > -1) {
+					if (x) x[currentFocus].click();
+				}
+			}
+		});
+		function addActive(x) {
+			if (!x) return false;
+			removeActive(x);
+			if (currentFocus >= x.length) currentFocus = 0;
+			if (currentFocus < 0) currentFocus = (x.length - 1);
+			x[currentFocus].classList.add("autocomplete-active");
+		}
+		function removeActive(x) {
+			for (var i = 0; i < x.length; i++) {
+				x[i].classList.remove("autocomplete-active");
 			}
 		}
-	});
-	function addActive(x) {
-		if (!x) return false;
-		removeActive(x);
-		if (currentFocus >= x.length) currentFocus = 0;
-		if (currentFocus < 0) currentFocus = (x.length - 1);
-		x[currentFocus].classList.add("autocomplete-active");
-	}
-	function removeActive(x) {
-		for (var i = 0; i < x.length; i++) {
-			x[i].classList.remove("autocomplete-active");
-		}
-	}
-	function closeAllLists(elmnt) {
-		var x = document.getElementsByClassName("autocomplete-items");
-		for (var i = 0; i < x.length; i++) {
-			if (elmnt != x[i] && elmnt != input) {
-				x[i].parentNode.removeChild(x[i]);
+		function closeAllLists(elmnt) {
+			var x = document.getElementsByClassName("autocomplete-items");
+			for (var i = 0; i < x.length; i++) {
+				if (elmnt != x[i] && elmnt != input) {
+					x[i].parentNode.removeChild(x[i]);
+				}
 			}
 		}
+		document.addEventListener("click", function (e) {
+			closeAllLists(e.target);
+		});
 	}
-	document.addEventListener("click", function (e) {
-		closeAllLists(e.target);
-	});
 }
 
 
@@ -2166,7 +2204,6 @@ function replaceVariable(text)
 			var variable_value = variable_name.substring(0,variable_name.indexOf("["))
 			var i = text.substring(text.indexOf("[")+1,text.indexOf("]"));
 			i = replaceVariable(i);
-			var variable_array1 = text.replace("["+i+"]","");
 			if (g_variables[variable_value]!=undefined && g_variables[variable_value].length>=i)
 				text = g_variables[variable_value][i];
 			}
@@ -2175,6 +2212,89 @@ function replaceVariable(text)
 	return text;
 }
 
+function addParentCode (parentid) {
+	var parentCode = UICom.structure.ui[parentid].getCode();
+	var parentcode_parts = parentCode.split("*");
+	var nodes = $("asmUnitStructure:has(code:not(:empty))",UICom.structure.ui[parentid].node);
+	for (var i=0;i<nodes.length;i++) {
+		var nodeid = $(nodes[i]).attr("id");
+		var newcode = nodecode =  UICom.structure.ui[nodeid].getCode();
+		if (nodecode.indexOf(parentCode)<0) {
+			//-------test if parent last = node first------------
+			var nodecode_parts = nodecode.split("*");
+			if (parentcode_parts[parentcode_parts.length-1]==nodecode_parts[0]) {
+				newcode = "";
+				for (var j=1;j<nodecode_parts.length;j++) 
+					newcode += nodecode_parts[j] + ((j==nodecode_parts.length-1)?"" : "*");
+			}
+			//-------------------
+			var newnodecode = parentCode + "*" + newcode;
+			//-------------------
+			var resource = $("asmResource[xsi_type='nodeRes']",nodes[i])[0];
+			$("code",resource).text(newnodecode);
+			var data = "<asmResource xsi_type='nodeRes'>" + $(resource).html() + "</asmResource>";
+			var strippeddata = data.replace(/xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g,"");  // remove xmlns attribute
+			//-------------------
+			$.ajax({
+				async : false,
+				type : "PUT",
+				contentType: "application/xml",
+				dataType : "text",
+				data : strippeddata,
+				url : serverBCK_API+"/nodes/node/" + nodeid + "/noderesource",
+				success : function(data) {
+				},
+				error : function(data) {
+				}
+			});
+			//-------------------
+		}
+	}
+}
+
+function updateParentCode (node) {
+	var uuid = $(node).attr("id");
+	var parentcode = UICom.structure.ui[uuid].getCode();
+	var nodes = $("> asmUnitStructure:has(code:not(:empty))",UICom.structure.ui[uuid].node);
+	for (var i=0;i<nodes.length;i++) {
+		var nodeid = $(nodes[i]).attr("id");
+		var nodecode =  UICom.structure.ui[nodeid].getCode();
+		if (nodecode.indexOf("*")>-1) {
+			var newnodecode = parentcode + nodecode.substring(nodecode.indexOf("*"));
+			//-------------------
+			var resource = $("asmResource[xsi_type='nodeRes']",nodes[i])[0];
+			$("code",resource).text(newnodecode);
+			var data = "<asmResource xsi_type='nodeRes'>" + $(resource).html() + "</asmResource>";
+			var strippeddata = data.replace(/xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g,"");  // remove xmlns attribute
+			//-------------------
+			$.ajax({
+				async : false,
+				type : "PUT",
+				contentType: "application/xml",
+				dataType : "text",
+				data : strippeddata,
+				url : serverBCK_API+"/nodes/node/" + nodeid + "/noderesource",
+				success : function(data) {
+				},
+				error : function(data) {
+				}
+			});
+			//-------------------
+		}
+	}
+	UIFactory.Node.reloadUnit;
+}
+
+//==================================
+function getNodeIdBySemtag(semtag)
+//==================================
+{
+	var nodeid = "";
+	var nodes = $("*:has(>metadata[semantictag='"+semtag+"'])",g_portfolio_current);
+	if (nodes.length>0)
+		nodeid = $(nodes[0]).attr("id");
+	return nodeid;
+}
 //=====================================================================================================
 //=====================================================================================================
 //============================== TREE MANAGEMENT ====================================================
