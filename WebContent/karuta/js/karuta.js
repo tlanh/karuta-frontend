@@ -108,7 +108,8 @@ function getLanguageMenu(js)
 	var html = "";
 	for (var i=0; i<languages.length;i++) {
 		html += "<a class='dropdown-item' id='lang-menu-"+languages[i]+"' onclick=\"setLanguage('"+languages[i]+"');"+js+"\">";
-		html += "	<img width='20px;' src='../../karuta/img/flags/"+karutaStr[languages[i]]['flag-name']+".png'/>&nbsp;&nbsp;"+karutaStr[languages[i]]['language'];
+//		html += "	<img width='20px;' src='../../karuta/img/flags/"+karutaStr[languages[i]]['flag-name']+".png'/>&nbsp;&nbsp;"+karutaStr[languages[i]]['language'];
+		html += karutaStr[languages[i]]['langshort']
 		html += "</a>"
 	}
 	return html;
@@ -120,7 +121,7 @@ function setLanguageMenu(js)
 //==============================
 {
 	for (var i=0; i<languages.length;i++) {
-		$("#lang-menu-"+languages[i]).attr("onclick","setLanguage('"+languages[i]+"');$('#navigation-bar').html(getNavBar('list',null));setWelcomeTitles();"+js);
+		$("#lang-menu-"+languages[i]).attr("onclick","setLanguage('"+languages[i]+"');$('#navigation-bar').html(getNavBar('list',null));applyNavbarConfiguration();setWelcomeTitles();"+js);
 	}
 }
 
@@ -162,7 +163,8 @@ function getNavBar(type,portfolioid,edit)
 	if (languages.length>1) {
 		html += "	<li id='navbar-language' class='nav-item dropdown'>";
 		html += "		<a class='nav-link dropdown-toggle' href='#' id='languageDropdown' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>";
-		html += "			<img id='flagimage' style='width:25px;margin-top:-5px;' src='../../karuta/img/flags/"+karutaStr[LANG]['flag-name']+".png'/>";
+//		html += "			<img id='flagimage' style='width:25px;margin-top:-5px;' src='../../karuta/img/flags/"+karutaStr[LANG]['flag-name']+".png'/>";
+		html += karutaStr[LANG]['langshort'];
 		html += "		</a>";
 		html += "		<div class='dropdown-menu' aria-labelledby='languageDropdown'>";
 		if(type=="login")
@@ -170,7 +172,7 @@ function getNavBar(type,portfolioid,edit)
 		else if(type=="create_account")
 			html += getLanguageMenu("displayKarutaCreateAccount();");
 		else
-			html += getLanguageMenu("setWelcomeTitles();fill_list_page();$('#navigation-bar').html(getNavBar('list',null));$('#search-portfolio-div').html(getSearch());$('#search-user-div').html(getSearchUser());");
+			html += getLanguageMenu("setWelcomeTitles();fill_list_page();$('#navigation-bar').html(getNavBar('list',null));applyNavbarConfiguration();$('#search-portfolio-div').html(getSearch());$('#search-user-div').html(getSearchUser());");
 		html += "		</div>";
 		html += "	</li>";
 	}
@@ -2212,7 +2214,9 @@ function replaceVariable(text)
 	return text;
 }
 
+//==================================
 function addParentCode (parentid) {
+//==================================
 	var parentCode = UICom.structure.ui[parentid].getCode();
 	var parentcode_parts = parentCode.split("*");
 	var nodes = $("asmUnitStructure:has(code:not(:empty))",UICom.structure.ui[parentid].node);
@@ -2252,7 +2256,9 @@ function addParentCode (parentid) {
 	}
 }
 
+//==================================
 function updateParentCode (node) {
+//==================================
 	var uuid = $(node).attr("id");
 	var parentcode = UICom.structure.ui[uuid].getCode();
 	var nodes = $("> asmUnitStructure:has(code:not(:empty))",UICom.structure.ui[uuid].node);
@@ -2375,4 +2381,266 @@ function outCopy(id)
 	var element = document.getElementById("pcode_"+id);
 	$(element).tooltip('hide');
 	$(element).attr('title', karutaStr[LANG]['copy'] +" : "+element.textContent);
+}
+
+
+
+
+//==================================
+function callmajcodenum (nodeid) {
+//==================================
+	majcodenum(UICom.structure.ui[nodeid].node);
+}
+
+//=====================================================================================================
+//=====================================================================================================
+//============================== UTILITIES =======================================================
+//=====================================================================================================
+//=====================================================================================================
+
+//==================================
+function updatelabel (node) {
+//==================================
+	var uuid = $(node).attr("id");
+	var label = UICom.structure.ui[uuid].getLabel(null,'none');
+	var nodes = $("*:has(>metadata[semantictag*='updatelabel'])",node);
+	for (var i=0;i<nodes.length;i++) {
+		var nodeid = $(nodes[i]).attr("id");
+		var resource = $("asmResource[xsi_type='nodeRes']",nodes[i])[0];
+		$("label[lang='"+LANG+"']",resource).text(label);
+		var data = "<asmResource xsi_type='nodeRes'>" + $(resource).html() + "</asmResource>";
+		var strippeddata = data.replace(/xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g,"");  // remove xmlns attribute
+		//-------------------
+		$.ajax({
+			async : false,
+			type : "PUT",
+			contentType: "application/xml",
+			dataType : "text",
+			data : strippeddata,
+			url : serverBCK_API+"/nodes/node/" + nodeid + "/noderesource",
+			success : function(data) {
+			},
+			error : function(data) {
+			}
+		});
+		//-------------------
+	}
+	//-------------------------------------------------------------------------
+	if (UICom.structure.ui[uuid].asmtype=='asmStructure')
+		UIFactory.Node.reloadStruct();
+	else
+		UIFactory.Node.reloadUnit();
+}
+
+//==================================
+function updatecodenum (uuid) {
+//==================================
+	var node = UICom.structure.ui[uuid].node;
+	var code = UICom.structure.ui[uuid].getCode();
+	if (code.indexOf("*")>-1)
+		code = code.substring(0,code.indexOf("*"));
+	var nodes = $("*:has(>metadata[semantictag*='updatecode'])",node);
+	for (var i=0;i<nodes.length;i++) {
+		var nodeid = $(nodes[i]).attr("id");
+		var resource = $("asmResource[xsi_type='nodeRes']",nodes[i])[0];
+		var nodecode =  UICom.structure.ui[nodeid].getCode();
+		var newnodecode = nodecode;
+		if (nodecode.indexOf("*")>-1) {
+			var oldpartcode = nodecode.substring(nodecode.indexOf("*"));
+			newnodecode = code+oldpartcode;
+		}
+		$("code",resource).text(newnodecode);
+		var data = "<asmResource xsi_type='nodeRes'>" + $(resource).html() + "</asmResource>";
+		var strippeddata = data.replace(/xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g,"");  // remove xmlns attribute
+		//-------------------
+		$.ajax({
+			async : false,
+			type : "PUT",
+			contentType: "application/xml",
+			dataType : "text",
+			data : strippeddata,
+			url : serverBCK_API+"/nodes/node/" + nodeid + "/noderesource",
+			success : function(data) {
+			},
+			error : function(data) {
+			}
+		});
+		//-------------------
+	}
+	//-----Node ordering-------------------------------------------------------
+	var nodes = $("*:has(>metadata[semantictag*='updatenum'])",node);
+	var tableau1 = new Array();
+	for ( var i = 0; i < $(nodes).length; i++) {
+		var resource = $("asmResource[xsi_type='nodeRes']",nodes[i])[0];
+		var code = $('code',resource).text();
+		tableau1[i] = [code.substring(0,code.indexOf("*")+2),nodes[i]];
+	}
+	var newTableau1 = tableau1.sort(sortOn1);
+	//-------------------------------------------------------------------------
+	var num = 0;
+	var currentletter = "";
+	for ( var i = 0; i < newTableau1.length; i++) {
+		var oldcode = newTableau1[i][0];
+		var starindex = oldcode.indexOf("*");
+		var letter = oldcode.substring(starindex+1,starindex+2);
+		if (letter!=currentletter) {
+			num = 0;
+			currentletter = letter;
+		}
+		num++;
+		var newcode = oldcode.substring(0,starindex+1)+currentletter+(num>9?"":"0")+num.toString();
+		//--------------- maj resource --------------
+		var nodeid = $(newTableau1[i][1]).attr('id');
+		var resource = $("asmResource[xsi_type='nodeRes']",newTableau1[i][1])[0];
+		$("code",resource).text(newcode);
+		var data = "<asmResource xsi_type='nodeRes'>" + $(resource).html() + "</asmResource>";
+		var strippeddata = data.replace(/xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g,"");  // remove xmlns attribute
+		//-------------------
+		$.ajax({
+			async : false,
+			type : "PUT",
+			contentType: "application/xml",
+			dataType : "text",
+			data : strippeddata,
+			url : serverBCK_API+"/nodes/node/" + nodeid + "/noderesource",
+			success : function(data) {
+			},
+			error : function(data) {
+			}
+		});
+		//-------------------
+	}
+	//-------------------------------------------------------------------------
+	if (UICom.structure.ui[uuid].asmtype=='asmStructure')
+		UIFactory.Node.reloadStruct();
+	else
+		UIFactory.Node.reloadUnit();
+}
+
+//==================================
+function callmajcodenum (nodeid) {
+//==================================
+	majcodenum(UICom.structure.ui[nodeid].node);
+}
+
+//==================================
+function majcodenum (node) {
+//==================================
+	var uuid = $(node).attr("id");
+	var code = UICom.structure.ui[uuid].getCode();
+	if (code.indexOf("*")>-1)
+		code = code.substring(0,code.indexOf("*"));
+	var nodes = $("*:has(>metadata[semantictag*='majcode'])",node);
+	for (var i=0;i<nodes.length;i++) {
+		var nodeid = $(nodes[i]).attr("id");
+		if (UICom.structure.ui[nodeid].semantictag.indexOf('majcode')>-1) {
+			var resource = $("asmResource[xsi_type='nodeRes']",nodes[i])[0];
+			var nodecode =  UICom.structure.ui[nodeid].getCode();
+			var newnodecode = nodecode;
+			if (nodecode.indexOf("*")>-1) {
+				var oldpartcode = nodecode.substring(nodecode.indexOf("*"));
+				newnodecode = code+oldpartcode;
+			}
+			$("code",resource).text(newnodecode);
+			var data = "<asmResource xsi_type='nodeRes'>" + $(resource).html() + "</asmResource>";
+			var strippeddata = data.replace(/xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g,"");  // remove xmlns attribute
+			//-------------------
+			$.ajax({
+				async : false,
+				type : "PUT",
+				contentType: "application/xml",
+				dataType : "text",
+				data : strippeddata,
+				url : serverBCK_API+"/nodes/node/" + nodeid + "/noderesource",
+				success : function(data) {
+				},
+				error : function(data) {
+				}
+			});
+			//-------------------
+		}
+	}
+	//-----Node ordering-------------------------------------------------------
+	var nodes = $("*:has(>metadata[semantictag*='majnum'])",node);
+	var tableau1 = new Array();
+	for ( var i = 0; i < $(nodes).length; i++) {
+		var resource = $("asmResource[xsi_type='nodeRes']",nodes[i])[0];
+		var code = $('code',resource).text();
+		tableau1[i] = [code.substring(0,code.indexOf("*")+2),nodes[i]];
+	}
+	var newTableau1 = tableau1.sort(sortOn1);
+	//-------------------------------------------------------------------------
+	var num = 0;
+	var currentletter = "";
+	for ( var i = 0; i < newTableau1.length; i++) {
+		var oldcode = newTableau1[i][0];
+		var starindex = oldcode.indexOf("*");
+		var letter = oldcode.substring(starindex+1,starindex+2);
+		if (letter!=currentletter) {
+			num = 0;
+			currentletter = letter;
+		}
+		num++;
+		var newcode = oldcode.substring(0,starindex+1)+currentletter+(num>9?"":"0")+num.toString();
+		//--------------- maj resource --------------
+		var nodeid = $(newTableau1[i][1]).attr('id');
+		var resource = $("asmResource[xsi_type='nodeRes']",newTableau1[i][1])[0];
+		$("code",resource).text(newcode);
+		var data = "<asmResource xsi_type='nodeRes'>" + $(resource).html() + "</asmResource>";
+		var strippeddata = data.replace(/xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g,"");  // remove xmlns attribute
+		//-------------------
+		$.ajax({
+			async : false,
+			type : "PUT",
+			contentType: "application/xml",
+			dataType : "text",
+			data : strippeddata,
+			url : serverBCK_API+"/nodes/node/" + nodeid + "/noderesource",
+			success : function(data) {
+			},
+			error : function(data) {
+			}
+		});
+		//-------------------
+	}
+	//-------------------------------------------------------------------------
+	if (UICom.structure.ui[uuid].asmtype=='asmStructure')
+		UIFactory.Node.reloadStruct();
+	else
+		UIFactory.Node.reloadUnit();
+}
+
+//==================================
+function sortTable (tableid)
+//==================================
+{
+	// adapted from Pierre Giraud - www.pierre-giraud.com
+	const compare = function(ids, asc){
+		return function(row1, row2){
+			const tdValue = function(row, ids){
+				return row.children[ids].textContent;
+			}
+			const tri = function(v1, v2){
+				if (v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2)){
+					return v1 - v2;
+				} else {
+					return v1.toString().localeCompare(v2);
+				}
+				return v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2);
+			};
+			return tri(tdValue(asc ? row1 : row2, ids), tdValue(asc ? row2 : row1, ids));
+		}
+	}
+
+	var table = document.getElementById(tableid);
+	var ths = table.querySelectorAll(".sort-th");
+	var trs = table.querySelectorAll(".sort-tr");
+	ths.forEach(function(th){
+		th.addEventListener('click', function(){
+			let classe = Array.from(trs).sort(compare(Array.from(ths).indexOf(th), this.asc = !this.asc));
+			classe.forEach(function(tr){
+				table.appendChild(tr)
+			});
+		});
+	});
 }

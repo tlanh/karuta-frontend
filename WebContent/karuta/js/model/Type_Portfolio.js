@@ -120,6 +120,7 @@ UIFactory["Portfolio"].getLogicalMetadataAttribute= function(node,attribute)
 function dragPortfolio(ev)
 //==================================
 {
+	folder_last_drop = ""; // init
 	var portfolioid = ev.target.id.substring(ev.target.id.lastIndexOf('_')+1);
 	var parentid = ev.target.getAttribute('parentid');
 	var index = ev.target.getAttribute('index');
@@ -401,10 +402,6 @@ UIFactory["Portfolio"].displayPortfolio = function(destid,type,langcode,edit)
 		html += "	</div>";
 		$("#"+destid).html($(html));
 		UIFactory["Portfolio"].displaySidebar(UICom.root,'sidebar',type,LANGCODE,edit,UICom.rootid);
-	}
-	//---------------------------------------
-	if (typeof checkIfSpecialApp == 'function') { 
-		checkIfSpecialApp(UICom.structure["ui"][rootid].getCode());
 	}
 	//---------------------------------------
 	$('[data-toggle=tooltip]').tooltip({html: true, trigger: 'hover'}); 

@@ -33,8 +33,8 @@ function fill_list_users(type)
 	html += "		<div id='user-rightside-title' class='title'></div>";
 	html += "		<div id='user-rightside-header1' class='header' style='display:none'>"+karutaStr[LANG]['active_users']+"</div>";
 	html += "		<div id='user-rightside-content1' class='content1' style='display:none'>";
-	html += "			<table class='users-content'>";
-	html += "				<tr class='table-head'><th class='firstname'>"+karutaStr[LANG]['firstname']+"</th><th class='lastname'>"+karutaStr[LANG]['lastname']+"</th><th class='c-a-s'>"+karutaStr[LANG]['c-a-s']+"</th><th class='username'>"+karutaStr[LANG]['username']+"</th><th class='buttons'></th></tr>";
+	html += "			<table id='users-table' class='users-content'>";
+	html += "				<tr class='table-head'><th class='firstname sort-th'>"+karutaStr[LANG]['firstname']+"</th><th class='lastname  sort-th'>"+karutaStr[LANG]['lastname']+"</th><th class='c-a-s sort-th'>"+karutaStr[LANG]['c-a-s']+"</th><th class='username sort-th'>"+karutaStr[LANG]['username']+"</th><th class='buttons'></th></tr>";
 	html += "				<tbody id='user-rightside-users-content1' class='users-content'></tbody>";
 	html += "			</table>";
 	html += "		</div>";
@@ -75,12 +75,7 @@ function fill_list_users(type)
 	UIFactory.User.displaySearch("user-search",true,'user');
 	if (!UsersLoaded)
 		UIFactory.User.loadAll();
-	if (UsersActive_list.length<200)
-		UIFactory.User.displayActive('user-rightside-users-content1','user');
-	else {
-		$("#user-rightside-users-content1").html(karutaStr[LANG]['too-much-users']);
-		$("#user-rightside-users-content1").show();
-	}
+	UIFactory.User.displayActive('user-rightside-users-content1','user');
 }
 
 
@@ -88,6 +83,7 @@ function fill_list_users(type)
 function display_list_users(type)
 //==============================
 {
+	USER.admin = USER.admin_original; // reset if role playing when reload
 	if (type==null)
 		type='list1';
 	if ($("#user-create").length) {
@@ -142,9 +138,9 @@ function fill_list_usersOLD(dest,type,viewtype)
 				success : function(data) {
 					UIFactory["User"].parse(data);
 					if (type=='active')
-						UIFactory["User"].displayActive(dest,this.viewtype);
+						UIFactory["User"].displayActive(dest,this.viewtype,index);
 					else
-						UIFactory["User"].displayInactive(dest,this.viewtype);
+						UIFactory["User"].displayInactive(dest,this.viewtype,index);
 				}
 			});
 			//----------------

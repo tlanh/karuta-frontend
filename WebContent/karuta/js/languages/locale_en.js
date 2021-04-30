@@ -2,6 +2,7 @@
 
 //----------------------------------------------------
 karutaStr['en']['language']="English";
+karutaStr['en']['langshort']="EN";
 karutaStr['en']['flag-name']="United-Kingdom";
 //----------------------------------------------------
 karutaStr['en']['new']="New Element";
@@ -171,7 +172,7 @@ karutaStr['en']['menulabels2']="label@en";
 karutaStr['en']['menulabels3']=",roles[;other label]</span>";
 karutaStr['en']['help']="Help Bubble<br/><span style='font-size:smaller'>";
 karutaStr['en']['help2']="Text in English@en";
-karutaStr['en']['help3']="</span>";
+karutaStr['en']['help3']="[,role]</span>";
 karutaStr['en']['font-size']="Font Size (px)";
 karutaStr['en']['font-weight']="Font Weight";
 karutaStr['en']['font-style']="Font Style";

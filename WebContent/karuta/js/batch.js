@@ -203,7 +203,10 @@ function getSourceUrl(node)
 			treeref = eval("g_json."+treeref.substring(2));
 		else if (treeref.indexOf("/")>-1)
 			treeref = eval("g_json.lines["+g_noline+"]."+treeref.substring(1));
-		url = serverBCK_API+"/nodes/node/"+treeref;
+		else if (treeref.indexOf("##")>-1)
+			treeref = replaceVariable(treeref);
+		if (treeref!='#none')
+			url = serverBCK_API+"/nodes/node/"+treeref;
 	} else if (treeref.indexOf("#")>-1)
 		url = serverBCK_API+"/nodes?portfoliocode=" + treeref.substring(1) + "&semtag="+semtag;	
 	else
@@ -222,8 +225,10 @@ function processAll(model_code,portfoliologcode)
 //=================================================
 {
 	$.ajaxSetup({async: false});
-	get_list_portfoliosgroups();
-	get_list_usersgroups();
+	if (USER.creator){
+		get_list_portfoliosgroups();
+		get_list_usersgroups();
+	}
 	var actions_list = $("model",g_xmlDoc).children();
 	processListActions(actions_list);
 	$("#batch-log").append("<br>=============== THIS IS THE END ===============================");
@@ -468,6 +473,80 @@ g_actions['create-user'] = function createUser(node)
 	return ok;
 };
 
+function updateUserAttribute(data,attribute,value) {
+		if (value!="" && $(attribute,data).text()!=value) {
+		$(attribute,data).text(value);
+	}
+}
+//=================================================
+g_actions['update-user'] = function updateUser(node)
+//=================================================
+{
+	var ok = false;
+	var identifier = getTxtvals($("identifier",node));
+	var newlastname = getTxtvals($("lastname",node));
+	var newfirstname = getTxtvals($("firstname",node));
+	var newemail = getTxtvals($("email",node));
+	var newdesigner = getTxtvals($("designer",node));
+	var newadmin = getTxtvals($("admin",node));
+	var newpassword = getTxtvals($("password",node));
+	var newother = getTxtvals($("other",node));
+	//---- get userid ----------
+	var userid = "";
+	var url = serverBCK_API+"/users/user/username/"+identifier;
+	$.ajax({
+		async : false,
+		type : "GET",
+		contentType: "application/xml",
+		dataType : "text",
+		url : url,
+		success : function(data) {
+			userid = data;
+			var url = serverBCK_API+"/users/user/"+userid;
+			$.ajax({
+				async : false,
+				type : "GET",
+				contentType: "application/xml",
+				dataType : "text",
+				url : url,
+				success : function(data) {
+					ok = true;
+					updateUserAttribute(data,"lastname",newlastname)
+					updateUserAttribute(data,"firstname",newfirstname)
+					updateUserAttribute(data,"email",newemail)
+					updateUserAttribute(data,"designer",newdesigner)
+					updateUserAttribute(data,"admin",newadmin)
+					updateUserAttribute(data,"password",newpassword)
+					updateUserAttribute(data,"other",newother)
+					var url = serverBCK_API+"/users/user/"+userid;
+					$.ajax({
+						async : false,
+						type : "PUT",
+						contentType: "application/xml; charset=UTF-8",
+						dataType : "text",
+						url : url,
+						data : data,
+						success : function(data) {
+							userid = data;
+							ok = true;
+							$("#batch-log").append("<br>- user updated("+userid+") - identifier:"+identifier+" lastname:"+lastname+" firstname:"+firstname);
+						},
+						error : function(data) {
+							$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in update-user ("+userid+") - identifier:"+identifier+" lastname:"+lastname+" firstname:"+firstname);					
+						}
+					});
+				},
+				error : function(data) {
+					$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in update-user ("+userid+") - identifier:"+identifier+" lastname:"+lastname+" firstname:"+firstname);					
+				}
+			});
+		},
+		error : function(data) {
+			$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in update-user ("+userid+") - identifier:"+identifier+" lastname:"+lastname+" firstname:"+firstname);					
+		}
+	});
+	return ok;
+};
 
 //=================================================
 g_actions['delete-user'] = function deleteUser(node)
@@ -1743,11 +1822,9 @@ function updateMetada(nodes,node,type,semtag,text,attribute)
 			url : serverBCK_API+"/nodes/node/" + nodeid+"/metadata",
 			success : function(data) {
 				$("#batch-log").append("<br>- resource metadata updated ("+this.nodeid+") - semtag="+this.semtag+" attribute="+attribute+" value="+text);
-				updateMetada(nodes,node,type,semtag,text,attribute)
 			},
 			error : function(data,nodeid,semtag) {
 				$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in update metadata("+this.nodeid+") - semtag="+this.semantictag+" attribute="+attribute+" value="+text);
-				updateMetada(nodes,node,type,semtag,text,attribute);
 			}
 		});
 	}
@@ -1801,11 +1878,9 @@ function updateMetadaepm(nodes,node,type,semtag,text,attribute)
 			url : serverBCK_API+"/nodes/node/" + nodeid+"/metadataepm",
 			success : function(data) {
 				$("#batch-log").append("<br>- resource metadataepm updated ("+this.nodeid+") - semtag="+this.semtag+" attribute="+attribute+" value="+text);
-				updateMetadaepm(nodes,node,type,semtag,text,attribute)
 			},
-			error : function(data,nodeid,semtag) {
+			error : function(data) {
 				$("#batch-log").append("<br>- ***<span class='danger'>ERROR</span> in update metadataepm("+this.nodeid+") - semtag="+this.semantictag+" attribute="+attribute+" value="+text);
-				updateMetadaepm(nodes,node,type,semtag,text,attribute);
 			}
 		});
 	}
@@ -2013,7 +2088,7 @@ g_actions['join-portfoliogroup'] = function JoinPortfolioGroup(node)
 {
 	var ok = false;
 	var portfoliogroup = getTxtvals($("portfoliogroup",node));
-	var select = $(node).attr("select");  // select = #portfoliocode. or refif
+	var select = $(node).attr("select");  // select = #portfoliocode. or refid
 	//---- get portfoliogroupid ----------
 	var groupid = "";
 	var url = serverBCK_API+"/portfoliogroups";
@@ -2031,9 +2106,8 @@ g_actions['join-portfoliogroup'] = function JoinPortfolioGroup(node)
 			if (groupid=="")
 				$("#batch-log").append("<br>- <span class='danger'>ERROR</span> in JoinPortfolioGroup - portfoliogroup:"+portfoliogroup+" NOT FOUND");
 			else {
-				var portfolios = new Array();
 				if (select.indexOf("#")<0) {
-					var treeref = select;
+					var treeref = select.replace(".","");
 					//---- join group --------------
 					$.ajax({
 						async : false,
@@ -2095,7 +2169,7 @@ g_actions['leave-portfoliogroup'] = function LeavePortfolioGroup(node)
 {
 	var ok = false;
 	var portfoliogroup = getTxtvals($("portfoliogroup",node));
-	var treeref = $(node).attr("select");
+	var treeref = select.replace(".","");
 	//---- get portfoliogroupid ----------
 	var groupid = "";
 	var url = serverBCK_API+"/portfoliogroups";
@@ -2739,24 +2813,26 @@ g_actions['update-proxy'] = function update_proxy(node)
 	var srce_url = getSourceUrl(node);
 	var sources = new Array();
 	var sourceid = "";
-	$.ajax({
-		async : false,
-		type : "GET",
-		dataType : "xml",
-		url : srce_url,
-		success : function(data) {
-			if (this.url.indexOf('/node/')>-1) {  // get by uuid
-				var results = $('*',data);
-				sources[0] = results[0];
-			} else {							// get by code and semtag
-				sources = $("node",data);
+	if (srce_url!="") {
+		$.ajax({
+			async : false,
+			type : "GET",
+			dataType : "xml",
+			url : srce_url,
+			success : function(data) {
+				if (this.url.indexOf('/node/')>-1) {  // get by uuid
+					var results = $('*',data);
+					sources[0] = results[0];
+				} else {							// get by code and semtag
+					sources = $("node",data);
+				}
+				sourceid = $(sources[0]).attr('id');
+			},
+			error : function() {
+				$("#batch-log").append("<br>- ***SOURCE NOT FOUND <span class='danger'>ERROR</span>");
 			}
-			sourceid = $(sources[0]).attr('id');
-		},
-		error : function(data) {
-			$("#batch-log").append("<br>- ***SOURCE NOT FOUND <span class='danger'>ERROR</span>");
-		}
-	});
+		});
+	}
 	//------------ Target --------------------
 	var target_url = getTargetUrl(node);
 	var nodes = new Array();
@@ -2787,7 +2863,7 @@ g_actions['update-proxy'] = function update_proxy(node)
 					type : "PUT",
 					contentType: "application/xml",
 					dataType : "text",
-					data : xml,
+					data : strippeddata,
 					targetid : targetid,
 					sourceid : sourceid,
 					url : serverBCK_API+"/resources/resource/" + targetid,
@@ -2990,6 +3066,7 @@ function processCode()
 function getModelAndProcess(model_code)
 //=================================================
 {
+	model_code = replaceVariable(model_code)
 	$.ajax({
 		async : false,
 		type : "GET",
@@ -3114,7 +3191,7 @@ function getInputsLine(node)
 	for ( var j = 0; j < line_inputs.length; j++) {
 		var inputid = $(line_inputs[j]).attr('id');
 		code = UICom.structure["ui"][inputid].getCode().trim();
-		g_json_line[code] = UICom.structure["ui"][inputid].resource.getView(null,'batchform').trim();
+		g_json_line[code] = replaceVariable(UICom.structure["ui"][inputid].resource.getView(null,'batchform').trim());
 	}
 	return g_json_line;
 };
@@ -3261,11 +3338,12 @@ function saveLog(model_code,portfoliologcode,logtext)
 function displayExecBatchButton()
 //=================================================
 {
-	var html = "<div id='create-portfolio'>"+g_execbatchbuttonlabel1[LANG]+"</div>";
+	var html = "<div id='create-portfolio' class='alert alert-success'>"+g_execbatchbuttonlabel1[LANG]+"</div>";
 	$("#main-list").html(html);
 	initBatchVars();
 	prepareBatch();
 	getModelAndProcess(g_json.model_code);
+
 }
 
 //-----------------------------------------------------------------------

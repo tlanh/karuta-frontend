@@ -253,9 +253,10 @@ UIFactory["User"].displayActive = function(dest,type,index,nbindex)
 //==================================
 {
 	if (index==null)
-		index = 0;
+		index = localStorage.getItem('currentUsersIndex')!=undefined ? localStorage.getItem('currentUsersIndex') : 0;
 	if (nbindex==null)
 		nbindex = 1;
+	localStorage.setItem('currentUsersIndex',index);
 	$("#"+type+"-rightside-content2").hide();
 	$("#"+type+"-rightside-content1").show();
 	$("#"+type+"-rightside-users-content1").html("");
@@ -278,13 +279,18 @@ UIFactory["User"].displayActive = function(dest,type,index,nbindex)
 					$("#"+type+"-rightside-navbar-pages-bottom").hide();
 				else
 					$("#"+type+"-rightside-navbar-pages-bottom").show();
+				if (index>=nbindex)
+					index = 0;
 				UIFactory.User.displayActiveIndexed(this.dest,this.xtype,this.index,nbindex);
 			}
 		});
 	else {
 		nbindex = Math.ceil((UsersActive_list.length)/nb_users_page);
+		if (index>=nbindex)
+			index = 0;
 		UIFactory.User.displayActiveIndexed(dest,type,index,nbindex);
 	}
+	sortTable('users-table');
 };
 
 //==================================
@@ -379,7 +385,7 @@ UIFactory["User"].prototype.getView = function(dest,type,lang,gid)
 	var html = "";
 	//--------------------------------------------------------------------------------------------
 	if (type=='user') {
-		html += "<tr class='user-row'>"
+		html += "<tr class='user-row sort-tr'>"
 		html += "<td class='firstname'>"+this.firstname_node.text()+"</td>";
 		html += "<td class='lastname'>"+this.lastname_node.text()+"</td>";
 		html += "<td class='creator'>"+this.designer_node.text()+"/"+this.admin_node.text()+"/"+this.substitute_node.text()+"</td>";
